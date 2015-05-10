@@ -1,0 +1,258 @@
+#so-custom-css-form {
+  margin-right: 340px;
+}
+#so-custom-css-info {
+  width: 315px;
+  float: right;
+}
+#so-custom-css-info p:first-child {
+  margin-top: 0;
+}
+#so-custom-css-info p:last-child {
+  margin-bottom: 0;
+}
+#so-custom-css-revisions ol {
+  list-style: none;
+  margin: 0;
+}
+#so-custom-css-revisions ol li {
+  margin: 0;
+  line-height: 2.2em;
+}
+#custom-css-container {
+  border: 1px solid #D0D0D0;
+  background: #f7f7f7;
+  cursor: text;
+  overflow: hidden;
+}
+#custom-css-container .CodeMirror {
+  height: auto;
+}
+#custom-css-container .CodeMirror-scroll {
+  min-height: 300px;
+}
+#custom-css-container .CodeMirror-lines {
+  padding: 8px 0 8px 0;
+}
+#custom-css-container textarea {
+  border: 0;
+  padding: 8px 0 8px 4px;
+  width: 100%;
+  min-height: 300px;
+  display: block;
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1em;
+  border-left: 1px solid #ddd;
+  margin-left: 16px;
+}
+#custom-css-toolbar {
+  border: 1px solid #D0D0D0;
+  border-bottom: none;
+  background: #efefef;
+  padding: 8px 10px;
+  overflow: auto;
+}
+#custom-css-toolbar a.toolbar-button {
+  line-height: 1em;
+  display: inline-block;
+  border: 1px solid #c0c0c0;
+  background: #f6f6f6;
+  text-decoration: none;
+  padding: 8px 14px;
+  font-weight: bold;
+  color: #555;
+  font-size: 0.95em;
+}
+#custom-css-toolbar a.toolbar-button:hover {
+  border: 1px solid #b0b0b0;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+#custom-css-toolbar #css-editor-expand {
+  float: right;
+  text-decoration: none;
+  color: #666;
+  padding: 5px;
+  line-height: 1em;
+}
+#custom-css-toolbar #css-editor-expand .dashicons {
+  font-size: 20px;
+}
+#custom-css-toolbar #css-editor-expand .dashicons-no-alt {
+  display: none;
+}
+#so-custom-css-form #custom-css-preview iframe {
+  display: none;
+}
+#so-custom-css-form .decoration {
+  display: none;
+}
+#so-custom-css-form.expanded {
+  z-index: 100000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 320px;
+}
+#so-custom-css-form.expanded #custom-css-toolbar #css-editor-expand .dashicons-editor-expand {
+  display: none;
+}
+#so-custom-css-form.expanded #custom-css-toolbar #css-editor-expand .dashicons-no-alt {
+  display: inline-block;
+}
+#so-custom-css-form.expanded .decoration {
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 319px;
+  width: 2px;
+  background: rgba(0, 0, 0, 0.1);
+}
+#so-custom-css-form.expanded .description {
+  display: none;
+}
+#so-custom-css-form.expanded .submit {
+  display: none;
+}
+#so-custom-css-form.expanded #custom-css-preview {
+  position: fixed;
+  display: block;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 320px;
+  background: #ffffff;
+}
+#so-custom-css-form.expanded #custom-css-preview iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+#snippet-browser #snippet-browser-overlay {
+  position: fixed;
+  z-index: 100000;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+}
+#snippet-browser #snippet-browser-dialog > div {
+  position: fixed;
+  z-index: 100001;
+  background: #fff;
+  box-sizing: border-box;
+}
+#snippet-browser #snippet-browser-dialog .toolbar {
+  top: 40px;
+  left: 40px;
+  right: 40px;
+  height: 50px;
+  background: #FCFCFC;
+  border-bottom: 1px solid #dddddd;
+  overflow: hidden;
+}
+#snippet-browser #snippet-browser-dialog .toolbar h1 {
+  padding: 0 16px;
+  font-size: 22px;
+  line-height: 50px;
+  margin: 0;
+  color: #444;
+}
+#snippet-browser #snippet-browser-dialog .toolbar .close {
+  cursor: pointer;
+  color: #777;
+  background-color: transparent;
+  height: 50px;
+  width: 50px;
+  padding: 15px 0 0 0;
+  position: absolute;
+  text-align: center;
+  border: 0;
+  border-left: 1px solid #ddd;
+  top: 0;
+  right: 0;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+#snippet-browser #snippet-browser-dialog .toolbar .close:hover {
+  background: #dddddd;
+}
+#snippet-browser #snippet-browser-dialog .toolbar .close .icon:before {
+  content: '\f158';
+  font: normal 20px/1 'dashicons';
+  vertical-align: middle;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #666;
+}
+#snippet-browser #snippet-browser-dialog .sidebar {
+  top: 90px;
+  left: 40px;
+  bottom: 90px;
+  width: 300px;
+  background: #f3f3f3;
+  border-right: 1px solid #dddddd;
+  padding: 16px;
+  overflow: auto;
+}
+#snippet-browser #snippet-browser-dialog .sidebar #snippet-search {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 8px;
+}
+#snippet-browser #snippet-browser-dialog .sidebar .snippets {
+  margin: 0;
+}
+#snippet-browser #snippet-browser-dialog .sidebar .snippets .snippet {
+  cursor: pointer;
+  margin-bottom: 0.5em;
+  font-size: 1.1em;
+  line-height: 1.35em;
+  margin-bottom: 20px;
+}
+#snippet-browser #snippet-browser-dialog .sidebar .snippets .snippet.active {
+  font-weight: bold;
+}
+#snippet-browser #snippet-browser-dialog .main {
+  top: 90px;
+  left: 340px;
+  right: 40px;
+  bottom: 90px;
+  background: #fff;
+  overflow: auto;
+}
+#snippet-browser #snippet-browser-dialog .main .snippet-view {
+  padding: 20px;
+}
+#snippet-browser #snippet-browser-dialog .main .snippet-view .snippet-title {
+  margin: 0 0 0.75em 0;
+  padding: 0;
+}
+#snippet-browser #snippet-browser-dialog .main .snippet-view .snippet-description {
+  font-size: 1.1em;
+  color: #666;
+  margin-bottom: 2em;
+}
+#snippet-browser #snippet-browser-dialog .main .snippet-view .snippet-code {
+  padding: 20px;
+  border: 1px solid #d0d0d0;
+  background: #f8f8f8;
+}
+#snippet-browser #snippet-browser-dialog .buttons {
+  bottom: 40px;
+  left: 40px;
+  right: 40px;
+  height: 50px;
+  background: #FCFCFC;
+  border-top: 1px solid #dddddd;
+  text-align: right;
+  padding: 10px 20px;
+  overflow: hidden;
+}
+.CodeMirror-lint-tooltip {
+  z-index: 100002;
+}
