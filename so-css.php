@@ -134,6 +134,10 @@ class SiteOrigin_CSS {
 
 		wp_enqueue_script( 'siteorigin-custom-css', $root_uri . 'js/admin' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
 		wp_enqueue_style( 'siteorigin-custom-css', $root_uri . 'css/admin.css', array( ), SOCSS_VERSION );
+
+		// Enqueue the scripts for theme CSS processing
+		wp_enqueue_script( 'siteorigin-custom-css-parser', $root_uri . 'js/css' . SOCSS_JS_SUFFIX . '.js', array( ), SOCSS_VERSION );
+		wp_enqueue_script( 'siteorigin-custom-css-processor', $root_uri . 'js/theme-process' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
 	}
 
 	function display_admin_page(){
@@ -220,8 +224,30 @@ class SiteOrigin_CSS {
 		return trim( strip_tags( $css ) );
 	}
 
+	/**
+	 * Get all the available theme CSS
+	 */
 	function get_theme_css(){
+		$css = '';
+		if( file_exists( get_template_directory() . '/style.css' ) ) {
+			$css .= file_get_contents( get_template_directory() . '/style.css' );
+		}
 
+		if( is_child_theme() ) {
+			$css .= file_get_contents( get_stylesheet_directory() . '/style.css' );
+		}
+
+		// Remove all CSS comments
+		$regex = array(
+			"`^([\t\s]+)`ism"=>'',
+			"`^\/\*(.+?)\*\/`ism"=>"",
+			"`([\n\A;]+)\/\*(.+?)\*\/`ism"=>"$1",
+			"`([\n\A;\s]+)//(.+?)[\n\r]`ism"=>"$1\n",
+			"`(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+`ism"=>"\n"
+		);
+		$css = preg_replace( array_keys($regex), $regex, $css );
+
+		return $css;
 	}
 }
 

@@ -114,8 +114,8 @@
 		</div>
 	</div>
 
-	<script type="template/css">
-		<?php  ?>
+	<script type="template/css" id="current-theme-css">
+		<?php echo SiteOrigin_CSS::single()->get_theme_css(); ?>
 	</script>
 
 </div>
