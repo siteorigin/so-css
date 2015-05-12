@@ -10,7 +10,7 @@ License: GPL3
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 */
 
-define('SOCSS_VERSION', 'dev');
+define('SOCSS_VERSION', '1.0');
 define('SOCSS_JS_SUFFIX', '');
 
 /**
@@ -33,6 +33,11 @@ class SiteOrigin_CSS {
 		add_action( 'admin_menu', array($this, 'action_admin_menu') );
 		add_action( 'admin_enqueue_scripts', array($this, 'enqueue_admin_scripts') );
 		add_action( 'load-appearance_page_siteorigin_custom_css', array($this, 'add_help_tab') );
+		add_action( 'admin_footer', array($this, 'action_admin_footer') );
+
+		if( isset($_GET['so_css_preview']) && !is_admin() ) {
+			add_filter('show_admin_bar', '__return_false');
+		}
 	}
 
 	/**
@@ -118,30 +123,44 @@ class SiteOrigin_CSS {
 	}
 
 	function enqueue_admin_scripts( $page ){
-		if ( $page != 'appearance_page_siteorigin_custom_css' ) return;
+		if( $page != 'appearance_page_siteorigin_custom_css' ) return;
 
-		$root_uri = plugin_dir_url(__FILE__);
-
-		wp_enqueue_script( 'codemirror', $root_uri . 'codemirror/lib/codemirror' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
-		wp_enqueue_script( 'codemirror-mode-css', $root_uri . 'codemirror/mode/css/css' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
+		// Enqueue the codemirror scripts. Call Underscore and Backbone dependencies so they're enqueued first to prevent conflicts.
+		wp_enqueue_script( 'codemirror', plugin_dir_url(__FILE__) . 'codemirror/lib/codemirror' . SOCSS_JS_SUFFIX . '.js', array( 'underscore', 'backbone' ), '5.2.0' );
+		wp_enqueue_script( 'codemirror-mode-css', plugin_dir_url(__FILE__) . 'codemirror/mode/css/css' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
 
 		// Add in all the linting libs
-		wp_enqueue_script( 'codemirror-lint', $root_uri . 'codemirror/addon/lint/lint' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
-		wp_enqueue_script( 'codemirror-lint-css', $root_uri . 'codemirror/addon/lint/css-lint' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
-		wp_enqueue_script( 'codemirror-lint-css-lib', $root_uri . 'js/csslint' . SOCSS_JS_SUFFIX . '.js', array(), '0.10.0' );
+		wp_enqueue_script( 'codemirror-lint', plugin_dir_url(__FILE__) . 'codemirror/addon/lint/lint' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror' ), '5.2.0' );
+		wp_enqueue_script( 'codemirror-lint-css', plugin_dir_url(__FILE__) . 'codemirror/addon/lint/css-lint' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror', 'codemirror-lint-css-lib' ), '5.2.0' );
+		wp_enqueue_script( 'codemirror-lint-css-lib', plugin_dir_url(__FILE__) . 'js/csslint' . SOCSS_JS_SUFFIX . '.js', array(), '0.10.0' );
 
-		// All the styles
-		wp_enqueue_style( 'codemirror', $root_uri . 'codemirror/lib/codemirror.css', array(), '5.2.0' );
-		wp_enqueue_style( 'codemirror-theme-neat', $root_uri . 'codemirror/theme/neat.css', array(), '5.2.0' );
-		wp_enqueue_style( 'codemirror-lint-css', $root_uri . 'codemirror/addon/lint/lint.css', array(), '5.2.0' );
-
-		// All the custom SiteOrigin CSS stuff
-		wp_enqueue_script( 'siteorigin-custom-css', $root_uri . 'js/admin' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
-		wp_enqueue_style( 'siteorigin-custom-css', $root_uri . 'css/admin.css', array( ), SOCSS_VERSION );
+		// All the Codemirror styles
+		wp_enqueue_style( 'codemirror', plugin_dir_url(__FILE__) . 'codemirror/lib/codemirror.css', array(), '5.2.0' );
+		wp_enqueue_style( 'codemirror-theme-neat', plugin_dir_url(__FILE__) . 'codemirror/theme/neat.css', array(), '5.2.0' );
+		wp_enqueue_style( 'codemirror-lint-css', plugin_dir_url(__FILE__) . 'codemirror/addon/lint/lint.css', array(), '5.2.0' );
 
 		// Enqueue the scripts for theme CSS processing
-		wp_enqueue_script( 'siteorigin-custom-css-parser', $root_uri . 'js/css' . SOCSS_JS_SUFFIX . '.js', array( ), SOCSS_VERSION );
-		wp_enqueue_script( 'siteorigin-custom-css-processor', $root_uri . 'js/theme-process' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
+		wp_enqueue_script( 'siteorigin-custom-css-parser', plugin_dir_url(__FILE__) . 'js/css-parser' . SOCSS_JS_SUFFIX . '.js', array( ), SOCSS_VERSION );
+
+		// All the custom SiteOrigin CSS stuff
+		wp_enqueue_script( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'js/editor' . SOCSS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'siteorigin-custom-css-parser', 'codemirror' ), SOCSS_VERSION, true );
+		wp_enqueue_style( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'css/admin.css', array( ), SOCSS_VERSION );
+
+		wp_localize_script( 'siteorigin-custom-css', 'socssOptions', array(
+			'themeCSS' => SiteOrigin_CSS::single()->get_theme_css(),
+			'homeURL' => add_query_arg( 'so_css_preview', '1', site_url() ),
+			'snippets' => $this->get_snippets(),
+		) );
+
+		// This is for the templates required by the CSS editor
+		add_action( 'admin_footer', array($this, 'action_admin_footer') );
+	}
+
+	/**
+	 * Display the templates for the CSS Editor
+	 */
+	function action_admin_footer(){
+		include plugin_dir_path( __FILE__ ) . 'tpl/js-templates.php';
 	}
 
 	function display_admin_page(){
@@ -201,8 +220,6 @@ class SiteOrigin_CSS {
 
 		usort($snippets, array( $this, 'sort_snippet_callback' ) );
 		return $snippets;
-
-		return array();
 	}
 
 	/**
@@ -250,8 +267,19 @@ class SiteOrigin_CSS {
 			"`(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+`ism"=>"\n"
 		);
 		$css = preg_replace( array_keys($regex), $regex, $css );
+		$css = preg_replace('/\s+/', ' ', $css);
 
 		return $css;
+	}
+
+	/**
+	 * Get the editor description
+	 *
+	 * @return string
+	 */
+	static function editor_description(){
+		$theme = wp_get_theme();
+		return sprintf( __( 'Changes apply to %s and its child themes', 'so-css' ), $theme->get('Name') );
 	}
 }
 

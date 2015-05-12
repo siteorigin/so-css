@@ -41,36 +41,41 @@
 
 		</div>
 
-		<form action="<?php echo esc_url( add_query_arg( array( 'theme' => false, 'time' => false ) ) ) ?>" method="POST" id="so-custom-css-form">
+		<form action="<?php echo esc_url( admin_url('themes.php?page=siteorigin_custom_css') ) ?>" method="POST" id="so-custom-css-form">
 
-			<div id="custom-css-toolbar">
-				<?php if( !empty($snippets) ) : ?>
-					<a href="#" class="toolbar-button" id="css-insert-snippet"><?php _e('Snippets', 'so-css') ?></a>
-				<?php endif; ?>
+			<div class="custom-css-toolbar">
+				<div class="toolbar-function-buttons">
+					<div class="toolbar-functions-dropdown">
+						<span class="dashicons dashicons-menu"></span>
+					</div>
+					<ul class="toolbar-buttons">
+					</ul>
+				</div>
 
-				<a href="#" id="css-editor-expand" class="toolbar-button">
-					<span class="dashicons dashicons-editor-expand"></span>
-					<span class="dashicons dashicons-no-alt"></span>
-				</a>
+				<div class="toolbar-action-buttons">
+					<a href="#" class="editor-inspector">
+						<span class="dashicons dashicons-search"></span>
+					</a>
+
+					<a href="#" class="editor-expand">
+						<span class="dashicons dashicons-editor-expand"></span>
+						<span class="dashicons dashicons-no-alt"></span>
+					</a>
+				</div>
 			</div>
 
-			<div id="custom-css-container">
-				<textarea name="custom_css" id="custom-css-textarea" rows="<?php echo max( 10, substr_count( $custom_css, "\n" )+1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
+			<div class="custom-css-container">
+				<textarea name="custom_css" id="custom-css-textarea" class="css-editor" rows="<?php echo max( 10, substr_count( $custom_css, "\n" )+1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
 				<?php wp_nonce_field( 'custom_css', '_sononce' ) ?>
 			</div>
-			<p class="description">
-				<?php
-				$theme = wp_get_theme();
-				printf( __( 'Changes apply to %s and its child themes', 'so-css' ), $theme->get('Name') );
-				?>
-			</p>
+			<p class="description"><?php SiteOrigin_CSS::editor_description() ?></p>
 
 			<p class="submit">
 				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( 'Save CSS', 'so-css' ); ?>" />
 			</p>
 
-			<div id="custom-css-preview">
-				<iframe data-home="<?php echo esc_url( add_query_arg( 'so_css_preview', '1', site_url() ) ) ?>"></iframe>
+			<div class="custom-css-preview">
+
 			</div>
 
 			<div class="decoration"></div>
@@ -80,42 +85,5 @@
 	</div>
 
 	<div class="clear"></div>
-
-	<div id="snippet-browser" style="display: none">
-		<div id="snippet-browser-overlay">
-
-		</div>
-
-		<div id="snippet-browser-dialog">
-			<div class="toolbar">
-				<h1><?php _e('CSS Snippets', 'so-css') ?></h1>
-				<a href="#" class="close">
-					<span class="icon"></span>
-				</a>
-			</div>
-			<div class="sidebar">
-				<input type="text" id="snippet-search" placeholder="<?php esc_attr_e('Search Snippets', 'so-css') ?>" />
-				<ul class="snippets">
-					<?php foreach( $snippets as $snippet ) : ?>
-						<li class="snippet" data-description="<?php echo esc_attr($snippet['Description']) ?>" data-code="<?php echo esc_attr($snippet['css']) ?>"><?php echo esc_html($snippet['Name']) ?></li>
-					<?php endforeach; ?>
-				</ul>
-			</div>
-			<div class="main">
-				<div class="snippet-view">
-					<h2 class="snippet-title"></h2>
-					<p class="snippet-description"></p>
-					<pre class="snippet-code"></pre>
-				</div>
-			</div>
-			<div class="buttons">
-				<input id="so-insert-snippet" type="button" class="button-primary" value="<?php esc_attr_e('Insert Snippet', 'so-css') ?>" />
-			</div>
-		</div>
-	</div>
-
-	<script type="template/css" id="current-theme-css">
-		<?php echo SiteOrigin_CSS::single()->get_theme_css(); ?>
-	</script>
 
 </div>
