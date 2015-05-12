@@ -36,7 +36,9 @@ class SiteOrigin_CSS {
 		add_action( 'admin_footer', array($this, 'action_admin_footer') );
 
 		if( isset($_GET['so_css_preview']) && !is_admin() ) {
-			add_filter('show_admin_bar', '__return_false');
+			add_filter( 'show_admin_bar', '__return_false' );
+			add_filter( 'wp_enqueue_scripts', array($this, 'enqueue_inspector_scripts') );
+			add_filter( 'wp_footer', array($this, 'inspector_hover') );
 		}
 	}
 
@@ -280,6 +282,20 @@ class SiteOrigin_CSS {
 	static function editor_description(){
 		$theme = wp_get_theme();
 		return sprintf( __( 'Changes apply to %s and its child themes', 'so-css' ), $theme->get('Name') );
+	}
+
+	function enqueue_inspector_scripts(){
+		wp_enqueue_script('siteorigin-css-sizes', plugin_dir_url(__FILE__) . 'js/jquery.sizes' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), '0.33' );
+		wp_enqueue_script('siteorigin-css-inspector', plugin_dir_url(__FILE__) . 'js/inspector' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
+		wp_enqueue_style('siteorigin-css-inspector', plugin_dir_url(__FILE__) . 'css/inspector.css', array( ), SOCSS_VERSION );
+	}
+
+	function inspector_hover(){
+		?>
+		<div id="socss-inspector-hover" class="socss-inspector-hover">
+			<div class="socss-padding-indicator"></div>
+		</div>
+		<?php
 	}
 }
 

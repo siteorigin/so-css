@@ -1,0 +1,15 @@
+.socss-inspector-hover {
+  pointer-events: none;
+  position: absolute;
+  /* Same index as the admin bar */
+  z-index: 99999;
+  display: none;
+  border: 1px solid rgba(0, 117, 203, 0.6);
+  background: rgba(0, 117, 203, 0.1);
+}
+.socss-inspector-hover .socss-padding-indicator {
+  display: none;
+}
+body.no-inspector .socss-inspector-hover {
+  display: none !important;
+}

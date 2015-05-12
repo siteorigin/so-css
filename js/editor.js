@@ -75,8 +75,13 @@
 
             this.$('.editor-inspector').click(function(e){
                 e.preventDefault();
-                $(this).blur();
-                thisView.trigger('click_inspector');
+                var $$ = $(this);
+
+                $$.blur();
+                $$.toggleClass('active');
+                var isActive = $$.is('.active');
+
+                thisView.trigger('click_inspector', isActive);
             });
         },
 
@@ -123,8 +128,15 @@
             this.toolbar.on('click_expand', function(){
                 thisView.toggleExpand();
             });
-            this.toolbar.on('click_inspector', function(){
-                thisView.setExpand(true);
+
+            this.toolbar.on('click_inspector', function(active){
+                if( active ) {
+                    thisView.setExpand(true);
+                    thisView.preview.startInspector();
+                }
+                else {
+                    thisView.preview.stopInspector();
+                }
             });
 
             this.preview = new socss.view.preview( {
@@ -275,6 +287,14 @@
             // Update the CSS after a short delay
             var css = this.editor.codeMirror.getValue();
             style.html(css);
+        },
+
+        startInspector: function(){
+            this.$('.preview-iframe')[0].contentWindow.startInspector();
+        },
+
+        stopInspector: function(){
+            this.$('.preview-iframe')[0].contentWindow.stopInspector();
         }
     } );
 
