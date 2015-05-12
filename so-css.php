@@ -122,16 +122,20 @@ class SiteOrigin_CSS {
 
 		$root_uri = plugin_dir_url(__FILE__);
 
-		wp_enqueue_script( 'codemirror', $root_uri . 'codemirror/lib/codemirror' . SOCSS_JS_SUFFIX . '.js', array(), '4.2.0' );
-		wp_enqueue_script( 'codemirror-mode-css', $root_uri . 'codemirror/mode/css/css' . SOCSS_JS_SUFFIX . '.js', array(), '4.2.0' );
-		wp_enqueue_script( 'codemirror-lint', $root_uri . 'codemirror/lib/util/lint' . SOCSS_JS_SUFFIX . '.js', array(), '4.2.0' );
-		wp_enqueue_script( 'codemirror-lint-css', $root_uri . 'codemirror/lib/util/css-lint' . SOCSS_JS_SUFFIX . '.js', array(), '4.2.0' );
-		wp_enqueue_script( 'codemirror-lint-css-lib', $root_uri . 'codemirror/lib/util/csslint' . SOCSS_JS_SUFFIX . '.js', array(), '4.2.0' );
+		wp_enqueue_script( 'codemirror', $root_uri . 'codemirror/lib/codemirror' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
+		wp_enqueue_script( 'codemirror-mode-css', $root_uri . 'codemirror/mode/css/css' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
 
-		wp_enqueue_style( 'codemirror', $root_uri . 'codemirror/lib/codemirror.css', array(), '4.2.0' );
-		wp_enqueue_style( 'codemirror-theme-neat', $root_uri . 'codemirror/theme/neat.css', array(), '4.2.0' );
-		wp_enqueue_style( 'codemirror-lint-css', $root_uri . 'codemirror/lib/util/lint.css', array(), '4.2.0' );
+		// Add in all the linting libs
+		wp_enqueue_script( 'codemirror-lint', $root_uri . 'codemirror/addon/lint/lint' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
+		wp_enqueue_script( 'codemirror-lint-css', $root_uri . 'codemirror/addon/lint/css-lint' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
+		wp_enqueue_script( 'codemirror-lint-css-lib', $root_uri . 'js/csslint' . SOCSS_JS_SUFFIX . '.js', array(), '0.10.0' );
 
+		// All the styles
+		wp_enqueue_style( 'codemirror', $root_uri . 'codemirror/lib/codemirror.css', array(), '5.2.0' );
+		wp_enqueue_style( 'codemirror-theme-neat', $root_uri . 'codemirror/theme/neat.css', array(), '5.2.0' );
+		wp_enqueue_style( 'codemirror-lint-css', $root_uri . 'codemirror/addon/lint/lint.css', array(), '5.2.0' );
+
+		// All the custom SiteOrigin CSS stuff
 		wp_enqueue_script( 'siteorigin-custom-css', $root_uri . 'js/admin' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
 		wp_enqueue_style( 'siteorigin-custom-css', $root_uri . 'css/admin.css', array( ), SOCSS_VERSION );
 
