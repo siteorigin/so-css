@@ -242,7 +242,7 @@ jQuery( function($){
     // Initialize the inspector
     socssInspect.initialize();
 
-    //$('body').addClass('no-inspector');
+    $('body').addClass('no-inspector');
 
     $('#socss-selector-dialog .socss-button-close').click( function(e){
         $('#socss-selector-dialog').fadeOut('fast');
