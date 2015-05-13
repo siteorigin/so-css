@@ -38,7 +38,7 @@ class SiteOrigin_CSS {
 		if( isset($_GET['so_css_preview']) && !is_admin() ) {
 			add_filter( 'show_admin_bar', '__return_false' );
 			add_filter( 'wp_enqueue_scripts', array($this, 'enqueue_inspector_scripts') );
-			add_filter( 'wp_footer', array($this, 'inspector_hover') );
+			add_filter( 'wp_footer', array($this, 'inspector_templates') );
 		}
 	}
 
@@ -291,31 +291,8 @@ class SiteOrigin_CSS {
 		wp_enqueue_style('siteorigin-css-inspector', plugin_dir_url(__FILE__) . 'css/inspector.css', array( ), SOCSS_VERSION );
 	}
 
-	function inspector_hover(){
-		?>
-		<div id="socss-inspector-hover" class="socss-inspector-hover socss-element">
-			<div class="socss-padding-indicator"></div>
-		</div>
-
-		<div id="socss-selector-dialog" class="socss-selector-dialog socss-element">
-			<div class="socss-selector-overlay"></div>
-			<div class="socss-selector-window">
-				<div class="socss-selector-title"><?php _e('Select', 'so-css') ?></div>
-
-				<ul class="socss-element-parents">
-
-				</ul>
-
-				<ul class="socss-selectors">
-
-				</ul>
-
-				<div class="socss-buttons">
-					<div class="socss-button-close"><?php _e('Close', 'so-css') ?></div>
-				</div>
-			</div>
-		</div>
-		<?php
+	function inspector_templates(){
+		include plugin_dir_path( __FILE__ ) . 'tpl/inspector-templates.php';
 	}
 }
 
