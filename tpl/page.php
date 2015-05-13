@@ -53,10 +53,6 @@
 				</div>
 
 				<div class="toolbar-action-buttons">
-					<a href="#" class="editor-inspector">
-						<span class="dashicons dashicons-search"></span>
-					</a>
-
 					<a href="#" class="editor-expand">
 						<span class="dashicons dashicons-editor-expand"></span>
 						<span class="dashicons dashicons-no-alt"></span>

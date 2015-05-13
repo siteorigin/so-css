@@ -129,16 +129,6 @@
                 thisView.toggleExpand();
             });
 
-            this.toolbar.on('click_inspector', function(active){
-                if( active ) {
-                    thisView.setExpand(true);
-                    thisView.preview.startInspector();
-                }
-                else {
-                    thisView.preview.stopInspector();
-                }
-            });
-
             this.preview = new socss.view.preview( {
                 editor: this,
                 el: this.$('.custom-css-preview')
@@ -147,7 +137,7 @@
         },
 
         /**
-         * Do the initial setup of the editor
+         * Do the initial setup of the CodeMirror editor
          */
         setupEditor: function( ) {
             var thisView = this;
@@ -173,6 +163,28 @@
             $(window).resize(function(){
                 thisView.scaleEditor();
             });
+
+            // Setup the extensions
+            this.setupCodeMirrorExtensions();
+        },
+
+        setupCodeMirrorExtensions: function(){
+            var thisView = this;
+
+            this.codeMirror.on('cursorActivity', function(cm){
+                var cur = cm.getCursor(), token = cm.getTokenAt(cur);
+
+                // If we have a qualifier selected, then highlight that in the preview
+                if( token.type === 'qualifier' || token.type === 'tag' || token.type === 'builtin' ) {
+                    var line = cm.getLine( cur.line );
+                    var selector = line.substring( 0, token.end );
+
+                    thisView.preview.highlight( selector );
+                }
+                else {
+                    thisView.preview.clearHighlight();
+                }
+            } );
         },
 
         /**
@@ -315,13 +327,17 @@
             style.html(css);
         },
 
-        startInspector: function(){
-            this.$('.preview-iframe')[0].contentWindow.socssInspec.startInspector();
+        /**
+         * Highlight all elements with a given selector
+         */
+        highlight: function( selector ){
+            this.$('.preview-iframe')[0].contentWindow.socssInspect.highlighter.highlight( selector );
         },
 
-        stopInspector: function(){
-            this.$('.preview-iframe')[0].contentWindow.socssInspec.stopInspector();
+        clearHighlight: function(){
+            this.$('.preview-iframe')[0].contentWindow.socssInspect.highlighter.clearAll( );
         }
+
     } );
 
     /**

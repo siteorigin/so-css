@@ -39,7 +39,6 @@ jQuery( function($){
         },
 
         setHoverEl: function(el){
-            this.highlighter.clearAll();
             this.highlighter.highlight( el, true );
             this.hover = el;
         },
@@ -82,6 +81,15 @@ jQuery( function($){
             return selectors;
         },
 
+        startInspector: function(){
+            // This body class tells the inspector whether or not it should operate
+            $('body').removeClass( 'no-inspector' );
+        },
+
+        stopInspector: function(){
+            $('body').addClass( 'no-inspector' );
+        },
+
         /**
          * Handles highlighting elements
          */
@@ -89,41 +97,48 @@ jQuery( function($){
             hlTemplate: _.template( $('#socss-template-hover').html().trim() ),
             highlighted: [],
 
-            highlight: function( el, guides ){
-                var hl = $( this.hlTemplate() );
-                hl.css({
-                    'top' : el.offset().top - 1,
-                    'left' : el.offset().left - 1,
-                    'width' : el.outerWidth(),
-                    'height' : el.outerHeight()
-                }).appendTo( 'body' );
+            highlight: function( els, guides ){
+                this.clearAll();
+                var parent = this;
 
-                if( guides ) {
-                    var g;
+                $(els).each(function(i, el){
+                    el = $(el);
 
-                    var padding = el.padding();
-                    for( var k in padding ) {
-                        if( parseInt( padding[k] ) > 0 ) {
-                            g = hl.find('.socss-guide-padding.socss-guide-' + k).show();
-                            if( k === 'top' || k === 'bottom' ) {
-                                g.css('height', padding[k]);
+                    var hl = $( parent.hlTemplate() );
+                    hl.css({
+                        'top' : el.offset().top - 1,
+                        'left' : el.offset().left - 1,
+                        'width' : el.outerWidth(),
+                        'height' : el.outerHeight()
+                    }).appendTo( 'body' );
+
+                    if( guides ) {
+                        var g;
+
+                        var padding = el.padding();
+                        for( var k in padding ) {
+                            if( parseInt( padding[k] ) > 0 ) {
+                                g = hl.find('.socss-guide-padding.socss-guide-' + k).show();
+                                if( k === 'top' || k === 'bottom' ) {
+                                    g.css('height', padding[k]);
+                                }
                             }
                         }
-                    }
 
-                    var margin = el.margin();
-                    for( var k in margin ) {
-                        if( parseInt( margin[k] ) > 0 ) {
-                            g = hl.find('.socss-guide-margin.socss-guide-' + k).show();
-                            if( k === 'top' || k === 'bottom' ) {
-                                g.css('height', margin[k]);
+                        var margin = el.margin();
+                        for( var k in margin ) {
+                            if( parseInt( margin[k] ) > 0 ) {
+                                g = hl.find('.socss-guide-margin.socss-guide-' + k).show();
+                                if( k === 'top' || k === 'bottom' ) {
+                                    g.css('height', margin[k]);
+                                }
                             }
                         }
+
                     }
 
-                }
-
-                this.highlighted.push( hl );
+                    parent.highlighted.push( hl );
+                } );
             },
 
             clearAll: function(){
@@ -237,23 +252,13 @@ jQuery( function($){
         }
 
     };
-    window.socssInspec = socssInspect;
+    window.socssInspect = socssInspect;
 
     // Initialize the inspector
     socssInspect.initialize();
-
-    $('body').addClass('no-inspector');
 
     $('#socss-selector-dialog .socss-button-close').click( function(e){
         $('#socss-selector-dialog').fadeOut('fast');
     } );
 
-    socssInspect.startInspector = function(){
-        // This body class tells the inspector whether or not it should operate
-        $('body').removeClass( 'no-inspector' );
-    };
-
-    socssInspect.stopInspector = function(){
-        $('body').addClass( 'no-inspector' );
-    };
 } );

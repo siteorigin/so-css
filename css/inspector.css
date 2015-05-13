@@ -133,7 +133,3 @@
   border: 1px solid #E0E0E0;
   cursor: pointer;
 }
-/* Don't display any socss elements when the inspector is disabled */
-body.no-inspector .socss-element {
-  display: none !important;
-}
