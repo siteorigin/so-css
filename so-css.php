@@ -286,14 +286,34 @@ class SiteOrigin_CSS {
 
 	function enqueue_inspector_scripts(){
 		wp_enqueue_script('siteorigin-css-sizes', plugin_dir_url(__FILE__) . 'js/jquery.sizes' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), '0.33' );
-		wp_enqueue_script('siteorigin-css-inspector', plugin_dir_url(__FILE__) . 'js/inspector' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
+		wp_enqueue_script('siteorigin-css-specificity', plugin_dir_url(__FILE__) . 'js/specificity' . SOCSS_JS_SUFFIX . '.js', array( ) );
+		wp_enqueue_script('siteorigin-css-inspector', plugin_dir_url(__FILE__) . 'js/inspector' . SOCSS_JS_SUFFIX . '.js', array( 'jquery', 'underscore' ), SOCSS_VERSION );
 		wp_enqueue_style('siteorigin-css-inspector', plugin_dir_url(__FILE__) . 'css/inspector.css', array( ), SOCSS_VERSION );
 	}
 
 	function inspector_hover(){
 		?>
-		<div id="socss-inspector-hover" class="socss-inspector-hover">
+		<div id="socss-inspector-hover" class="socss-inspector-hover socss-element">
 			<div class="socss-padding-indicator"></div>
+		</div>
+
+		<div id="socss-selector-dialog" class="socss-selector-dialog socss-element">
+			<div class="socss-selector-overlay"></div>
+			<div class="socss-selector-window">
+				<div class="socss-selector-title"><?php _e('Select', 'so-css') ?></div>
+
+				<ul class="socss-element-parents">
+
+				</ul>
+
+				<ul class="socss-selectors">
+
+				</ul>
+
+				<div class="socss-buttons">
+					<div class="socss-button-close"><?php _e('Close', 'so-css') ?></div>
+				</div>
+			</div>
 		</div>
 		<?php
 	}

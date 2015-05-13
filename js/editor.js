@@ -228,6 +228,32 @@
                     thisView.snippets.show();
                 });
             }
+        },
+
+        addCode: function( css ){
+            var editor = this.codeMirror;
+
+            var before_css = '';
+            if( editor.doc.lineCount() === 1 && editor.doc.getLine( editor.doc.lastLine() ).length === 0 ) {
+                before_css = "";
+            }
+            else if( editor.doc.getLine( editor.doc.lastLine() ).length === 0 ) {
+                before_css = "\n";
+            }
+            else {
+                before_css = "\n\n";
+            }
+
+            // Now insert the code in the editor
+            editor.doc.setCursor(
+                editor.doc.lastLine(),
+                editor.doc.getLine( editor.doc.lastLine() ).length
+            );
+            editor.doc.replaceSelection( before_css + css );
+        },
+
+        addEmptySelector: function( selector ) {
+            this.addCode( selector + " {\n  \n}" );
         }
 
     } );
@@ -290,11 +316,11 @@
         },
 
         startInspector: function(){
-            this.$('.preview-iframe')[0].contentWindow.startInspector();
+            this.$('.preview-iframe')[0].contentWindow.socssInspec.startInspector();
         },
 
         stopInspector: function(){
-            this.$('.preview-iframe')[0].contentWindow.stopInspector();
+            this.$('.preview-iframe')[0].contentWindow.socssInspec.stopInspector();
         }
     } );
 
@@ -430,10 +456,6 @@
          * @return {number}
          * @todo implement this.
          */
-        selectorSpecificity: function( selector ){
-            return 5;
-        }
-
     };
 
 } ) ( jQuery, _, socssOptions );
@@ -448,4 +470,6 @@ jQuery( function($){
     } );
     editor.render();
     editor.setSnippets( socssOptions.snippets );
+
+    window.socss.mainEditor = editor;
 } );

@@ -10,6 +10,75 @@
 .socss-inspector-hover .socss-padding-indicator {
   display: none;
 }
-body.no-inspector .socss-inspector-hover {
+#socss-selector-dialog {
+  display: none;
+  font-size: 13px;
+  font-family: "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+}
+#socss-selector-dialog > div {
+  z-index: 100000;
+}
+#socss-selector-dialog .socss-selector-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+#socss-selector-dialog .socss-selector-window {
+  position: fixed;
+  width: 480px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.15);
+  border: 1px solid #C0C0C0;
+  background: #f8f8f8 linear-gradient(to bottom, #f8f8f8, #e9e9e9);
+  box-sizing: border-box;
+  padding: 20px;
+}
+#socss-selector-dialog .socss-selector-window .socss-selector-title {
+  margin: -20px -20px 10px -20px;
+  padding: 15px 20px;
+  background: #F0F0F0;
+  border-bottom: 1px solid #C0C0C0;
+}
+#socss-selector-dialog .socss-selector-window .socss-element-parents {
+  margin: 0 -20px;
+  padding: 0;
+}
+#socss-selector-dialog .socss-selector-window .socss-element-parents li {
+  display: inline-block;
+  margin-right: 1px;
+  border: 1px solid #E0E0E0;
+  background: #f0f0f0;
+  padding: 4px;
+  cursor: pointer;
+}
+#socss-selector-dialog .socss-selector-window .socss-selectors {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+#socss-selector-dialog .socss-selector-window .socss-selectors li {
+  margin: 0;
+  padding: 5px;
+  display: block;
+  background: #f0f0f0;
+  border: 1px solid #E0E0E0;
+  cursor: pointer;
+}
+#socss-selector-dialog .socss-selector-window .socss-buttons {
+  text-align: right;
+}
+#socss-selector-dialog .socss-selector-window .socss-buttons .socss-button-close {
+  display: inline-block;
+  padding: 8px;
+  background: #f0f0f0;
+  border: 1px solid #E0E0E0;
+  cursor: pointer;
+}
+/* Don't display any socss elements when the inspector is disabled */
+body.no-inspector .socss-element {
   display: none !important;
 }
