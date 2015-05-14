@@ -1,24 +1,20 @@
-<script type="text/template" id="socss-template-selector-dialog">
-	<div id="socss-selector-dialog" class="socss-selector-dialog socss-element">
-		<div class="socss-selector-overlay"></div>
-		<div class="socss-selector-window">
-			<div class="socss-selector-title">
-				<span><?php _e('Select', 'so-css') ?></span>
-				<div class="socss-button-close"><?php _e('Close', 'so-css') ?></div>
-			</div>
+<div id="socss-inspector-interface" class="socss-element">
 
-			<ul class="socss-element-parents">
-
-			</ul>
-
-			<ul class="socss-selectors">
-
-			</ul>
-
-
+	<div class="socss-toolbar">
+		<div class="socss-enable-inspector dashicons dashicons-search"></div>
+		<div class="socss-hierarchy">
 		</div>
 	</div>
-</script>
+
+	<div class="socss-selectors-window">
+
+	</div>
+
+	<div class="socss-attributes-window">
+
+	</div>
+
+</div>
 
 <script type="text/template" id="socss-template-hover">
 	<div class="socss-inspector-hover socss-element">

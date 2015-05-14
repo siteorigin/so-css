@@ -1,345 +1,310 @@
 
-/* globals jQuery, _, SPECIFICITY, window, console */
+/* globals jQuery, Backbone, _, socssOptions */
 
-jQuery( function($){
+( function( $, _, socssOptions ){
 
-    var socssInspect = {
+    var socss = {
+        model : { },
+        collection : { },
+        view : { },
+        fn : {}
+    };
 
-        highlight: $('#socss-inspector-hover').html(),
-        hover : null,
-        pageSelectors: null,
+    /**
+     * This is the main view for the app
+     */
+    socss.view.inspector = Backbone.View.extend( {
 
-        /**
-         * Should we be using mouse inspection
-         */
-        mouseInspection: false,
+        active: false,
+        hl: false,
+        hoverEl: false,
 
-        /**
-         * Initialize the main inspector.
-         */
+        selectorTemplate: _.template('<div class="socss-selector"><%= selector %></div>'),
+
         initialize: function(){
-            var thisInspector = this;
+            var thisView = this;
 
-            this.pageSelectors = this.getCssSelectors();
+            this.hl = new socss.view.highlighter();
+            this.hl.initialize();
 
-            // Inform the parent frame of the selectors we have
-            try {
-                parent.socss.mainEditor.registerSelectors( this.pageSelectors );
-            }
-            catch(err) {
-                console.log( "Can't register selectors" );
-            }
+            this.pageSelectors = socss.fn.pageSelectors();
 
             // Setup hovering
             $('body').on('mouseover', '*', function(e){
-                if( !thisInspector.mouseInspection ) {
+                if( !thisView.active ) {
                     return true;
                 }
 
                 var $$ = $(this);
                 if( $$.closest('.socss-element').length === 0 ) {
                     e.stopPropagation();
-                    thisInspector.setHoverEl( $(this) );
+                    thisView.setHoverEl( $(this) );
                 }
             });
 
             // Setup the click event
             $('body *').click(function( e ){
-                if( !thisInspector.mouseInspection ) {
+                if( !thisView.active || thisView.$el.is(':hover') ) {
                     return true;
                 }
 
-                if( !$('body').hasClass('no-inspector') && !$('#socss-selector-dialog').is(':visible') ) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    var $$ = $(this);
-                    $$.blur();
-                    thisInspector.selectorDialog.setActive( thisInspector.hover).show();
-                }
+                e.preventDefault();
+                e.stopPropagation();
+                var $$ = $(this);
+                $$.blur();
+                thisView.setActiveEl( thisView.hoverEl );
             });
 
-            // Initialize the selector dialog
-            this.selectorDialog.initialize();
+            this.$('.socss-enable-inspector').click( function(){
+                thisView.toggleActive();
+            } );
+
+            this.$el.mouseenter( function(){
+                thisView.hl.clear();
+            } );
+
+            // Try register this inspector with the parent editor
+            try {
+                parent.socss.mainEditor.setInspector( this );
+            }
+            catch( err ){
+                console.log( 'No editor to register this inspector with' );
+            }
+
+        },
+
+        setHoverEl: function( hoverEl ){
+            this.hoverEl = hoverEl;
+            this.hl.highlight( hoverEl );
+        },
+
+        activate: function(){
+            this.active = true;
+            $('body').addClass('socss-active');
+            $('body').removeClass('socss-inactive');
+        },
+
+        deactivate: function(){
+            this.active = false;
+            $('body').addClass('socss-inactive');
+            $('body').removeClass('socss-active');
+            this.hl.clear();
+            this.$('.socss-hierarchy').empty();
         },
 
         /**
-         * Set the element that we're currently hovering over.
-         *
+         * Toggle the active status
+         */
+        toggleActive: function(){
+            if( this.active ) {
+                this.deactivate();
+            }
+            else {
+                this.activate();
+            }
+        },
+
+        /**
+         * Set the element that we're busy inspecting
          * @param el
          */
-        setHoverEl: function(el){
-            this.highlighter.highlight( el, true );
-            this.hover = el;
+        setActiveEl: function( el ){
+            var thisView = this;
+
+            var $h = this.$('.socss-hierarchy');
+            $h.empty();
+
+            var cel = $(el);
+            do {
+                $( this.selectorTemplate({ selector: socss.fn.elSelector( cel ) }) )
+                    .prependTo($h)
+                    .data('el', cel);
+                cel = cel.parent();
+            } while( cel.prop('tagName').toLowerCase() !== 'body' );
+
+            this.$('.socss-hierarchy .socss-selector')
+                .hover(function(){
+                    thisView.hl.highlight( $(this).data('el') );
+                } )
+                .click(function(e){
+                    e.preventDefault();
+                    e.stopPropagation();
+                    thisView.setActiveEl( $(this).data('el') );
+                });
+
+            // Scroll all the way left...
+            $h.scrollLeft( 99999 );
+
+            // Now lets add all the CSS selectors
+            var selectors = this.pageSelectors.filter( function(a){
+                return el.is( a.selector );
+            } );
+
+            var container = this.$('.socss-selectors-window').empty();
+
+            _.each( selectors, function(selector){
+                container.append(
+                    $( thisView.selectorTemplate(selector) )
+                        .data( selector )
+                );
+            } );
+            container.find('> div')
+                .mouseenter( function(){
+                    thisView.hl.highlight( $(this).data('selector') );
+                } )
+                .click( function(e){
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    thisView.trigger( 'click_selector', $(this).data('selector') );
+                } );
+
+            // And the CSS attributes
+        }
+
+    } );
+
+    socss.view.highlighter = Backbone.View.extend( {
+        template: _.template( $('#socss-template-hover').html().trim() ),
+        highlighted: [ ],
+
+        highlight: function( els ){
+            this.clear();
+            var thisView = this;
+
+            $(els).each(function(i, el){
+                el = $(el);
+
+                if( !el.is(':visible') ) {
+                    // Skip over invisible elements
+                    return true;
+                }
+
+                var hl = $( thisView.template() );
+                hl.css({
+                    'top' : el.offset().top,
+                    'left' : el.offset().left,
+                    'width' : el.outerWidth(),
+                    'height' : el.outerHeight()
+                }).appendTo( 'body' );
+
+                var g;
+
+                var padding = el.padding();
+                for( var k in padding ) {
+                    if( parseInt( padding[k] ) > 0 ) {
+                        g = hl.find( '.socss-guide-padding.socss-guide-' + k ).show();
+                        if( k === 'top' || k === 'bottom' ) {
+                            g.css('height', padding[k]);
+                        }
+                    }
+                }
+
+                var margin = el.margin();
+                for( var k in margin ) {
+                    if( parseInt( margin[k] ) > 0 ) {
+                        g = hl.find( '.socss-guide-margin.socss-guide-' + k ).show();
+                        if( k === 'top' || k === 'bottom' ) {
+                            g.css('height', margin[k]);
+                        }
+                    }
+                }
+
+                thisView.highlighted.push( hl );
+            } );
         },
 
-        /**
-         * Return the selectors used by this page, ordered by specificity.
-         *
-         * @return {Array}
-         */
-        getCssSelectors: function(){
-            var selectors = [];
+        clear: function(){
+            while( this.highlighted.length ) {
+                this.highlighted.pop().remove();
+            }
+        }
+    } );
 
-            if( !this.browserSupportsStylesheets() ) {
-                var stylesheet = null, ruleSpecificity;
-                for (var i = 0; i < document.styleSheets.length; i++) {
-                    stylesheet = document.styleSheets[i];
+    /**
+     * Function to get all the available page selectors
+     */
+    socss.fn.pageSelectors = function(){
+        var selectors = [];
 
-                    if (stylesheet.rules === null || ( stylesheet.href !== null && stylesheet.href.indexOf('so-css/css/inspector.css') !== -1 )) {
-                        // Skip anything without rules or the inspector css
+        if( document.styleSheets ) {
+            var stylesheet = null, ruleSpecificity;
+            for (var i = 0; i < document.styleSheets.length; i++) {
+                stylesheet = document.styleSheets[i];
+
+                if (stylesheet.rules === null || ( stylesheet.href !== null && stylesheet.href.indexOf('so-css/css/inspector.css') !== -1 )) {
+                    // Skip anything without rules or the inspector css
+                    continue;
+                }
+
+                for (var j = 0; j < stylesheet.rules.length; j++) {
+                    if (typeof stylesheet.rules[j].selectorText === 'undefined') {
                         continue;
                     }
 
-                    for (var j = 0; j < stylesheet.rules.length; j++) {
-                        if (typeof stylesheet.rules[j].selectorText === 'undefined') {
-                            continue;
-                        }
-
-                        ruleSpecificity = SPECIFICITY.calculate(stylesheet.rules[j].selectorText);
-                        for (var k = 0; k < ruleSpecificity.length; k++) {
-                            selectors.push({
-                                'selector': ruleSpecificity[k].selector.trim(),
-                                'specificity': parseInt(ruleSpecificity[k].specificity.replace(/,/g, ''))
-                            });
-                        }
+                    ruleSpecificity = SPECIFICITY.calculate(stylesheet.rules[j].selectorText);
+                    for (var k = 0; k < ruleSpecificity.length; k++) {
+                        selectors.push({
+                            'selector': ruleSpecificity[k].selector.trim(),
+                            'specificity': parseInt(ruleSpecificity[k].specificity.replace(/,/g, ''))
+                        });
                     }
                 }
             }
-
-            // Also add selectors for all the elements in the
-            $('body *').each(function(){
-                var $$ = $(this);
-                var elName = '';
-                if( $$.attr('id') !== undefined ) {
-                    elName += '#' + $$.attr('id');
-                }
-                if( $$.attr('class') !== undefined ) {
-                    elName += '.' + $$.attr('class').replace(/\s+/, '.');
-                }
-
-                if( elName === '' ) {
-                    elName = $$.prop('tagName').toLowerCase();
-                }
-
-                var ruleSpecificity = SPECIFICITY.calculate( elName );
-                for (var k = 0; k < ruleSpecificity.length; k++) {
-                    selectors.push({
-                        'selector': ruleSpecificity[k].selector.trim(),
-                        'specificity': parseInt(ruleSpecificity[k].specificity.replace(/,/g, ''))
-                    });
-                }
-            });
-
-            selectors = _.uniq( selectors, false, function( a ){
-                return a.selector;
-            } );
-
-            selectors.sort(function(a, b){
-                return a.specificity > b.specificity ? -1 : 1;
-            });
-
-            return selectors;
-        },
-
-        /**
-         * Start the hover inspector
-         */
-        startInspector: function(){
-            // This body class tells the inspector whether or not it should operate
-            this.mouseInspection = true;
-        },
-
-        /**
-         * Stop the hover inspector
-         */
-        stopInspector: function(){
-            this.mouseInspection = false;
-            this.highlighter.clearAll();
-        },
-
-        /**
-         * A check to see if the browser has support for stylesheets.
-         *
-         * @return {boolean}
-         */
-        browserSupportsStylesheets: function(){
-            return !!document.styleSheets;
-        },
-
-        /**
-         * Handles highlighting elements
-         */
-        highlighter: {
-            hlTemplate: _.template( $('#socss-template-hover').html().trim() ),
-            highlighted: [],
-
-            highlight: function( els, guides ){
-                this.clearAll();
-                var parent = this;
-
-                $(els).each(function(i, el){
-                    el = $(el);
-
-                    if( !el.is(':visible') ) {
-                        // Skip over invisible elements
-                        return true;
-                    }
-
-                    var hl = $( parent.hlTemplate() );
-                    hl.css({
-                        'top' : el.offset().top,
-                        'left' : el.offset().left,
-                        'width' : el.outerWidth(),
-                        'height' : el.outerHeight()
-                    }).appendTo( 'body' );
-
-                    if( guides ) {
-                        var g;
-
-                        var padding = el.padding();
-                        for( var k in padding ) {
-                            if( parseInt( padding[k] ) > 0 ) {
-                                g = hl.find('.socss-guide-padding.socss-guide-' + k).show();
-                                if( k === 'top' || k === 'bottom' ) {
-                                    g.css('height', padding[k]);
-                                }
-                            }
-                        }
-
-                        var margin = el.margin();
-                        for( var k in margin ) {
-                            if( parseInt( margin[k] ) > 0 ) {
-                                g = hl.find('.socss-guide-margin.socss-guide-' + k).show();
-                                if( k === 'top' || k === 'bottom' ) {
-                                    g.css('height', margin[k]);
-                                }
-                            }
-                        }
-
-                    }
-
-                    parent.highlighted.push( hl );
-                } );
-            },
-
-            clearAll: function(){
-                while( this.highlighted.length ) {
-                    this.highlighted.pop().remove();
-                }
-            }
-        },
-
-        /**
-         * Handles the dialog
-         */
-        selectorDialog: {
-            dialogTemplate: _.template( $('#socss-template-selector-dialog').html().trim() ),
-            selectorTemplate: _.template( '<li><%= selector %></li>' ),
-
-            /**
-             * The dialog jQuery element
-             */
-            dialog: null,
-
-            initialize: function(){
-                var thisDialog = this;
-                this.dialog = $( this.dialogTemplate() );
-                this.dialog.hide().appendTo('body');
-
-                this.dialog.find('.socss-button-close').click(function(){
-                    thisDialog.hide();
-                });
-
-                return this;
-            },
-
-            setActive: function( activeEl ){
-                this.updateSelectors( activeEl );
-                this.updateParents( activeEl );
-                return this;
-            },
-
-            show: function(){
-                this.dialog.show();
-                return this;
-            },
-
-            hide: function(){
-                this.dialog.hide();
-                return this;
-            },
-
-            /**
-             * Change the selectors so they represent the given Element
-             * @param el
-             */
-            updateSelectors: function( activeEl ){
-                var selectors = socssInspect.pageSelectors.filter( function(a){
-                    return activeEl.is( a.selector );
-                } );
-
-                var container = this.dialog.find('.socss-selectors').empty();
-                var thisDialog = this;
-
-                _.each( selectors, function(selector){
-                    container.append(
-                        $( thisDialog.selectorTemplate(selector) )
-                            .data( selector )
-                            .click( function(e){
-                                e.preventDefault();
-                                if( typeof parent.window !== 'undefined' && typeof parent.window.socss !== 'undefined' ) {
-                                    parent.window.socss.mainEditor.addEmptySelector( $(this).data('selector') );
-                                }
-                            } )
-                    );
-                } );
-
-                return this;
-            },
-
-            updateParents: function( activeEl ){
-                var container = this.dialog.find('.socss-element-parents').empty();
-                var thisDialog = this;
-
-                var cEl = activeEl, elName;
-                container.empty();
-                do{
-                    elName = cEl.prop('tagName').toLowerCase();
-                    if( cEl.attr('id') !== undefined ) {
-                        elName += '#' + cEl.attr('id');
-                    }
-                    if( cEl.attr('class') !== undefined ) {
-                        elName += '.' + cEl.attr('class').replace(/\s+/, '.');
-                    }
-
-                    container.prepend(
-                        $( thisDialog.selectorTemplate( { selector: elName } ) )
-                            .data( 'el', cEl )
-                            .mouseover(function(){
-                                $(this).data('el').trigger('mouseover');
-                            })
-                            .click( function(){
-                                var $$ = $(this);
-                                thisDialog.updateSelectors( $$.data('el') );
-                                thisDialog.updateParents( $$.data('el') );
-                            } )
-                    );
-                    cEl = cEl.parent();
-                } while( cEl.parent().length !== 0 && cEl.prop('tagName') !== 'BODY' );
-
-                return this;
-            }
-
         }
 
+        // Also add selectors for all the elements in the
+        $('body *').each(function(){
+            var $$ = $(this);
+            var elName = socss.fn.elSelector( $$ );
+            var ruleSpecificity = SPECIFICITY.calculate( elName );
+            for (var k = 0; k < ruleSpecificity.length; k++) {
+                selectors.push({
+                    'selector': ruleSpecificity[k].selector.trim(),
+                    'specificity': parseInt(ruleSpecificity[k].specificity.replace(/,/g, ''))
+                });
+            }
+        });
+
+        selectors = _.uniq( selectors, false, function( a ){
+            return a.selector;
+        } );
+
+        selectors.sort(function(a, b){
+            return a.specificity > b.specificity ? -1 : 1;
+        });
+
+        return selectors;
     };
-    window.socssInspect = socssInspect;
 
-    // Initialize the inspector
-    socssInspect.initialize();
+    socss.fn.elSelector = function( el ){
+        var elName = '';
+        if( el.attr('id') !== undefined ) {
+            elName += '#' + el.attr('id');
+        }
+        if( el.attr('class') !== undefined ) {
+            elName += '.' + el.attr('class').replace(/\s+/, '.');
+        }
 
-    $('#socss-selector-dialog .socss-button-close').click( function(e){
-        $('#socss-selector-dialog').fadeOut('fast');
+        if( elName === '' ) {
+            elName = el.prop('tagName').toLowerCase();
+        }
+
+        return elName;
+    };
+
+    window.socssInspector = socss;
+
+} ) ( jQuery, _, socssOptions );
+
+jQuery( function($){
+    var socss = window.socssInspector;
+
+    // Setup the editor
+    var inspector = new socss.view.inspector( {
+        el : $('#socss-inspector-interface').get(0)
     } );
+    inspector.activate();
 
+    window.socssInspector.mainInspector = inspector;
 } );

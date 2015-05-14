@@ -289,10 +289,16 @@ class SiteOrigin_CSS {
 	}
 
 	function enqueue_inspector_scripts(){
+		wp_enqueue_style( 'dashicons' );
+
 		wp_enqueue_script('siteorigin-css-sizes', plugin_dir_url(__FILE__) . 'js/jquery.sizes' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), '0.33' );
 		wp_enqueue_script('siteorigin-css-specificity', plugin_dir_url(__FILE__) . 'js/specificity' . SOCSS_JS_SUFFIX . '.js', array( ) );
-		wp_enqueue_script('siteorigin-css-inspector', plugin_dir_url(__FILE__) . 'js/inspector' . SOCSS_JS_SUFFIX . '.js', array( 'jquery', 'underscore' ), SOCSS_VERSION );
+		wp_enqueue_script('siteorigin-css-inspector', plugin_dir_url(__FILE__) . 'js/inspector' . SOCSS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone' ), SOCSS_VERSION, true );
 		wp_enqueue_style('siteorigin-css-inspector', plugin_dir_url(__FILE__) . 'css/inspector.css', array( ), SOCSS_VERSION );
+
+		wp_localize_script('siteorigin-css-inspector', 'socssOptions', array(
+
+		) );
 	}
 
 	function inspector_templates(){
