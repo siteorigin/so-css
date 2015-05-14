@@ -22,8 +22,6 @@ jQuery( function($){
 
             this.pageSelectors = this.getCssSelectors();
 
-            console.log( this.pageSelectors );
-
             // Inform the parent frame of the selectors we have
             try {
                 parent.socss.mainEditor.registerSelectors( this.pageSelectors );
