@@ -18,6 +18,7 @@
         active: false,
         hl: false,
         hoverEl: false,
+        pageSelectors: [],
 
         selectorTemplate: _.template('<div class="socss-selector"><%= selector %></div>'),
 

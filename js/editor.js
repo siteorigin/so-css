@@ -366,18 +366,12 @@
         },
 
         /**
-         * Register all the CSS selectors. This is called from the child frame.
-         */
-        registerSelectors: function( selectors ){
-            this.cssSelectors = selectors;
-        },
-
-        /**
          * This function lets an inspector let a
          */
         setInspector: function( inspector ){
             var thisView = this;
             this.inspector = inspector;
+            this.cssSelectors = inspector.pageSelectors;
 
             inspector.on('click_selector', function(selector){
                 thisView.addEmptySelector( selector );
