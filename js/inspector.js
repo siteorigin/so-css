@@ -81,32 +81,54 @@ jQuery( function($){
             var selectors = [];
 
             if( !this.browserSupportsStylesheets() ) {
-                return selectors;
-            }
+                var stylesheet = null, ruleSpecificity;
+                for (var i = 0; i < document.styleSheets.length; i++) {
+                    stylesheet = document.styleSheets[i];
 
-            var stylesheet = null, ruleSpecificity;
-            for( var i = 0; i < document.styleSheets.length; i++ ) {
-                stylesheet = document.styleSheets[i];
-
-                if( stylesheet.rules === null || ( stylesheet.href !== null && stylesheet.href.indexOf('so-css/css/inspector.css') !== -1 ) ) {
-                    // Skip anything without rules or the inspector css
-                    continue;
-                }
-
-                for( var j = 0; j < stylesheet.rules.length; j++ ) {
-                    if( typeof stylesheet.rules[j].selectorText === 'undefined' ) {
+                    if (stylesheet.rules === null || ( stylesheet.href !== null && stylesheet.href.indexOf('so-css/css/inspector.css') !== -1 )) {
+                        // Skip anything without rules or the inspector css
                         continue;
                     }
 
-                    ruleSpecificity = SPECIFICITY.calculate( stylesheet.rules[j].selectorText );
-                    for( var k = 0; k < ruleSpecificity.length; k++ ) {
-                        selectors.push( {
-                            'selector' : ruleSpecificity[k].selector.trim(),
-                            'specificity' : parseInt( ruleSpecificity[k].specificity.replace(/,/g, '') )
-                        } );
+                    for (var j = 0; j < stylesheet.rules.length; j++) {
+                        if (typeof stylesheet.rules[j].selectorText === 'undefined') {
+                            continue;
+                        }
+
+                        ruleSpecificity = SPECIFICITY.calculate(stylesheet.rules[j].selectorText);
+                        for (var k = 0; k < ruleSpecificity.length; k++) {
+                            selectors.push({
+                                'selector': ruleSpecificity[k].selector.trim(),
+                                'specificity': parseInt(ruleSpecificity[k].specificity.replace(/,/g, ''))
+                            });
+                        }
                     }
                 }
             }
+
+            // Also add selectors for all the elements in the
+            $('body *').each(function(){
+                var $$ = $(this);
+                var elName = '';
+                if( $$.attr('id') !== undefined ) {
+                    elName += '#' + $$.attr('id');
+                }
+                if( $$.attr('class') !== undefined ) {
+                    elName += '.' + $$.attr('class').replace(/\s+/, '.');
+                }
+
+                if( elName === '' ) {
+                    elName = $$.prop('tagName').toLowerCase();
+                }
+
+                var ruleSpecificity = SPECIFICITY.calculate( elName );
+                for (var k = 0; k < ruleSpecificity.length; k++) {
+                    selectors.push({
+                        'selector': ruleSpecificity[k].selector.trim(),
+                        'specificity': parseInt(ruleSpecificity[k].specificity.replace(/,/g, ''))
+                    });
+                }
+            });
 
             selectors = _.uniq( selectors, false, function( a ){
                 return a.selector;
