@@ -9,6 +9,11 @@ jQuery( function($){
         hover : null,
         pageSelectors: null,
 
+        /**
+         * Should we be using mouse inspection
+         */
+        mouseInspection: false,
+
         initialize: function(){
             var thisInspector = this;
 
@@ -16,6 +21,10 @@ jQuery( function($){
 
             // Setup hovering
             $('body').on('mouseover', '*', function(e){
+                if( !thisInspector.mouseInspection ) {
+                    return true;
+                }
+
                 var $$ = $(this);
                 if( $$.closest('.socss-element').length === 0 ) {
                     e.stopPropagation();
@@ -25,6 +34,10 @@ jQuery( function($){
 
             // Setup the click event
             $('body *').click(function( e ){
+                if( !thisInspector.mouseInspection ) {
+                    return true;
+                }
+
                 if( !$('body').hasClass('no-inspector') && !$('#socss-selector-dialog').is(':visible') ) {
                     e.preventDefault();
                     e.stopPropagation();
@@ -83,11 +96,12 @@ jQuery( function($){
 
         startInspector: function(){
             // This body class tells the inspector whether or not it should operate
-            $('body').removeClass( 'no-inspector' );
+            this.mouseInspection = true;
         },
 
         stopInspector: function(){
-            $('body').addClass( 'no-inspector' );
+            this.mouseInspection = false;
+            this.highlighter.clearAll();
         },
 
         /**
@@ -106,8 +120,8 @@ jQuery( function($){
 
                     var hl = $( parent.hlTemplate() );
                     hl.css({
-                        'top' : el.offset().top - 1,
-                        'left' : el.offset().left - 1,
+                        'top' : el.offset().top,
+                        'left' : el.offset().left,
                         'width' : el.outerWidth(),
                         'height' : el.outerHeight()
                     }).appendTo( 'body' );

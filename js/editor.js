@@ -134,6 +134,16 @@
                 el: this.$('.custom-css-preview')
             } );
             this.preview.render();
+
+            this.toolbar.on('click_inspector', function(active){
+                if( active ) {
+                    thisView.setExpand(true);
+                    thisView.preview.startInspector();
+                }
+                else {
+                    thisView.preview.stopInspector();
+                }
+            });
         },
 
         /**
@@ -325,6 +335,14 @@
             // Update the CSS after a short delay
             var css = this.editor.codeMirror.getValue();
             style.html(css);
+        },
+
+        startInspector: function(){
+            this.$('.preview-iframe')[0].contentWindow.socssInspect.startInspector();
+        },
+
+        stopInspector: function(){
+            this.$('.preview-iframe')[0].contentWindow.socssInspect.stopInspector();
         },
 
         /**
