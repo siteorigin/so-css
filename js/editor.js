@@ -1,5 +1,5 @@
 
-/* globals jQuery, _, socssOptions, Backbone, CodeMirror */
+/* globals jQuery, _, socssOptions, Backbone, CodeMirror, console */
 
 ( function( $, _, socssOptions ){
 
@@ -71,18 +71,7 @@
                 e.preventDefault();
                 $(this).blur();
                 thisView.trigger('click_expand');
-            });
-
-            this.$('.editor-inspector').click(function(e){
-                e.preventDefault();
-                var $$ = $(this);
-
-                $$.blur();
-                $$.toggleClass('active');
-                var isActive = $$.is('.active');
-
-                thisView.trigger('click_inspector', isActive);
-            });
+            } );
         },
 
         render: function(){
@@ -112,6 +101,8 @@
         snippets: null,
         toolbar: null,
 
+        inspector: null,
+
         cssSelectors: [],
 
         initialize: function( args ){
@@ -136,16 +127,6 @@
                 el: this.$('.custom-css-preview')
             } );
             this.preview.render();
-
-            this.toolbar.on('click_inspector', function(active){
-                if( active ) {
-                    thisView.setExpand(true);
-                    thisView.preview.startInspector();
-                }
-                else {
-                    thisView.preview.stopInspector();
-                }
-            });
         },
 
         /**
@@ -197,7 +178,7 @@
                     return;
                 }
 
-                if (token.type === "keyword" && "!important".indexOf(token.string) == 0){
+                if (token.type === "keyword" && "!important".indexOf(token.string) === 0){
                     return {list: ["!important"], from: CodeMirror.Pos(cur.line, token.start),
                         to: CodeMirror.Pos(cur.line, token.end)};
                 }
@@ -389,6 +370,22 @@
          */
         registerSelectors: function( selectors ){
             this.cssSelectors = selectors;
+        },
+
+        /**
+         * This function lets an inspector let a
+         */
+        setInspector: function( inspector ){
+            var thisView = this;
+            this.inspector = inspector;
+
+            inspector.on('click_selector', function(selector){
+                thisView.addEmptySelector( selector );
+            });
+
+            inspector.on('click_property', function( property ){
+                thisView.codeMirror.replaceSelection( property + ";\n  " );
+            });
         }
 
     } );
@@ -426,6 +423,9 @@
                     } );
 
                     thisView.updatePreviewCss();
+                } )
+                .mouseleave( function(){
+                    thisView.clearHighlight();
                 } );
         },
 
@@ -450,23 +450,25 @@
             style.html(css);
         },
 
-        startInspector: function(){
-            this.$('.preview-iframe')[0].contentWindow.socssInspect.startInspector();
-        },
-
-        stopInspector: function(){
-            this.$('.preview-iframe')[0].contentWindow.socssInspect.stopInspector();
-        },
-
         /**
          * Highlight all elements with a given selector
          */
         highlight: function( selector ){
-            this.$('.preview-iframe')[0].contentWindow.socssInspect.highlighter.highlight( selector );
+            try {
+                this.editor.inspector.hl.highlight( selector );
+            }
+            catch (err) {
+                console.log('No inspector to highlight with');
+            }
         },
 
         clearHighlight: function(){
-            this.$('.preview-iframe')[0].contentWindow.socssInspect.highlighter.clearAll( );
+            try {
+                this.editor.inspector.hl.clear();
+            }
+            catch (err) {
+                console.log('No inspector to highlight with');
+            }
         }
 
     } );
