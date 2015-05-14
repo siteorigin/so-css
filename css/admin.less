@@ -164,7 +164,7 @@
 	}
 
 	&.expanded {
-		@expanded_form_width: 320px;
+		@expanded_form_width: 340px;
 
 		z-index: 100000;
 		position: fixed;
@@ -211,7 +211,7 @@
 			top: 0;
 			right: 0;
 			bottom: 0;
-			left: 320px;
+			left: @expanded_form_width;
 			background: #ffffff;
 
 			iframe {
@@ -377,6 +377,8 @@
 }
 
 
-.CodeMirror-lint-tooltip {
+.CodeMirror-lint-tooltip,
+.CodeMirror-hints {
+	/* This is above the editor in full-screen mode */
 	z-index: 100002;
 }

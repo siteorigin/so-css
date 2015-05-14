@@ -132,7 +132,7 @@
   top: 0;
   left: 0;
   bottom: 0;
-  width: 320px;
+  width: 340px;
 }
 #so-custom-css-form.expanded .custom-css-toolbar .editor-expand .dashicons-editor-expand {
   display: none;
@@ -145,7 +145,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 319px;
+  left: 339px;
   width: 2px;
   background: rgba(0, 0, 0, 0.1);
 }
@@ -161,7 +161,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  left: 320px;
+  left: 340px;
   background: #ffffff;
 }
 #so-custom-css-form.expanded .custom-css-preview iframe {
@@ -293,6 +293,8 @@
   padding: 10px 20px;
   overflow: hidden;
 }
-.CodeMirror-lint-tooltip {
+.CodeMirror-lint-tooltip,
+.CodeMirror-hints {
+  /* This is above the editor in full-screen mode */
   z-index: 100002;
 }

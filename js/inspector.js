@@ -1,5 +1,5 @@
 
-/* globals jQuery, _, SPECIFICITY, window */
+/* globals jQuery, _, SPECIFICITY, window, console */
 
 jQuery( function($){
 
@@ -14,10 +14,23 @@ jQuery( function($){
          */
         mouseInspection: false,
 
+        /**
+         * Initialize the main inspector.
+         */
         initialize: function(){
             var thisInspector = this;
 
             this.pageSelectors = this.getCssSelectors();
+
+            console.log( this.pageSelectors );
+
+            // Inform the parent frame of the selectors we have
+            try {
+                parent.socss.mainEditor.registerSelectors( this.pageSelectors );
+            }
+            catch(err) {
+                console.log( "Can't register selectors" );
+            }
 
             // Setup hovering
             $('body').on('mouseover', '*', function(e){
@@ -51,13 +64,27 @@ jQuery( function($){
             this.selectorDialog.initialize();
         },
 
+        /**
+         * Set the element that we're currently hovering over.
+         *
+         * @param el
+         */
         setHoverEl: function(el){
             this.highlighter.highlight( el, true );
             this.hover = el;
         },
 
+        /**
+         * Return the selectors used by this page, ordered by specificity.
+         *
+         * @return {Array}
+         */
         getCssSelectors: function(){
             var selectors = [];
+
+            if( !this.browserSupportsStylesheets() ) {
+                return selectors;
+            }
 
             var stylesheet = null, ruleSpecificity;
             for( var i = 0; i < document.styleSheets.length; i++ ) {
@@ -94,14 +121,29 @@ jQuery( function($){
             return selectors;
         },
 
+        /**
+         * Start the hover inspector
+         */
         startInspector: function(){
             // This body class tells the inspector whether or not it should operate
             this.mouseInspection = true;
         },
 
+        /**
+         * Stop the hover inspector
+         */
         stopInspector: function(){
             this.mouseInspection = false;
             this.highlighter.clearAll();
+        },
+
+        /**
+         * A check to see if the browser has support for stylesheets.
+         *
+         * @return {boolean}
+         */
+        browserSupportsStylesheets: function(){
+            return !!document.styleSheets;
         },
 
         /**
@@ -117,6 +159,11 @@ jQuery( function($){
 
                 $(els).each(function(i, el){
                     el = $(el);
+
+                    if( !el.is(':visible') ) {
+                        // Skip over invisible elements
+                        return true;
+                    }
 
                     var hl = $( parent.hlTemplate() );
                     hl.css({

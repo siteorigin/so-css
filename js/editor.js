@@ -112,6 +112,8 @@
         snippets: null,
         toolbar: null,
 
+        cssSelectors: [],
+
         initialize: function( args ){
             this.setupEditor();
         },
@@ -152,6 +154,8 @@
         setupEditor: function( ) {
             var thisView = this;
 
+            this.registerCodeMirrorAutocomplete();
+
             // Setup the Codemirror instance
             this.codeMirror = CodeMirror.fromTextArea( this.$el.find('textarea.css-editor').get( 0 ), {
                 tabSize : 2,
@@ -160,9 +164,7 @@
                 gutters: [
                     "CodeMirror-lint-markers"
                 ],
-                lint: true,
-                extraKeys: {
-                }
+                lint: true
             } );
 
             // Set the container to visible overflow once the editor is setup
@@ -176,6 +178,59 @@
 
             // Setup the extensions
             this.setupCodeMirrorExtensions();
+        },
+
+        registerCodeMirrorAutocomplete: function(){
+            var thisView = this;
+            var pseudoClasses = {link: 1, visited: 1, active: 1, hover: 1, focus: 1,
+                "first-letter": 1, "first-line": 1, "first-child": 1,
+                before: 1, after: 1, lang: 1};
+
+            CodeMirror.registerHelper("hint", "css", function(cm) {
+                var cur = cm.getCursor(), token = cm.getTokenAt(cur);
+                var inner = CodeMirror.innerMode(cm.getMode(), token.state);
+                if (inner.mode.name != "css") {
+                    return;
+                }
+
+                if (token.type == "keyword" && "!important".indexOf(token.string) == 0){
+                    return {list: ["!important"], from: CodeMirror.Pos(cur.line, token.start),
+                        to: CodeMirror.Pos(cur.line, token.end)};
+                }
+
+                var start = token.start, end = cur.ch, word = token.string.slice(0, end - start);
+                if (/[^\w$_-]/.test(word)) {
+                    word = ""; start = end = cur.ch;
+                }
+
+                var spec = CodeMirror.resolveMode("text/css");
+
+                var result = [];
+                function add(keywords) {
+                    for (var name in keywords)
+                        if (!word || name.lastIndexOf(word, 0) == 0)
+                            result.push(name);
+                }
+
+                var st = inner.state.state;
+                if (st == "pseudo" || token.type == "variable-3") {
+                    add(pseudoClasses);
+                } else if (st == "block" || st == "maybeprop") {
+                    add(spec.propertyKeywords);
+                } else if (st == "prop" || st == "parens" || st == "at" || st == "params") {
+                    add(spec.valueKeywords);
+                    add(spec.colorKeywords);
+                } else if (st == "media" || st == "media_parens") {
+                    add(spec.mediaTypes);
+                    add(spec.mediaFeatures);
+                }
+
+                if (result.length) return {
+                    list: result,
+                    from: CodeMirror.Pos(cur.line, start),
+                    to: CodeMirror.Pos(cur.line, end)
+                };
+            });
         },
 
         setupCodeMirrorExtensions: function(){
@@ -195,6 +250,20 @@
                     thisView.preview.clearHighlight();
                 }
             } );
+
+            // This sets up automatic autocompletion at all times
+            this.codeMirror.on('keyup', function(cm, e){
+                if(
+                    ( e.keyCode >= 65 && e.keyCode <= 90 ) ||
+                    ( e.keyCode === 189 && !e.shiftKey ) ||
+                    ( e.keyCode === 190  && !e.shiftKey ) ||
+                    ( e.keyCode === 51 && e.shiftKey ) ||
+                    ( e.keyCode === 189 && e.shiftKey )
+                ) {
+                    console.log('Trigger autocomplete');
+                    cm.showHint(e);
+                }
+            });
         },
 
         /**
@@ -276,6 +345,13 @@
 
         addEmptySelector: function( selector ) {
             this.addCode( selector + " {\n  \n}" );
+        },
+
+        /**
+         * Register all the CSS selectors. This is called from the child frame.
+         */
+        registerSelectors: function( selectors ){
+            this.cssSelectors = selectors;
         }
 
     } );
