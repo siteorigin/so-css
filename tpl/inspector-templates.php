@@ -10,7 +10,7 @@
 
 	</div>
 
-	<div class="socss-attributes-window">
+	<div class="socss-properties-window">
 
 	</div>
 

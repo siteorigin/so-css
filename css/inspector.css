@@ -57,19 +57,19 @@
   padding-right: 9px;
 }
 #socss-inspector-interface .socss-selectors-window,
-#socss-inspector-interface .socss-attributes-window {
+#socss-inspector-interface .socss-properties-window {
   overflow: scroll;
   font-family: "Courier New", "Lucida Console", Courier, monospace;
   font-size: 13px;
 }
 #socss-inspector-interface .socss-selectors-window > div,
-#socss-inspector-interface .socss-attributes-window > div {
+#socss-inspector-interface .socss-properties-window > div {
   line-height: 1.2em;
   padding: 4px 10px;
   white-space: nowrap;
 }
 #socss-inspector-interface .socss-selectors-window > div:hover,
-#socss-inspector-interface .socss-attributes-window > div:hover {
+#socss-inspector-interface .socss-properties-window > div:hover {
   background: #f6f6f6;
   cursor: pointer;
 }
@@ -82,7 +82,7 @@
   background: #fff;
   border-right: 1px solid #aaa;
 }
-#socss-inspector-interface .socss-attributes-window {
+#socss-inspector-interface .socss-properties-window {
   position: absolute;
   top: 29px;
   right: 0;

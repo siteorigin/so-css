@@ -1,5 +1,5 @@
 
-/* globals jQuery, Backbone, _, socssOptions */
+/* globals jQuery, Backbone, _, socssOptions, SPECIFICITY */
 
 ( function( $, _, socssOptions ){
 
@@ -160,6 +160,23 @@
                 } );
 
             // And the CSS attributes
+            var attributes = socss.fn.elementAttributes(el);
+            container = this.$('.socss-properties-window').empty();
+
+            _.each( attributes, function(v, k){
+                container.append(
+                    $( thisView.selectorTemplate( { selector: '<strong>' + k + '</strong>: ' + v } ) )
+                        .data( 'property', k + ': ' + v )
+                );
+            } );
+
+            container.find('> div')
+                .click( function(e){
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    thisView.trigger( 'click_property', $(this).data('property') );
+                });
         }
 
     } );
@@ -275,6 +292,74 @@
         });
 
         return selectors;
+    };
+
+    socss.fn.elementAttributes = function( el ) {
+        if( !document.styleSheets ) {
+            return [];
+        }
+
+        var stylesheet = null, ruleSpecificity;
+        var properties = [];
+
+        var trimFunc = function(e) {
+            return e.trim();
+        };
+
+        var filterFunc = function(e){
+            return e !== '';
+        };
+
+        var splitFunc = function(e) {
+            return e.split(':').map( trimFunc );
+        };
+
+        for (var i = 0; i < document.styleSheets.length; i++) {
+            stylesheet = document.styleSheets[i];
+
+            if (stylesheet.rules === null || ( stylesheet.href !== null && stylesheet.href.indexOf('so-css/css/inspector.css') !== -1 )) {
+                // Skip anything without rules or the inspector css
+                continue;
+            }
+
+            for (var j = 0; j < stylesheet.rules.length; j++) {
+                if (typeof stylesheet.rules[j].selectorText === 'undefined') {
+                    continue;
+                }
+
+                ruleSpecificity = SPECIFICITY.calculate(stylesheet.rules[j].selectorText);
+                for (var k = 0; k < ruleSpecificity.length; k++) {
+
+                    if( el.is( ruleSpecificity[k].selector ) ) {
+                        // Filter the stylesheet to get out all the properties
+                        var p = stylesheet.rules[j].style.cssText.split(';').map( trimFunc).filter( filterFunc).map( splitFunc );
+
+                        for( var l = 0; l < p.length; l++ ) {
+                            properties.push({
+                                'name' : p[l][0],
+                                'value' : p[l][1],
+                                'specificity' : parseInt(ruleSpecificity[k].specificity.replace(/,/g, ''))
+                            });
+                        }
+
+                    }
+
+                }
+            }
+        }
+
+        properties.sort( function(a,b) {
+            return a.specificity > b.specificity ? 1 : -1;
+        }).reverse();
+
+        var returnProperties = {};
+        for( var i = 0; i < properties.length; i++ ) {
+            if( typeof returnProperties[properties[i].name] === 'undefined' ) {
+                returnProperties[properties[i].name] = properties[i].value;
+            }
+        }
+
+        return returnProperties;
     };
 
     socss.fn.elSelector = function( el ){

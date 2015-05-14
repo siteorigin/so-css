@@ -382,6 +382,10 @@
             inspector.on('click_selector', function(selector){
                 thisView.addEmptySelector( selector );
             });
+
+            inspector.on('click_property', function( property ){
+                thisView.codeMirror.replaceSelection( property + ";\n  " );
+            });
         }
 
     } );
