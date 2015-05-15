@@ -1,5 +1,5 @@
 
-/* globals jQuery, Backbone, _, socssOptions, SPECIFICITY */
+/* globals jQuery, Backbone, _, socssOptions, SPECIFICITY, console */
 
 ( function( $, _, socssOptions ){
 
@@ -138,7 +138,13 @@
 
             // Now lets add all the CSS selectors
             var selectors = this.pageSelectors.filter( function(a){
-                return el.is( a.selector );
+                // Use try to catch any malformed selectors
+                try {
+                    return el.is( a.selector );
+                }
+                catch(err) {
+                    return false;
+                }
             } );
 
             var container = this.$('.socss-selectors-window').empty();
@@ -344,7 +350,6 @@
                         }
 
                     }
-
                 }
             }
         }

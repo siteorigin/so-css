@@ -412,6 +412,10 @@
                     var $$ = $(this);
                     $$.contents().find('a').each( function(){
                         var href = $(this).attr('href');
+                        if( href === undefined ) {
+                            return true;
+                        }
+
                         var firstSeperator = (href.indexOf('?') === -1 ? '?' : '&');
                         $(this).attr('href', href + firstSeperator + 'so_css_preview=1' );
                     } );
