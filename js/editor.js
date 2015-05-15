@@ -827,6 +827,9 @@
                 } );
 
                 this.$el.append( input );
+
+                // Set this up as a color picker
+                this.$el.find('input').minicolors( {} );
             }
 
         })

@@ -128,9 +128,7 @@ class SiteOrigin_CSS {
 		if( $page != 'appearance_page_siteorigin_custom_css' ) return;
 
 		// Core WordPress stuff that we use
-//		wp_enqueue_media();
-//		wp_enqueue_style( 'wp-color-picker' );
-//		wp_enqueue_script( 'wp-color-picker' );
+		wp_enqueue_media();
 
 		// Enqueue the codemirror scripts. Call Underscore and Backbone dependencies so they're enqueued first to prevent conflicts.
 		wp_enqueue_script( 'codemirror', plugin_dir_url(__FILE__) . 'codemirror/lib/codemirror' . SOCSS_JS_SUFFIX . '.js', array( 'underscore', 'backbone' ), '5.2.0' );
@@ -152,6 +150,10 @@ class SiteOrigin_CSS {
 
 		// Enqueue the scripts for theme CSS processing
 		wp_enqueue_script( 'siteorigin-custom-css-parser', plugin_dir_url(__FILE__) . 'js/css-parser' . SOCSS_JS_SUFFIX . '.js', array( ), SOCSS_VERSION );
+
+		// There are conflicts between CSS linting and the built in WordPress color picker, so use something else
+		wp_enqueue_style('siteorigin-custom-css-minicolors', plugin_dir_url(__FILE__) . 'minicolors/jquery.minicolors.css', array(), '2.1.7' );
+		wp_enqueue_script('siteorigin-custom-css-minicolors', plugin_dir_url(__FILE__) . 'minicolors/jquery.minicolors' . SOCSS_JS_SUFFIX . '.js', array('jquery'), '2.1.7' );
 
 		// All the custom SiteOrigin CSS stuff
 		wp_enqueue_script( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'js/editor' . SOCSS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'siteorigin-custom-css-parser', 'codemirror' ), SOCSS_VERSION, true );
