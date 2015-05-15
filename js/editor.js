@@ -1,5 +1,5 @@
 
-/* globals jQuery, _, socssOptions, Backbone, CodeMirror, console */
+/* globals jQuery, _, socssOptions, Backbone, CodeMirror, console, cssjs */
 
 ( function( $, _, socssOptions ){
 
@@ -11,52 +11,6 @@
     };
 
     window.socss = socss;
-
-    /**
-     * The main CSS model.
-     */
-    socss.model.css = Backbone.Model.extend( {
-
-        selectors: {},
-        css: '',
-
-        initialize: function( args ){
-            this.css = args.css;
-        },
-
-        parse: function(css) {
-
-        },
-
-        /**
-         * Add some CSS to the model
-         */
-        addCss: function(){
-
-        }
-
-    } );
-
-    /**
-     * Model for a CSS selector
-     */
-    socss.model.cssSelector = Backbone.Model.extend( {
-
-        selector: '',
-        specificity: 0,
-
-        initialize: function(){
-
-        }
-
-    } );
-
-    /**
-     * Model for a CSS attribute and value
-     */
-    socss.model.cssAttr = Backbone.Model.extend( {
-
-    } );
 
     /**
      * The toolbar view
@@ -71,6 +25,12 @@
                 e.preventDefault();
                 $(this).blur();
                 thisView.trigger('click_expand');
+            } );
+
+            this.$('.editor-visual').click(function(e){
+                e.preventDefault();
+                $(this).blur();
+                thisView.trigger('click_visual');
             } );
         },
 
@@ -100,6 +60,7 @@
         codeMirror : null,
         snippets: null,
         toolbar: null,
+        visualProperties: null,
 
         inspector: null,
 
@@ -118,8 +79,21 @@
             } );
             this.toolbar.render();
 
+            // Create the visual properties view
+            this.visualProperties = new socss.view.properties( {
+                el: $('#so-custom-css-properties')
+            } );
+            this.visualProperties.editor = this;
+            this.visualProperties.render();
+
             this.toolbar.on('click_expand', function(){
                 thisView.toggleExpand();
+            });
+
+            this.toolbar.on('click_visual', function(){
+                var currentBlock = thisView.selectCurrentBlock();
+                thisView.visualProperties.loadCSS( "* " + currentBlock );
+                thisView.visualProperties.show();
             });
 
             this.preview = new socss.view.preview( {
@@ -256,7 +230,9 @@
             this.codeMirror.on('cursorActivity', function(cm){
                 var cur = cm.getCursor(), token = cm.getTokenAt(cur);
                 var inner = CodeMirror.innerMode(cm.getMode(), token.state);
-                console.log( inner.state.state );
+
+                // console.log( token );
+                // console.log( inner.state.state );
 
                 // If we have a qualifier selected, then highlight that in the preview
                 if( token.type === 'qualifier' || token.type === 'tag' || token.type === 'builtin' ) {
@@ -380,6 +356,50 @@
             inspector.on('click_property', function( property ){
                 thisView.codeMirror.replaceSelection( property + ";\n  " );
             });
+        },
+
+        /**
+         * Forces CodeMirror to select the current block.
+         *
+         * @todo improve this so we can click outside the selector
+         */
+        selectCurrentBlock: function(){
+            var cm = this.codeMirror;
+            var cur, token, inner;
+
+            cur = cm.getCursor();
+            token = cm.getTokenAt(cur);
+            inner = CodeMirror.innerMode(cm.getMode(), token.state);
+
+            if( inner.state.state === 'top' ) {
+                return false;
+            }
+
+            while( inner.state.state !== 'top' ) {
+                cm.execCommand('goGroupLeft');
+
+                cur = cm.getCursor();
+                token = cm.getTokenAt(cur);
+                inner = CodeMirror.innerMode(cm.getMode(), token.state);
+            }
+
+            var startCur = cm.getCursor();
+
+            cm.execCommand('goGroupRight');
+            cur = cm.getCursor();
+            token = cm.getTokenAt(cur);
+            inner = CodeMirror.innerMode(cm.getMode(), token.state);
+            while( inner.state.state !== 'top' ) {
+                cm.execCommand('goGroupRight');
+                cur = cm.getCursor();
+                token = cm.getTokenAt(cur);
+                inner = CodeMirror.innerMode(cm.getMode(), token.state);
+            }
+
+            var endCur = cm.getCursor();
+
+            cm.setSelection( startCur, endCur );
+            return cm.getSelection();
         }
 
     } );
@@ -469,27 +489,6 @@
             }
         }
 
-    } );
-
-    /**
-     * The attribute controller type
-     */
-    socss.view.attrController = Backbone.View.extend( {
-
-    } );
-
-    /**
-     * A single CSS snippet
-     */
-    socss.model.snippet = Backbone.Model.extend( {
-
-    } );
-
-    /**
-     * A collection of snippets
-     */
-    socss.collection.snippets = Backbone.Collection.extend( {
-        model: socss.model.snippet
     } );
 
     /**
@@ -596,13 +595,242 @@
         }
     } );
 
-    socss.fn = {
+
+    socss.model.cssRules = Backbone.Model.extend( {
+
+        initialize: function(){
+
+        },
+
         /**
-         * Get the specificity for a given selector.
-         * @param selector
-         * @return {number}
-         * @todo implement this.
+         * Get the CSS associated with the editor
          */
+        getCSS: function( ){
+            var prefix = '';
+            var returnString = "{";
+            for( var k in this.attributes )  {
+                if( this.attributes[k] !== '' ) {
+                    returnString += "\n" + prefix + '  ' + k + ': ' + this.attributes[k] + ';';
+                }
+            }
+            returnString += "\n}";
+            return returnString;
+        }
+    } ) ;
+
+    /**
+     * The visual properties editor
+     */
+    socss.view.properties = Backbone.View.extend( {
+
+        model: socss.model.cssRules,
+
+        tabTemplate: _.template('<li data-section="<%- id %>"><span class="dashicons dashicons-<%- icon %>"></span> <%- title %></li>'),
+        sectionTemplate: _.template('<div class="section" data-section="<%- id %>"><table class="fields-table"><tbody></tbody></table></div>'),
+        controllerTemplate: _.template('<tr><th scope="row"><%- title %></th><td></td></tr>'),
+
+        propertyControllers: {},
+
+        /**
+         * Initialize the properties editor with a new model
+         */
+        initialize: function(){
+            var thisView = this;
+
+            this.parser = new cssjs();
+            this.model = new socss.model.cssRules();
+
+            this.model.on('change', function(){
+                this.editor.codeMirror.replaceSelection( this.model.getCSS(), 'around' );
+            }, this);
+        },
+
+        /**
+         * Render the property editor
+         */
+        render: function(){
+            var thisView = this;
+
+            var controllers = socssOptions.propertyControllers;
+
+            for( var id in controllers ) {
+                // Create the tabs
+                var $t = $( this.tabTemplate({
+                    id: id,
+                    icon: controllers[id].icon,
+                    title: controllers[id].title
+                })).appendTo( this.$('.section-tabs') );
+
+                // Create the sections wrappers
+                var $s = $( this.sectionTemplate({
+                    id: id
+                })).appendTo( this.$('.sections') );
+
+                // Now lets add the controllers
+                if( ! _.isEmpty( controllers[id].controllers ) ) {
+
+                    for( var prop in controllers[id].controllers ) {
+                        var $c = $(thisView.controllerTemplate({
+                            title: controllers[id].controllers[prop].title
+                        })).appendTo($s.find('tbody'));
+
+                        var controller;
+                        if( typeof socss.view.properties.controllers[ controllers[id].controllers[prop].type ] === 'undefined' ) {
+                            controller = new socss.view.propertyController({
+                                el: $c.find('td')
+                            });
+                        }
+                        else {
+                            controller = new socss.view.properties.controllers[ controllers[id].controllers[prop].type ]({
+                                el: $c.find('td')
+                            });
+                        }
+
+                        thisView.propertyControllers[prop] = controller;
+
+                        // Setup and render the controller
+                        controller.setPropertiesView(thisView);
+                        controller.render();
+                        controller.on('change', function(val){
+                            this.model.set( prop, val );
+                        }, thisView);
+                    }
+                }
+            }
+
+            // Setup the tab switching
+            this.$('.section-tabs li').click(function(){
+                var $$ = $(this);
+                var show = thisView.$('.sections .section[data-section="' + $$.data('section') + '"]');
+
+                thisView.$('.sections .section').not( show ).hide().removeClass('active');
+                show.show().addClass('active');
+
+                thisView.$('.section-tabs li').not($$).removeClass('active');
+                $$.addClass('active');
+            }).eq(0).click();
+
+        },
+
+        /**
+         * Show the properties editor
+         */
+        show: function(){
+            this.$el.show();
+        },
+
+        /**
+         * Hide the properties editor
+         */
+        hide: function(){
+            this.$el.hide();
+        },
+
+        /**
+         * Loads a single CSS selector and associated properties into the model
+         * @param css
+         */
+        loadCSS: function(css) {
+            this.css = css;
+
+            try {
+                var parsed = this.parser.parseCSS( css )[0];
+                if( parsed.selector !== '*' ) {
+                    // Seems like there was a  problem
+                    return false;
+                }
+
+                // Load all these values into the value controllers
+                this.model.clear();
+
+                var setValues = {};
+                for( var i = 0; i < parsed.rules.length; i++ ) {
+                    setValues[parsed.rules[i].directive] = parsed.rules[i].value;
+                }
+                this.model.set( setValues, { silent: true } );
+
+                for( var k in setValues ) {
+                    if( typeof this.propertyControllers[k] !== 'undefined' ) {
+                        this.propertyControllers[k].setValue( setValues[k] );
+                    }
+                }
+            }
+            catch(err) {
+                console.log(err);
+                // This probably means that there is a CSS parsing issue
+                return false;
+            }
+
+            return true;
+        },
+
+        /**
+         * Initialize all the form elements
+         */
+        activateForm: function(){
+
+        },
+
+        /**
+         * Load the form values
+         */
+        loadFormValues: function(){
+
+        }
+
+    } );
+
+    socss.view.propertyController = Backbone.View.extend( {
+
+        propertiesView: null,
+        template: _.template('<input type="text" value="" />'),
+
+        initialize: function( ){
+
+        },
+
+        setPropertiesView: function( view ){
+            this.propertiesView = view;
+        },
+
+        render: function(){
+            this.$el.append( $( this.template( {} ) ) );
+        },
+
+        getValue: function(){
+            return this.$('input').val();
+        },
+
+        setValue: function(val) {
+            this.$('input').val(val);
+        }
+
+    } );
+
+    // All the controllers
+    socss.view.properties.controllers = {
+
+        // The color property controller
+        color: socss.view.propertyController.extend({
+
+            template: _.template('<input type="text" value="" />'),
+
+            initialize: function( ){
+            },
+
+            render: function(){
+                var thisView = this;
+
+                var input = $( this.template( {} ) );
+                input.on( 'change keyup', function(){
+                    thisView.trigger( 'change', input.val() );
+                } );
+
+                this.$el.append( input );
+            }
+
+        })
+
     };
 
 } ) ( jQuery, _, socssOptions );

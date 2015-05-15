@@ -127,6 +127,11 @@ class SiteOrigin_CSS {
 	function enqueue_admin_scripts( $page ){
 		if( $page != 'appearance_page_siteorigin_custom_css' ) return;
 
+		// Core WordPress stuff that we use
+//		wp_enqueue_media();
+//		wp_enqueue_style( 'wp-color-picker' );
+//		wp_enqueue_script( 'wp-color-picker' );
+
 		// Enqueue the codemirror scripts. Call Underscore and Backbone dependencies so they're enqueued first to prevent conflicts.
 		wp_enqueue_script( 'codemirror', plugin_dir_url(__FILE__) . 'codemirror/lib/codemirror' . SOCSS_JS_SUFFIX . '.js', array( 'underscore', 'backbone' ), '5.2.0' );
 		wp_enqueue_script( 'codemirror-mode-css', plugin_dir_url(__FILE__) . 'codemirror/mode/css/css' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
@@ -156,10 +161,19 @@ class SiteOrigin_CSS {
 			'themeCSS' => SiteOrigin_CSS::single()->get_theme_css(),
 			'homeURL' => add_query_arg( 'so_css_preview', '1', site_url() ),
 			'snippets' => $this->get_snippets(),
+
+			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() )
 		) );
 
 		// This is for the templates required by the CSS editor
 		add_action( 'admin_footer', array($this, 'action_admin_footer') );
+	}
+
+	/**
+	 * Get all the available property controllers
+	 */
+	function get_property_controllers() {
+		return include plugin_dir_path(__FILE__) . 'inc/controller-config.php';
 	}
 
 	/**
@@ -289,6 +303,8 @@ class SiteOrigin_CSS {
 	}
 
 	function enqueue_inspector_scripts(){
+		if( !current_user_can('edit_theme_options') ) return;
+
 		wp_enqueue_style( 'dashicons' );
 
 		wp_enqueue_script('siteorigin-css-sizes', plugin_dir_url(__FILE__) . 'js/jquery.sizes' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), '0.33' );

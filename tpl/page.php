@@ -53,7 +53,12 @@
 				</div>
 
 				<div class="toolbar-action-buttons">
-					<a href="#" class="editor-expand">
+
+					<a href="#visual" class="editor-visual">
+						<span class="dashicons dashicons-edit"></span>
+					</a>
+
+					<a href="#expand" class="editor-expand">
 						<span class="dashicons dashicons-editor-expand"></span>
 						<span class="dashicons dashicons-no-alt"></span>
 					</a>
@@ -77,6 +82,19 @@
 			<div class="decoration"></div>
 
 		</form>
+
+
+
+
+		<div id="so-custom-css-properties">
+
+			<ul class="section-tabs">
+			</ul>
+
+			<div class="sections">
+			</div>
+
+		</div>
 
 	</div>
 

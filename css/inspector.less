@@ -6,28 +6,36 @@
 	right: 0;
 	height: 220px;
 	background: #ffffff;
-	border-top: 1px solid #a3a3a3;
 	box-shadow: 0 -2px 2px rgba(0,0,0,0.05);
 	z-index: 99999 + 1;
 
 	font-family: "Arial", sans-serif;
 	font-size: 14px;
+	border-top: 1px solid #a3a3a3;
 
 	.socss-toolbar {
 		box-sizing: border-box;
 		background: #e6e6e6;
-		border-bottom: 1px solid #a3a3a3;
 		padding: 0 4px;
-		max-height: 29px;
 		user-select: none;
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 30px;
+		overflow: hidden;
 
 		.socss-enable-inspector {
 			font-size: 20px;
 			display: inline-block;
-			padding: 4px;
+			padding: 5px;
 			color: #777;
 			border-left: 1px solid transparent;
 			border-right: 1px solid transparent;
+			position: absolute;
+			top: 0;
+			left: 5px;
+			bottom: 0;
 
 			&:hover {
 				cursor: pointer;
@@ -39,17 +47,18 @@
 		.socss-hierarchy {
 			position: absolute;
 			top: 0;
-			left: 0;
 			right: 20px;
 			left: 40px;
+			bottom: 0;
 			display: block;
 			padding-left: 10px;
-			overflow-x: scroll;
+			overflow: hidden;
 			white-space: nowrap;
+			background: #e6e6e6;
 
 			.socss-selector {
 				font-size: 12px;
-				padding: 8px 20px 8px 9px;
+				padding: 9px 20px 9px 9px;
 				display: inline-block;
 				background: url(./images/separator.png) top right no-repeat;
 				background-size: contain;
@@ -66,9 +75,10 @@
 
 	.socss-selectors-window,
 	.socss-properties-window {
-		overflow: scroll;
+		overflow-y: scroll;
 		font-family: "Courier New", "Lucida Console", Courier, monospace;
 		font-size: 13px;
+		border-top: 1px solid #a3a3a3;
 
 		> div {
 			line-height: 1.2em;

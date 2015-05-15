@@ -224,6 +224,88 @@
 	}
 }
 
+#so-custom-css-properties {
+
+	display: none;
+
+	position: fixed;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	width: 340px;
+	background: #ffffff;
+	border:1px solid #D0D0D0;
+
+	z-index: 100000;
+
+	.section-tabs {
+		list-style: none;
+		height: auto;
+		margin: 0;
+		box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+
+		li {
+			box-sizing: border-box;
+			float: left;
+			width: 33.333%;
+			padding: 8px 7px 7px 7px;
+			border: 1px solid #aaa;
+			background: #F6F6F6;
+			font-weight: bold;
+
+			border-top: 0;
+			border-left: 0;
+			font-size: 12px;
+
+			cursor: pointer;
+			white-space: nowrap;
+			overflow: hidden;
+
+			&:hover {
+				background: #fff;
+			}
+
+			.dashicons {
+				float: left;
+				display: block;
+				margin: -1px 5px 0 -2px;
+				color: #555;
+			}
+
+			&:last-child {
+				border-right: 0;
+			}
+
+			&.active {
+				background: #e8e8e8;
+			}
+		}
+	}
+
+	.sections {
+
+		.section {
+			display: none;
+
+			padding: 5px;
+		}
+
+		.fields-table {
+			th, td {
+				padding: 4px;
+			}
+
+			th[scope="row"] {
+				white-space: nowrap;
+				width: 25%;
+				font-weight: bold;
+				text-align: right;
+			}
+		}
+	}
+
+}
+
 .css-editor-snippet-browser {
 	display: none;
 
