@@ -18,7 +18,11 @@
 
         button: _.template('<li><a href="#" class="toolbar-button"><%= text %></a></li>'),
 
-        initialize: function () {
+        editor: null,
+
+        initialize: function ( attr ) {
+            this.editor = attr.editor;
+
             var thisView = this;
             this.$('.editor-expand').click(function (e) {
                 e.preventDefault();
@@ -31,10 +35,6 @@
                 $(this).blur();
                 thisView.trigger('click_visual');
             });
-        },
-
-        render: function () {
-
         },
 
         addButton: function (text, action) {
@@ -74,15 +74,17 @@
 
             // Setup the toolbar
             this.toolbar = new socss.view.toolbar({
+                editor: this,
                 el: this.$('.custom-css-toolbar')
             });
+            this.toolbar.editor = this;
             this.toolbar.render();
 
             // Create the visual properties view
             this.visualProperties = new socss.view.properties({
+                editor: this,
                 el: $('#so-custom-css-properties')
             });
-            this.visualProperties.editor = this;
             this.visualProperties.render();
 
             this.toolbar.on('click_expand', function () {
@@ -361,6 +363,7 @@
             this.inspector = inspector;
             this.cssSelectors = inspector.pageSelectors;
 
+            // A selector is clicked in the inspector
             inspector.on('click_selector', function (selector) {
                 if (thisView.visualProperties.isVisible()) {
                     // Check if this selector already exists
@@ -371,7 +374,7 @@
                         dropdown.change();
                     }
                     else {
-                        // The selector doesn't exist
+                        // The selector doesn't exist, so add it to the CSS, then reload
                         thisView.addEmptySelector(selector);
                         thisView.visualProperties.loadCSS( thisView.codeMirror.getValue(), selector );
                     }
@@ -381,6 +384,7 @@
                 }
             });
 
+            // A property is clicked in the inspector
             inspector.on('click_property', function (property) {
                 if ( ! thisView.visualProperties.isVisible()) {
                     thisView.codeMirror.replaceSelection(property + ";\n  ");
@@ -433,6 +437,9 @@
                 });
         },
 
+        /**
+         * Update the preview CSS from the CodeMirror value in the editor
+         */
         updatePreviewCss: function () {
             var preview = this.$('.preview-iframe');
             if (preview.length === 0) {
@@ -633,9 +640,9 @@
         /**
          * Initialize the properties editor with a new model
          */
-        initialize: function () {
-            var thisView = this;
+        initialize: function ( attr ) {
             this.parser = new cssjs();
+            this.editor = attr.editor;
         },
 
         /**
@@ -830,6 +837,7 @@
 
     });
 
+    // The basic property controller
     socss.view.propertyController = Backbone.View.extend({
 
         template: _.template('<input type="text" value="" />'),
@@ -919,49 +927,47 @@
 
     });
 
-    // All the controllers
-    socss.view.properties.controllers = {
+    socss.view.properties.controllers = {};
 
-        // The color property controller
-        color: socss.view.propertyController.extend({
+    // The color controller
+    socss.view.properties.controllers.color = socss.view.propertyController.extend({
 
-            template: _.template('<input type="text" value="" />'),
+        template: _.template('<input type="text" value="" />'),
 
-            render: function () {
-                var thisView = this;
+        render: function () {
+            var thisView = this;
 
-                this.$el.append($(this.template({})));
+            this.$el.append($(this.template({})));
 
-                // Set this up as a color picker
-                this.field = this.$el.find('input');
-                this.field.minicolors({});
+            // Set this up as a color picker
+            this.field = this.$el.find('input');
+            this.field.minicolors({});
 
-            },
+        },
 
-            initChangeEvents: function () {
-                var thisView = this;
-                this.field.on('change keyup', function () {
-                    thisView.trigger('change', thisView.field.minicolors('value'));
-                });
-            },
+        initChangeEvents: function () {
+            var thisView = this;
+            this.field.on('change keyup', function () {
+                thisView.trigger('change', thisView.field.minicolors('value'));
+            });
+        },
 
-            getValue: function () {
-                return this.field.minicolors('value');
-            },
+        getValue: function () {
+            return this.field.minicolors('value');
+        },
 
-            setValue: function (val, options) {
-                options = _.extend({silent: false}, options);
+        setValue: function (val, options) {
+            options = _.extend({silent: false}, options);
 
-                this.field.minicolors('value', val);
+            this.field.minicolors('value', val);
 
-                if (!options.silent) {
-                    this.trigger('set_value', val);
-                }
+            if (!options.silent) {
+                this.trigger('set_value', val);
             }
+        }
 
-        })
+    });
 
-    };
 
 })(jQuery, _, socssOptions);
 
