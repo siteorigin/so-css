@@ -366,7 +366,6 @@
                     // Check if this selector already exists
                     var dropdown = thisView.visualProperties.$('.toolbar select');
                     dropdown.val( selector );
-                    console.log( dropdown.val() );
                     if( dropdown.val() === selector ) {
                         // Trigger a change event to load the existing selector
                         dropdown.change();
