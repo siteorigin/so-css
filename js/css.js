@@ -1,3 +1,10 @@
+/*
+ The MIT License (MIT)
+ Copyright (c) 2015 JotForm
+
+ Modifications made by SiteOrigin
+ */
+
 /* jshint unused:false */
 /* global base64_decode, CSSWizardView, window, console, jQuery */
 (function ($) {
