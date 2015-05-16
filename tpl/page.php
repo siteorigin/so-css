@@ -55,12 +55,12 @@
 				<div class="toolbar-action-buttons">
 
 					<a href="#visual" class="editor-visual">
-						<span class="dashicons dashicons-edit"></span>
+						<span class="dashicons dashicons-admin-appearance"></span>
 					</a>
 
 					<a href="#expand" class="editor-expand">
 						<span class="dashicons dashicons-editor-expand"></span>
-						<span class="dashicons dashicons-no-alt"></span>
+						<span class="dashicons dashicons-editor-contract"></span>
 					</a>
 				</div>
 			</div>
@@ -87,6 +87,13 @@
 
 
 		<div id="so-custom-css-properties">
+
+			<a class="toolbar">
+				<h3><?php _e('CSS Properties', 'so-css') ?></h3>
+				<div class="close">
+					<span class="dashicons dashicons-yes"></span>
+				</div>
+			</a>
 
 			<ul class="section-tabs">
 			</ul>

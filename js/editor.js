@@ -274,6 +274,14 @@
         },
 
         /**
+         * Check if the editor is in expanded mode
+         * @returns {*}
+         */
+        isExpanded: function(){
+            return this.$el.hasClass('expanded');
+        },
+
+        /**
          * Toggle if this is expanded or not
          */
         toggleExpand: function(){
@@ -357,6 +365,8 @@
                 thisView.codeMirror.replaceSelection( property + ";\n  " );
             });
         },
+
+        selectedBlock: '',
 
         /**
          * Forces CodeMirror to select the current block.
@@ -632,6 +642,15 @@
         propertyControllers: {},
 
         /**
+         * Was the editor expanded before we went into the property editor
+         */
+        editorExpandedBefore : false,
+
+        events: {
+            'click .close' : 'hide'
+        },
+
+        /**
          * Initialize the properties editor with a new model
          */
         initialize: function(){
@@ -692,6 +711,7 @@
                         controller.setPropertiesView(thisView);
                         controller.render();
                         controller.on('change', function(val){
+                            console.log( 'change' );
                             this.model.set( prop, val );
                         }, thisView);
                     }
@@ -716,6 +736,8 @@
          * Show the properties editor
          */
         show: function(){
+            this.editorExpandedBefore = this.editor.isExpanded();
+            this.editor.setExpand( true );
             this.$el.show();
         },
 
@@ -723,6 +745,7 @@
          * Hide the properties editor
          */
         hide: function(){
+            this.editor.setExpand( this.editorExpandedBefore );
             this.$el.hide();
         },
 
@@ -795,14 +818,16 @@
 
         render: function(){
             this.$el.append( $( this.template( {} ) ) );
+            this.field = this.$('input');
         },
 
         getValue: function(){
-            return this.$('input').val();
+            return this.field.val();
         },
 
         setValue: function(val) {
-            this.$('input').val(val);
+            this.field.val(val);
+            this.trigger('set_value', val);
         }
 
     } );
@@ -829,7 +854,19 @@
                 this.$el.append( input );
 
                 // Set this up as a color picker
-                this.$el.find('input').minicolors( {} );
+                this.field = this.$el.find('input');
+                this.field.minicolors( {} );
+
+            },
+
+            getValue: function(){
+                console.log( this.field.minicolors( 'value' ) );
+                return this.field.minicolors( 'value' );
+            },
+
+            setValue: function( val ){
+                this.field.minicolors( 'value', val);
+                this.trigger('set_value', val);
             }
 
         })

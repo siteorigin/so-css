@@ -93,7 +93,7 @@
 #so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .dashicons {
   font-size: 20px;
 }
-#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .dashicons-no-alt {
+#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .dashicons-editor-contract {
   display: none;
 }
 #so-custom-css-form .custom-css-container {
@@ -137,7 +137,7 @@
 #so-custom-css-form.expanded .custom-css-toolbar .editor-expand .dashicons-editor-expand {
   display: none;
 }
-#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .dashicons-no-alt {
+#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .dashicons-editor-contract {
   display: inline-block;
 }
 #so-custom-css-form.expanded .decoration {
@@ -179,6 +179,35 @@
   background: #ffffff;
   border: 1px solid #D0D0D0;
   z-index: 100000;
+}
+#so-custom-css-properties .toolbar {
+  display: block;
+  padding: 7px 10px;
+  border-bottom: 1px solid #aaa;
+  background: #F6F6F6;
+  text-align: right;
+}
+#so-custom-css-properties .toolbar h3 {
+  float: left;
+  line-height: 1;
+  padding: 10px 0 0 0;
+}
+#so-custom-css-properties .toolbar > div {
+  cursor: pointer;
+  line-height: 1em;
+  display: inline-block;
+  border: 1px solid #c0c0c0;
+  background: #f6f6f6;
+  text-decoration: none;
+  color: #555;
+  font-size: 0.95em;
+  padding: 5px;
+  margin-left: 5px;
+}
+#so-custom-css-properties .toolbar > div:hover {
+  border: 1px solid #b0b0b0;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 #so-custom-css-properties .section-tabs {
   list-style: none;
