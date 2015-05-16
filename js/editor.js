@@ -619,7 +619,7 @@
         /**
          * The controllers for each of the properties
          */
-        propertyControllers: {},
+        propertyControllers: [],
 
         /**
          * The editor view
@@ -674,7 +674,7 @@
                     title: controllers[id].title
                 })).appendTo( this.$('.section-tabs') );
 
-                // Create the sections wrappers
+                // Create the section wrapper
                 var $s = $( this.sectionTemplate({
                     id: id
                 })).appendTo( this.$('.sections') );
@@ -682,30 +682,38 @@
                 // Now lets add the controllers
                 if( ! _.isEmpty( controllers[id].controllers ) ) {
 
-                    for( var prop in controllers[id].controllers ) {
+                    for( var i = 0;  i < controllers[id].controllers.length; i++ ) {
+
                         var $c = $(thisView.controllerTemplate({
-                            title: controllers[id].controllers[prop].title
+                            title: controllers[id].controllers[i].title
                         })).appendTo($s.find('tbody'));
 
+                        var controllerAtts = controllers[id].controllers[i];
                         var controller;
-                        if( typeof socss.view.properties.controllers[ controllers[id].controllers[prop].type ] === 'undefined' ) {
+
+                        if( typeof socss.view.properties.controllers[ controllerAtts.type ] === 'undefined' ) {
+                            // Setup a default controller
                             controller = new socss.view.propertyController({
-                                el: $c.find('td')
+                                el: $c.find('td'),
+                                propertiesView: thisView,
+                                args : ( typeof controllerAtts.args === 'undefined' ? {} : controllerAtts.args )
                             });
                         }
                         else {
-                            controller = new socss.view.properties.controllers[ controllers[id].controllers[prop].type ]({
-                                el: $c.find('td')
+                            // Setup a specific controller
+                            controller = new socss.view.properties.controllers[ controllerAtts.type ]({
+                                el: $c.find('td'),
+                                propertiesView: thisView,
+                                args : ( typeof controllerAtts.args === 'undefined' ? {} : controllerAtts.args )
                             });
                         }
 
-                        thisView.propertyControllers[prop] = controller;
+                        thisView.propertyControllers.push( controller );
 
                         // Setup and render the controller
                         controller.render();
-                        controller.on('change', function(val){
-                            this.editor.codeMirror.setValue( this.parser.getCSSForEditor( this.parsed ) );
-                        }, thisView);
+                        controller.initChangeEvents();
+                        controller.on('change', thisView.updateMainEditor, thisView);
                     }
                 }
             }
@@ -723,9 +731,58 @@
             }).eq(0).click();
 
             this.$('.toolbar select').change( function(){
-                thisView.setActivateSelector( $(this).val(), $(this).find(':selected').data('selector') );
+                thisView.setActivateSelector( $(this).find(':selected').data('selector') );
             } );
 
+        },
+
+        /**
+         * Sets the rule value for the active selector
+         * @param rule
+         * @param value
+         */
+        setRuleValue: function(rule, value){
+            var newRule = true;
+            for( var i = 0; i < this.activeSelector.rules.length; i++ ) {
+                if( this.activeSelector.rules[i].directive === rule ) {
+                    this.activeSelector.rules[i].value = value;
+                    newRule = false;
+                    break;
+                }
+            }
+
+            if( newRule ) {
+                this.activeSelector.rules.push( {
+                    directive : rule,
+                    value: value
+                } );
+            }
+
+            this.updateMainEditor();
+        },
+
+        /**
+         * Get the rule value for the active selector
+         * @param rule
+         */
+        getRuleValue: function(rule) {
+            if( this.activeSelector === null ) {
+                return '';
+            }
+
+            for( var i = 0; i < this.activeSelector.rules.length; i++ ) {
+                if( this.activeSelector.rules[i].directive === rule ) {
+                    return this.activeSelector.rules[i].value;
+                }
+            }
+            return '';
+        },
+
+        /**
+         * Update the main editor with the value of the parsed CSS
+         */
+        updateMainEditor: function(){
+            this.editor.codeMirror.setValue( this.parser.getCSSForEditor( this.parsed ) );
         },
 
         /**
@@ -775,30 +832,10 @@
          * Set the selector that we're currently dealing with
          * @param selector
          */
-        setActivateSelector: function( id, selector ){
-            // Get the rules in the current selector
-            var ruleValues = {}, ruleObjects = {};
-            for( var i = 0; i < selector.rules.length; i++ ) {
-                ruleValues[ selector.rules[i].directive ] = selector.rules[i].value;
-                ruleObjects[ selector.rules[i].directive ] = selector.rules[i];
-            }
-
-            // Either setup or reset the property controllers with the values from this rule
-            for( var k in this.propertyControllers ) {
-                if( typeof ruleValues[k] !== 'undefined' ) {
-                    this.propertyControllers[k].activeRule = ruleObjects[k];
-                    this.propertyControllers[k].setValue( ruleValues[k], {silent: true} );
-                }
-                else {
-                    var newRule = {
-                        directive: k,
-                        value : ''
-                    };
-                    this.propertyControllers[k].activeRule = newRule;
-                    selector.rules.push( newRule );
-
-                    this.propertyControllers[k].reset( {silent: true} );
-                }
+        setActivateSelector: function( selector ){
+            this.activeSelector = selector;
+            for( var i = 0; i < this.propertyControllers.length; i++ ) {
+                this.propertyControllers[i].refreshFromRule();
             }
         }
 
@@ -808,26 +845,56 @@
 
         template: _.template('<input type="text" value="" />'),
         activeRule: null,
+        args: null,
+        propertiesView: null,
 
-        initialize: function( ){
-            var updateActiveRule = function(value){
-                // When the value is changed, we'll also change the active rule
-                if(this.activeRule === null) {
-                    return;
-                }
-                this.activeRule.value = value;
-            };
+        initialize: function( args ){
 
-            this.on('set_value', updateActiveRule, this);
-            this.on('change', updateActiveRule, this);
+            this.args = args.args;
+            this.propertiesView = args.propertiesView;
+
+            // By default, update the active rule whenever things change
+            this.on('set_value', this.updateRule, this);
+            this.on('change', this.updateRule, this);
         },
 
         /**
          * Render the property field controller
          */
         render: function(){
+            var thisView = this;
+
             this.$el.append( $( this.template( {} ) ) );
             this.field = this.$('input');
+        },
+
+        /**
+         * Initialize the events that constitute a change
+         */
+        initChangeEvents: function(){
+            var thisView = this;
+            this.field.on('change keyup', function(){
+                thisView.trigger('change', $(this).val());
+            });
+        },
+
+
+        /**
+         * Update the value of an active rule
+         */
+        updateRule: function( ){
+            this.propertiesView.setRuleValue(
+                this.args.property,
+                this.getValue()
+            );
+        },
+
+        /**
+         * This is called when the selector changes
+         */
+        refreshFromRule: function(){
+            var value = this.propertiesView.getRuleValue( this.args.property );
+            this.setValue( value, { silent: true } );
         },
 
         /**
@@ -874,17 +941,19 @@
             render: function(){
                 var thisView = this;
 
-                var input = $( this.template( {} ) );
-                input.on( 'change keyup', function(){
-                    thisView.trigger( 'change', input.minicolors( 'value') );
-                } );
-
-                this.$el.append( input );
+                this.$el.append( $( this.template( {} ) ) );
 
                 // Set this up as a color picker
                 this.field = this.$el.find('input');
                 this.field.minicolors( {} );
 
+            },
+
+            initChangeEvents: function(){
+                var thisView = this;
+                this.field.on( 'change keyup', function(){
+                    thisView.trigger( 'change', thisView.field.minicolors( 'value') );
+                } );
             },
 
             getValue: function(){
@@ -903,25 +972,6 @@
 
         })
 
-    };
-
-    socss.fn = {
-        quoteattr: function (s, preserveCR) {
-            preserveCR = preserveCR ? '&#13;' : '\n';
-            return ('' + s) /* Forces the conversion to string. */
-                .replace(/&/g, '&amp;') /* This MUST be the 1st replacement. */
-                .replace(/'/g, '&apos;') /* The 4 other predefined entities, required. */
-                .replace(/"/g, '&quot;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                /*
-                 You may add other replacements here for HTML only
-                 (but it's not necessary).
-                 Or for XML, only if the named entities are defined in its DTD.
-                 */
-                .replace(/\r\n/g, preserveCR) /* Must be before the next replacement. */
-                .replace(/[\r\n]/g, preserveCR);
-        }
     };
 
 } ) ( jQuery, _, socssOptions );

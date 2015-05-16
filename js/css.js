@@ -539,7 +539,7 @@
             }
 
             if (rules[i].defective === undefined) {
-                ret += this.getSpaces(depth) + rules[i].directive + ' : ' + rules[i].value + ';\n';
+                ret += this.getSpaces(depth) + rules[i].directive + ': ' + rules[i].value + ';\n';
             }
             else {
                 ret += this.getSpaces(depth) + rules[i].value + ';\n';
