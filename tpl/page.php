@@ -89,7 +89,8 @@
 		<div id="so-custom-css-properties">
 
 			<a class="toolbar">
-				<h3><?php _e('CSS Properties', 'so-css') ?></h3>
+				<select>
+				</select>
 				<div class="close">
 					<span class="dashicons dashicons-yes"></span>
 				</div>

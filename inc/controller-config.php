@@ -5,8 +5,8 @@ return array (
 		'title' => __('Text', 'so-css'),
 		'icon' => 'media-text',
 		'controllers' => array(
-			'background-color' => array(
-				'title' => __('Background Color', 'so-css'),
+			'color' => array(
+				'title' => __('Text Color', 'so-css'),
 				'type' => 'color',
 			)
 		)

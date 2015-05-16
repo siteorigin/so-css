@@ -108,6 +108,9 @@
                 selector = selector.replace(commentsRegex, '').trim();
             }
 
+            // Never have more than a single line break in a row
+            selector = selector.replace(/\n+/, "\n");
+
             //determine the type
             if (selector.indexOf('@media') !== -1) {
                 //we have a media query
@@ -383,11 +386,11 @@
 
     /*
      inserts new css objects into a bigger css object
-     with same selectors groupped together
+     with same selectors grouped together
 
      @param cssObjectArray, array of bigger css object to be pushed into
      @param minimalObject, single css object
-     @param reverse [optional] default is false, if given, cssObjectArray will be reversly traversed
+     @param reverse [optional] default is false, if given, cssObjectArray will be reverse traversed
      resulting more priority in minimalObject's styles
      */
     fi.prototype.intelligentCSSPush = function (cssObjectArray, minimalObject, reverse) {
@@ -449,7 +452,7 @@
 
      @param rules, array of rules
 
-     @returns rules array, compacted by deleting all unneccessary rules
+     @returns rules array, compacted by deleting all unnecessary rules
      */
     fi.prototype.compactRules = function (rules) {
         var newRules = [];
@@ -493,7 +496,8 @@
                 ret += comments + tmp.selector + '{\n';
                 ret += this.getCSSForEditor(tmp.subStyles, depth + 1);
                 ret += '}\n\n';
-            } else if (tmp.type !== 'keyframes' && tmp.type !== 'imports') {
+            }
+            else if (tmp.type !== 'keyframes' && tmp.type !== 'imports') {
                 ret += this.getSpaces(depth) + comments + tmp.selector + ' {\n';
                 ret += this.getCSSOfRules(tmp.rules, depth + 1);
                 ret += this.getSpaces(depth) + '}\n\n';
@@ -519,6 +523,7 @@
         }
         return imps;
     };
+
     /*
      given rules array, returns visually formatted css string
      to be used inside editor
@@ -529,6 +534,10 @@
             if (rules[i] === undefined) {
                 continue;
             }
+            if( rules[i].value === '' ) {
+                continue;
+            }
+
             if (rules[i].defective === undefined) {
                 ret += this.getSpaces(depth) + rules[i].directive + ' : ' + rules[i].value + ';\n';
             }
@@ -546,7 +555,7 @@
      */
     fi.prototype.getSpaces = function (num) {
         var ret = '';
-        for (var i = 0; i < num * 4; i++) {
+        for (var i = 0; i < num * 2; i++) {
             ret += ' ';
         }
         return ret;

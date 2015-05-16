@@ -175,7 +175,7 @@
   top: 0;
   left: 0;
   bottom: 0;
-  width: 340px;
+  width: 338px;
   background: #ffffff;
   border: 1px solid #D0D0D0;
   z-index: 100000;
@@ -187,10 +187,12 @@
   background: #F6F6F6;
   text-align: right;
 }
-#so-custom-css-properties .toolbar h3 {
+#so-custom-css-properties .toolbar select {
+  margin-top: 3px;
   float: left;
   line-height: 1;
-  padding: 10px 0 0 0;
+  font-size: 13px;
+  max-width: 265px;
 }
 #so-custom-css-properties .toolbar > div {
   cursor: pointer;

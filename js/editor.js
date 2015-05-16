@@ -91,8 +91,7 @@
             });
 
             this.toolbar.on('click_visual', function(){
-                var currentBlock = thisView.selectCurrentBlock();
-                thisView.visualProperties.loadCSS( "* " + currentBlock );
+                thisView.visualProperties.loadCSS( thisView.codeMirror.getValue() );
                 thisView.visualProperties.show();
             });
 
@@ -606,28 +605,6 @@
     } );
 
 
-    socss.model.cssRules = Backbone.Model.extend( {
-
-        initialize: function(){
-
-        },
-
-        /**
-         * Get the CSS associated with the editor
-         */
-        getCSS: function( ){
-            var prefix = '';
-            var returnString = "{";
-            for( var k in this.attributes )  {
-                if( this.attributes[k] !== '' ) {
-                    returnString += "\n" + prefix + '  ' + k + ': ' + this.attributes[k] + ';';
-                }
-            }
-            returnString += "\n}";
-            return returnString;
-        }
-    } ) ;
-
     /**
      * The visual properties editor
      */
@@ -639,7 +616,30 @@
         sectionTemplate: _.template('<div class="section" data-section="<%- id %>"><table class="fields-table"><tbody></tbody></table></div>'),
         controllerTemplate: _.template('<tr><th scope="row"><%- title %></th><td></td></tr>'),
 
+        /**
+         * The controllers for each of the properties
+         */
         propertyControllers: {},
+
+        /**
+         * The editor view
+         */
+        editor: null,
+
+        /**
+         * The current, raw CSS
+         */
+        css: '',
+
+        /**
+         * Parsed CSS
+         */
+        parsed: {},
+
+        /**
+         * The current active selector
+         */
+        activeSelector: '',
 
         /**
          * Was the editor expanded before we went into the property editor
@@ -655,13 +655,7 @@
          */
         initialize: function(){
             var thisView = this;
-
             this.parser = new cssjs();
-            this.model = new socss.model.cssRules();
-
-            this.model.on('change', function(){
-                this.editor.codeMirror.replaceSelection( this.model.getCSS(), 'around' );
-            }, this);
         },
 
         /**
@@ -708,11 +702,9 @@
                         thisView.propertyControllers[prop] = controller;
 
                         // Setup and render the controller
-                        controller.setPropertiesView(thisView);
                         controller.render();
                         controller.on('change', function(val){
-                            console.log( 'change' );
-                            this.model.set( prop, val );
+                            this.editor.codeMirror.setValue( this.parser.getCSSForEditor( this.parsed ) );
                         }, thisView);
                     }
                 }
@@ -729,6 +721,10 @@
                 thisView.$('.section-tabs li').not($$).removeClass('active');
                 $$.addClass('active');
             }).eq(0).click();
+
+            this.$('.toolbar select').change( function(){
+                thisView.setActivateSelector( $(this).val(), $(this).find(':selected').data('selector') );
+            } );
 
         },
 
@@ -753,81 +749,116 @@
          * Loads a single CSS selector and associated properties into the model
          * @param css
          */
-        loadCSS: function(css) {
+        loadCSS: function(css, activeSelector) {
             this.css = css;
+            this.parsed = this.parser.compressCSS( this.parser.parseCSS( css ) );
 
-            try {
-                var parsed = this.parser.parseCSS( css )[0];
-                if( parsed.selector !== '*' ) {
-                    // Seems like there was a  problem
-                    return false;
-                }
-
-                // Load all these values into the value controllers
-                this.model.clear();
-
-                var setValues = {};
-                for( var i = 0; i < parsed.rules.length; i++ ) {
-                    setValues[parsed.rules[i].directive] = parsed.rules[i].value;
-                }
-                this.model.set( setValues, { silent: true } );
-
-                for( var k in setValues ) {
-                    if( typeof this.propertyControllers[k] !== 'undefined' ) {
-                        this.propertyControllers[k].setValue( setValues[k] );
-                    }
-                }
-            }
-            catch(err) {
-                console.log(err);
-                // This probably means that there is a CSS parsing issue
-                return false;
+            // Add the dropdown menu items
+            var dropdown = this.$('.toolbar select').empty();
+            for( var i = 0; i < this.parsed.length; i++ ) {
+                dropdown.append(
+                    $('<option>')
+                        .html( this.parsed[i].selector )
+                        .attr('val', this.parsed[i].selector)
+                        .data('selector', this.parsed[i])
+                );
             }
 
-            return true;
+            if( typeof activeSelector === 'undefined' ) {
+                activeSelector = dropdown.find('option').eq(0).attr('val');
+            }
+
+            dropdown.val( activeSelector ).change();
         },
 
         /**
-         * Initialize all the form elements
+         * Set the selector that we're currently dealing with
+         * @param selector
          */
-        activateForm: function(){
+        setActivateSelector: function( id, selector ){
+            // Get the rules in the current selector
+            var ruleValues = {}, ruleObjects = {};
+            for( var i = 0; i < selector.rules.length; i++ ) {
+                ruleValues[ selector.rules[i].directive ] = selector.rules[i].value;
+                ruleObjects[ selector.rules[i].directive ] = selector.rules[i];
+            }
 
-        },
+            // Either setup or reset the property controllers with the values from this rule
+            for( var k in this.propertyControllers ) {
+                if( typeof ruleValues[k] !== 'undefined' ) {
+                    this.propertyControllers[k].activeRule = ruleObjects[k];
+                    this.propertyControllers[k].setValue( ruleValues[k], {silent: true} );
+                }
+                else {
+                    var newRule = {
+                        directive: k,
+                        value : ''
+                    };
+                    this.propertyControllers[k].activeRule = newRule;
+                    selector.rules.push( newRule );
 
-        /**
-         * Load the form values
-         */
-        loadFormValues: function(){
-
+                    this.propertyControllers[k].reset( {silent: true} );
+                }
+            }
         }
 
     } );
 
     socss.view.propertyController = Backbone.View.extend( {
 
-        propertiesView: null,
         template: _.template('<input type="text" value="" />'),
+        activeRule: null,
 
         initialize: function( ){
+            var updateActiveRule = function(value){
+                // When the value is changed, we'll also change the active rule
+                if(this.activeRule === null) {
+                    return;
+                }
+                this.activeRule.value = value;
+            };
 
+            this.on('set_value', updateActiveRule, this);
+            this.on('change', updateActiveRule, this);
         },
 
-        setPropertiesView: function( view ){
-            this.propertiesView = view;
-        },
-
+        /**
+         * Render the property field controller
+         */
         render: function(){
             this.$el.append( $( this.template( {} ) ) );
             this.field = this.$('input');
         },
 
+        /**
+         * Get the current value
+         * @return string
+         */
         getValue: function(){
             return this.field.val();
         },
 
-        setValue: function(val) {
+        /**
+         * Set the current value
+         * @param socss.view.properties val
+         */
+        setValue: function(val, options) {
+            options = _.extend( { silent: false }, options );
+
             this.field.val(val);
-            this.trigger('set_value', val);
+
+            if( !options.silent ) {
+                this.trigger('set_value', val);
+            }
+        },
+
+        /**
+         * Reset the current value
+         */
+        reset: function( options ){
+            options = _.extend( { silent: false }, options );
+
+            this.setValue('', options);
         }
 
     } );
@@ -840,15 +871,12 @@
 
             template: _.template('<input type="text" value="" />'),
 
-            initialize: function( ){
-            },
-
             render: function(){
                 var thisView = this;
 
                 var input = $( this.template( {} ) );
                 input.on( 'change keyup', function(){
-                    thisView.trigger( 'change', input.val() );
+                    thisView.trigger( 'change', input.minicolors( 'value') );
                 } );
 
                 this.$el.append( input );
@@ -860,17 +888,40 @@
             },
 
             getValue: function(){
-                console.log( this.field.minicolors( 'value' ) );
                 return this.field.minicolors( 'value' );
             },
 
-            setValue: function( val ){
+            setValue: function( val, options ){
+                options = _.extend( { silent: false }, options );
+
                 this.field.minicolors( 'value', val);
-                this.trigger('set_value', val);
+
+                if( !options.silent ) {
+                    this.trigger('set_value', val);
+                }
             }
 
         })
 
+    };
+
+    socss.fn = {
+        quoteattr: function (s, preserveCR) {
+            preserveCR = preserveCR ? '&#13;' : '\n';
+            return ('' + s) /* Forces the conversion to string. */
+                .replace(/&/g, '&amp;') /* This MUST be the 1st replacement. */
+                .replace(/'/g, '&apos;') /* The 4 other predefined entities, required. */
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                /*
+                 You may add other replacements here for HTML only
+                 (but it's not necessary).
+                 Or for XML, only if the named entities are defined in its DTD.
+                 */
+                .replace(/\r\n/g, preserveCR) /* Must be before the next replacement. */
+                .replace(/[\r\n]/g, preserveCR);
+        }
     };
 
 } ) ( jQuery, _, socssOptions );
