@@ -362,10 +362,23 @@
             this.cssSelectors = inspector.pageSelectors;
 
             inspector.on('click_selector', function (selector) {
-                thisView.addEmptySelector(selector);
-
                 if (thisView.visualProperties.isVisible()) {
-                    thisView.visualProperties.loadCSS( thisView.codeMirror.getValue(), selector );
+                    // Check if this selector already exists
+                    var dropdown = thisView.visualProperties.$('.toolbar select');
+                    dropdown.val( selector );
+                    console.log( dropdown.val() );
+                    if( dropdown.val() === selector ) {
+                        // Trigger a change event to load the existing selector
+                        dropdown.change();
+                    }
+                    else {
+                        // The selector doesn't exist
+                        thisView.addEmptySelector(selector);
+                        thisView.visualProperties.loadCSS( thisView.codeMirror.getValue(), selector );
+                    }
+                }
+                else {
+                    thisView.addEmptySelector(selector);
                 }
             });
 
