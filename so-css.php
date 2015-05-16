@@ -149,7 +149,7 @@ class SiteOrigin_CSS {
 		wp_enqueue_style( 'codemirror-show-hint', plugin_dir_url(__FILE__) . 'codemirror/addon/hint/show-hint.css', array( ), '5.2.0' );
 
 		// Enqueue the scripts for theme CSS processing
-		wp_enqueue_script( 'siteorigin-custom-css-parser', plugin_dir_url(__FILE__) . 'js/css-parser' . SOCSS_JS_SUFFIX . '.js', array( ), SOCSS_VERSION );
+		wp_enqueue_script( 'siteorigin-custom-css-parser', plugin_dir_url(__FILE__) . 'js/css' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
 
 		// There are conflicts between CSS linting and the built in WordPress color picker, so use something else
 		wp_enqueue_style('siteorigin-custom-css-minicolors', plugin_dir_url(__FILE__) . 'minicolors/jquery.minicolors.css', array(), '2.1.7' );
