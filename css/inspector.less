@@ -152,8 +152,10 @@ body.socss-inactive {
 	/* Same index as the admin bar */
 	z-index: 99999;
 
-	border: 1px solid rgba(0,117,203,0.5);
-	background: rgba(0,117,203,0.1);
+	border: 1px dashed rgba(0,117,203,1);
+	background: rgba(0,117,203,0.15);
+
+	box-sizing: border-box;
 
 	.socss-guide {
 		display: none;
@@ -165,14 +167,14 @@ body.socss-inactive {
 
 		&.socss-guide-top,
 		&.socss-guide-bottom {
-			width: 100%;
+			right: 0;
 			left: 0;
 		}
 
 		&.socss-guide-left,
 		&.socss-guide-right {
-			height: 100%;
 			top: 0;
+			bottom: 0;
 		}
 	}
 
@@ -199,7 +201,7 @@ body.socss-inactive {
 
 	.socss-guide-padding {
 
-		background: rgba(0,117,203,0.1);
+		background: rgba(0,117,203,0.25);
 
 		&.socss-guide-top {
 			top: 0;

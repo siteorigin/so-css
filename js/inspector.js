@@ -227,6 +227,14 @@
                         if( k === 'top' || k === 'bottom' ) {
                             g.css('height', padding[k]);
                         }
+                        else {
+                            g.css('width', padding[k]);
+                            g.css({
+                                'width': padding[k],
+                                'top' : padding.top,
+                                'bottom' : padding.bottom
+                            });
+                        }
                     }
                 }
 
@@ -236,6 +244,9 @@
                         g = hl.find( '.socss-guide-margin.socss-guide-' + k ).show();
                         if( k === 'top' || k === 'bottom' ) {
                             g.css('height', margin[k]);
+                        }
+                        else {
+                            g.css('width', margin[k]);
                         }
                     }
                 }

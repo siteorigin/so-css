@@ -130,8 +130,9 @@ body.socss-inactive #socss-inspector-interface .socss-attributes-window {
   position: absolute;
   /* Same index as the admin bar */
   z-index: 99999;
-  border: 1px solid rgba(0, 117, 203, 0.5);
-  background: rgba(0, 117, 203, 0.1);
+  border: 1px dashed #0075cb;
+  background: rgba(0, 117, 203, 0.15);
+  box-sizing: border-box;
 }
 .socss-inspector-hover .socss-guide {
   display: none;
@@ -144,15 +145,15 @@ body.socss-inactive #socss-inspector-interface .socss-attributes-window {
 .socss-inspector-hover .socss-guide-padding.socss-guide-top,
 .socss-inspector-hover .socss-guide-margin.socss-guide-bottom,
 .socss-inspector-hover .socss-guide-padding.socss-guide-bottom {
-  width: 100%;
+  right: 0;
   left: 0;
 }
 .socss-inspector-hover .socss-guide-margin.socss-guide-left,
 .socss-inspector-hover .socss-guide-padding.socss-guide-left,
 .socss-inspector-hover .socss-guide-margin.socss-guide-right,
 .socss-inspector-hover .socss-guide-padding.socss-guide-right {
-  height: 100%;
   top: 0;
+  bottom: 0;
 }
 .socss-inspector-hover .socss-guide-margin {
   background: rgba(20, 126, 74, 0.25);
@@ -170,7 +171,7 @@ body.socss-inactive #socss-inspector-interface .socss-attributes-window {
   left: 100%;
 }
 .socss-inspector-hover .socss-guide-padding {
-  background: rgba(0, 117, 203, 0.1);
+  background: rgba(0, 117, 203, 0.25);
 }
 .socss-inspector-hover .socss-guide-padding.socss-guide-top {
   top: 0;
