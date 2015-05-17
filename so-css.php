@@ -168,6 +168,8 @@ class SiteOrigin_CSS {
 
 			'loc' => array(
 				'unchanged' => __('Unchanged', 'so-css'),
+				'select' => __('Select', 'so-css'),
+				'select_image' => __('Select Image', 'so-css'),
 			)
 		) );
 

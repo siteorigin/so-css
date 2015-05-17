@@ -1,4 +1,4 @@
-/* globals jQuery, _, socssOptions, Backbone, CodeMirror, console, cssjs */
+/* globals jQuery, _, socssOptions, Backbone, CodeMirror, console, cssjs, wp */
 
 (function ($, _, socssOptions) {
 
@@ -781,7 +781,8 @@
         show: function () {
             this.editorExpandedBefore = this.editor.isExpanded();
             this.editor.setExpand(true);
-            this.$el.show();
+
+            this.$el.show().animate({'left': 0}, 'fast');
         },
 
         /**
@@ -789,7 +790,9 @@
          */
         hide: function () {
             this.editor.setExpand(this.editorExpandedBefore);
-            this.$el.hide();
+            this.$el.animate({'left': -338}, 'fast', function(){
+                $(this).hide();
+            });
         },
 
         /**
@@ -985,7 +988,58 @@
             for( var k in this.args.options ) {
                 this.field.append( $('<option></option>').attr('value', k).html( this.args.options[k] ) );
             }
-        },
+        }
+
+    } );
+
+    socss.view.properties.controllers.image = socss.view.propertyController.extend( {
+        template: _.template('<input type="text" value="" /> <span class="select"><span class="dashicons dashicons-upload"></span></span>'),
+
+        render: function(){
+            var thisView = this;
+
+            this.media = wp.media({
+                // Set the title of the modal.
+                title: socssOptions.loc.select_image,
+
+                // Tell the modal to show only images.
+                library: {
+                    type: 'image'
+                },
+
+                // Customize the submit button.
+                button: {
+                    // Set the text of the button.
+                    text: socssOptions.loc.select,
+                    // Tell the button not to close the modal, since we're
+                    // going to refresh the page when the image is selected.
+                    close: false
+                }
+            });
+
+            this.$el.append( $(this.template({
+                select: socssOptions.loc.select
+            })) );
+
+            this.field = this.$el.find('input');
+
+            this.$('.select').click(function(){
+                thisView.media.open();
+            });
+
+            this.media.on('select', function(){
+                // Grab the selected attachment.
+                var attachment = this.state().get('selection').first().attributes;
+                var val = thisView.args.value.replace('{{url}}', attachment.url);
+
+                // Change the field value and trigger a change event
+                thisView.field.val( val ).change();
+
+                // Close the image selector
+                thisView.media.close();
+
+            }, this.media);
+        }
 
     } );
 

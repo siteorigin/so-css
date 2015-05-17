@@ -180,7 +180,7 @@ return array (
 				'type' => 'image',
 				'args' => array(
 					'property' => 'background-image',
-					'transform' => 'url("{{image}}")',
+					'value' => 'url("{{url}}")',
 				)
 			),
 			array(
