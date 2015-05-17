@@ -257,8 +257,7 @@
 }
 #so-custom-css-properties .sections .fields-table th,
 #so-custom-css-properties .sections .fields-table td {
-  padding-top: 4px;
-  padding-bottom: 4px;
+  position: relative;
 }
 #so-custom-css-properties .sections .fields-table th[scope="row"] {
   font-weight: bold;
@@ -266,25 +265,38 @@
   padding-right: 10px;
   text-align: left;
   width: 38%;
+  vertical-align: top;
+}
+#so-custom-css-properties .sections .fields-table td {
+  padding-bottom: 8px;
+}
+#so-custom-css-properties .sections .fields-table input,
+#so-custom-css-properties .sections .fields-table select {
+  display: block;
+  margin: 0 24px 0 0;
+  border: 1px solid #c0c0c0;
+  width: 175px;
+  box-sizing: border-box;
 }
 #so-custom-css-properties .sections .fields-table .select {
   display: block;
-  float: right;
+  position: absolute;
+  top: 1px;
+  right: 1px;
   border: 1px solid #c0c0c0;
   background: #f6f6f6;
   text-decoration: none;
-  padding: 4px;
+  padding: 3px 3px 4px 3px;
   font-weight: bold;
   color: #555;
   font-size: 0.95em;
-  margin-left: 5px;
   cursor: pointer;
 }
 #so-custom-css-properties .sections .fields-table .select .dashicons {
-  width: 16px;
-  height: 16px;
-  font-size: 16px;
-  line-height: 16px;
+  width: 17px;
+  height: 17px;
+  font-size: 17px;
+  line-height: 17px;
 }
 #so-custom-css-properties .sections .fields-table .select:hover {
   border: 1px solid #b0b0b0;

@@ -331,8 +331,7 @@
 			width: 100%;
 
 			th, td {
-				padding-top: 4px;
-				padding-bottom: 4px;
+				position: relative;
 			}
 
 			th[scope="row"] {
@@ -341,30 +340,42 @@
 				padding-right: 10px;
 				text-align: left;
 				width: 38%;
+				vertical-align: top;
 			}
 
 			td {
+				padding-bottom: 8px;
+			}
+			
+			input, select {
+				display: block;
+				margin: 0 24px 0 0;
+				border: 1px solid #c0c0c0;
+				width: 175px;
+
+				box-sizing: border-box;
 			}
 
 			.select {
 				display: block;
-				float: right;
+				position: absolute;
+				top: 1px;
+				right: 1px;
 
 				border: 1px solid #c0c0c0;
 				background: #f6f6f6;
 				text-decoration: none;
-				padding: 4px;
+				padding: 3px 3px 4px 3px;
 				font-weight: bold;
 				color: #555;
 				font-size: 0.95em;
-				margin-left: 5px;
 				cursor: pointer;
 
 				.dashicons {
-					width:16px;
-					height:16px;
-					font-size: 16px;
-					line-height: 16px;
+					width: 17px;
+					height: 17px;
+					font-size: 17px;
+					line-height: 17px;
 				}
 
 				&:hover {
