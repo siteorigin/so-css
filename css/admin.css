@@ -251,16 +251,20 @@
   display: none;
   padding: 5px;
 }
+#so-custom-css-properties .sections .fields-table {
+  width: 100%;
+}
 #so-custom-css-properties .sections .fields-table th,
 #so-custom-css-properties .sections .fields-table td {
-  padding: 4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 #so-custom-css-properties .sections .fields-table th[scope="row"] {
-  white-space: nowrap;
-  width: 25%;
   font-weight: bold;
-  text-align: right;
   font-size: 12px;
+  padding-right: 10px;
+  text-align: left;
+  width: 38%;
 }
 .css-editor-snippet-browser {
   display: none;
