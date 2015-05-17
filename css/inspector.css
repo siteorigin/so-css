@@ -183,3 +183,8 @@ body.socss-inactive #socss-inspector-interface .socss-attributes-window {
 .socss-inspector-hover .socss-guide-padding.socss-guide-right {
   right: 0;
 }
+body,
+html {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}

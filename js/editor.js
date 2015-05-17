@@ -399,7 +399,7 @@
      */
     socss.view.preview = Backbone.View.extend({
 
-        template: _.template('<iframe class="preview-iframe"></iframe>'),
+        template: _.template('<iframe class="preview-iframe" seamless="seamless"></iframe>'),
         editor: null,
 
         initialize: function (attr) {
