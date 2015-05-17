@@ -55,6 +55,7 @@
 }
 #socss-inspector-interface .socss-toolbar .socss-hierarchy .socss-selector {
   font-size: 12px;
+  line-height: 1em;
   padding: 9px 20px 9px 9px;
   display: inline-block;
   background: url(images/separator.png) top right no-repeat;

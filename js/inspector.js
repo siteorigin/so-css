@@ -109,29 +109,35 @@
          * Set the element that we're busy inspecting
          * @param el
          */
-        setActiveEl: function( el ){
+        setActiveEl: function( el ) {
             var thisView = this;
 
             var $h = this.$('.socss-hierarchy');
             $h.empty();
 
-            var cel = $(el);
-            do {
-                $( this.selectorTemplate({ selector: socss.fn.elSelector( cel ) }) )
-                    .prependTo($h)
-                    .data('el', cel);
-                cel = cel.parent();
-            } while( cel.prop('tagName').toLowerCase() !== 'body' );
+            if (el.prop('tagName').toLowerCase() !== 'body') {
+                var cel = $(el);
+                do {
+                    $(this.selectorTemplate({selector: socss.fn.elSelector(cel)}))
+                        .prependTo($h)
+                        .data('el', cel);
+                    cel = cel.parent();
+                } while (cel.prop('tagName').toLowerCase() !== 'body');
 
-            this.$('.socss-hierarchy .socss-selector')
-                .hover(function(){
-                    thisView.hl.highlight( $(this).data('el') );
-                } )
-                .click(function(e){
-                    e.preventDefault();
-                    e.stopPropagation();
-                    thisView.setActiveEl( $(this).data('el') );
-                });
+                $(this.selectorTemplate({selector: 'body'}))
+                    .prependTo($h)
+                    .data('el', $('body'));
+
+                this.$('.socss-hierarchy .socss-selector')
+                    .hover(function () {
+                        thisView.hl.highlight($(this).data('el'));
+                    })
+                    .click(function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        thisView.setActiveEl($(this).data('el'));
+                    });
+            }
 
             // Scroll all the way left...
             $h.scrollLeft( 99999 );
