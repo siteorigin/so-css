@@ -164,7 +164,11 @@ class SiteOrigin_CSS {
 			'homeURL' => add_query_arg( 'so_css_preview', '1', site_url() ),
 			'snippets' => $this->get_snippets(),
 
-			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() )
+			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() ),
+
+			'loc' => array(
+				'unchanged' => __('Unchanged', 'so-css'),
+			)
 		) );
 
 		// This is for the templates required by the CSS editor

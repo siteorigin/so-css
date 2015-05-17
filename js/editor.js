@@ -968,6 +968,27 @@
 
     });
 
+    // The dropdown select box controller
+    socss.view.properties.controllers.select = socss.view.propertyController.extend( {
+        template: _.template('<select></select>'),
+
+        render: function(){
+            var thisView = this;
+
+            this.$el.append($(this.template({})));
+            this.field = this.$el.find('select');
+
+            // Add the unchanged option
+            this.field.append( $('<option value=""></option>').html('') );
+
+            // Add all the options to the dropdown
+            for( var k in this.args.options ) {
+                this.field.append( $('<option></option>').attr('value', k).html( this.args.options[k] ) );
+            }
+        },
+
+    } );
+
 
 })(jQuery, _, socssOptions);
 
