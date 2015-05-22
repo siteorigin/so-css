@@ -242,6 +242,36 @@
   cursor: pointer;
   font-size: 15px;
 }
+#so-custom-css-properties .sections .fields-table .select-tabs {
+  height: 29px;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab {
+  cursor: pointer;
+  float: left;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  text-align: center;
+  border: 1px solid #c0c0c0;
+  height: 27px;
+  padding: 2px;
+  border-right-width: 0;
+  background: #f2f2f2;
+  box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.05);
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab:last-child {
+  border-right-width: 1px;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab:hover,
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active {
+  background: #ffffff;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active {
+  box-shadow: none;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab .fa {
+  font-size: 11px;
+}
 .css-editor-snippet-browser {
   display: none;
 }

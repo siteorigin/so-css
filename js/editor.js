@@ -1002,6 +1002,57 @@
             for( var k in this.args.options ) {
                 this.field.append( $('<option></option>').attr('value', k).html( this.args.options[k] ) );
             }
+
+            if( typeof this.args.option_icons !== 'undefined' ) {
+                this.setupVisualSelect();
+            }
+        },
+
+        setupVisualSelect: function(){
+            var thisView = this;
+            this.field.hide();
+
+            var $tc = $('<div class="select-tabs"></div>').appendTo( this.$el );
+
+            var $none = $('<div class="select-tab" data-value=""></div>').appendTo($tc);
+
+            // Now add one for each of the option icons
+            for ( var k in this.args.option_icons ) {
+                console.log(k);
+                $('<div class="select-tab"></div>')
+                    .appendTo($tc)
+                    .append(
+                        $('<span class="fa"></span>')
+                            .addClass('fa-' + this.args.option_icons[k])
+                    )
+                    .attr('data-value', k)
+                ;
+            }
+
+            $tc.find('.select-tab')
+                .css('width', 100/( $tc.find('>div').length ) + "%" )
+                .click( function(){
+                    var $t = $(this);
+                    $tc.find('.select-tab').removeClass('active');
+                    $t.addClass('active');
+                    thisView.field.val( $t.data('value')).change();
+                } );
+        },
+
+        /**
+         * Set the current value
+         * @param socss.view.properties val
+         */
+        setValue: function (val, options) {
+            options = _.extend({silent: false}, options);
+
+            this.field.val(val);
+
+            this.$('.select-tabs .select-tab').removeClass('active').filter('[data-value="' + val + '"]').addClass('active');
+
+            if (!options.silent) {
+                this.trigger('set_value', val);
+            }
         }
 
     } );
@@ -1092,15 +1143,6 @@
             this.field.socssNumberField( {
 
             } );
-        }
-
-    } );
-
-
-    socss.view.properties.controllers.iconSelect = socss.view.propertyController.extend( {
-
-        render: function(){
-
         }
 
     } );

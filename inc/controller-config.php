@@ -56,9 +56,13 @@ return array (
 				'args' => array(
 					'property' => 'font-style',
 					'options' => array(
+						'none' => __('None', 'so-css'),
 						'normal' => __('Normal', 'so-css'),
 						'italic' => __('Italic', 'so-css'),
-						'oblique' => __('Oblique', 'so-css'),
+					),
+					'option_icons' => array(
+						'normal' => 'font',
+						'italic' => 'italic',
 					)
 				)
 			),
@@ -72,6 +76,11 @@ return array (
 						'underline' => __('Underline', 'so-css'),
 						'overline' => __('Overline', 'so-css'),
 						'line-through' => __('Line Through', 'so-css'),
+					),
+					'option_icons' => array(
+						'none' => 'font',
+						'underline' => 'underline',
+						'line-through' => 'strikethrough',
 					)
 				)
 			),
@@ -116,6 +125,12 @@ return array (
 						'right' => __('Right', 'so-css'),
 						'center' => __('Center', 'so-css'),
 						'justify' => __('Justify', 'so-css'),
+					),
+					'option_icons' => array(
+						'left' => 'align-left',
+						'right' => 'align-right',
+						'center' => 'align-center',
+						'justify' => 'align-justify',
 					)
 				)
 			),

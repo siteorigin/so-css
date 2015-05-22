@@ -21,7 +21,19 @@
         var units = [
             'px',
             '%',
-            'em'
+            'em',
+            'cm',
+            'mm',
+            'in',
+            'pt',
+            'pc',
+            'ex',
+            'ch',
+            'rem',
+            'vw',
+            'vh',
+            'vmin',
+            'vmax'
         ];
 
         var parseUnits = function( value ){
