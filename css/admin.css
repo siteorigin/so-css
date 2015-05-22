@@ -56,11 +56,11 @@
   text-decoration: none;
   color: #666;
 }
-#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .dashicons {
-  font-size: 20px;
-}
-#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .dashicons-editor-contract {
+#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .fa-compress {
   display: none;
+}
+#so-custom-css-form .custom-css-toolbar .fa {
+  font-size: 14px;
 }
 #so-custom-css-form .custom-css-container {
   border: 1px solid #D0D0D0;
@@ -100,10 +100,10 @@
   bottom: 0;
   width: 340px;
 }
-#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .dashicons-editor-expand {
+#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .fa-expand {
   display: none;
 }
-#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .dashicons-editor-contract {
+#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .fa-compress {
   display: inline-block;
 }
 #so-custom-css-form.expanded .decoration {
@@ -153,31 +153,16 @@
   padding: 7px 10px;
   border-bottom: 1px solid #aaa;
   background: #F6F6F6;
-  text-align: right;
+  text-align: left;
 }
 #so-custom-css-properties .toolbar select {
-  margin-top: 3px;
-  float: left;
   line-height: 1;
   font-size: 13px;
   max-width: 265px;
 }
-#so-custom-css-properties .toolbar > div {
-  cursor: pointer;
-  line-height: 1em;
-  display: inline-block;
-  border: 1px solid #c0c0c0;
-  background: #f6f6f6;
-  text-decoration: none;
-  color: #555;
-  font-size: 0.95em;
-  padding: 5px;
-  margin-left: 5px;
-}
-#so-custom-css-properties .toolbar > div:hover {
-  border: 1px solid #b0b0b0;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+#so-custom-css-properties .toolbar .close {
+  float: right;
+  margin: 2px 4px 0 0;
 }
 #so-custom-css-properties .section-tabs {
   list-style: none;
@@ -203,11 +188,12 @@
 #so-custom-css-properties .section-tabs li:hover {
   background: #fff;
 }
-#so-custom-css-properties .section-tabs li .dashicons {
+#so-custom-css-properties .section-tabs li .fa {
   float: left;
   display: block;
-  margin: -1px 5px 0 -2px;
+  margin: 2px 6px 0 0;
   color: #555;
+  font-size: 14px;
 }
 #so-custom-css-properties .section-tabs li:last-child {
   border-right: 0;
@@ -240,7 +226,7 @@
 #so-custom-css-properties .sections .fields-table input,
 #so-custom-css-properties .sections .fields-table select {
   display: block;
-  margin: 0 24px 0 0;
+  margin: 0 25px 0 0;
   border: 1px solid #c0c0c0;
   width: 175px;
   box-sizing: border-box;
@@ -251,15 +237,10 @@
   position: absolute;
   top: 1px;
   right: 1px;
-  padding: 4px;
+  padding: 5px;
   font-size: 0.95em;
   cursor: pointer;
-}
-#so-custom-css-properties .sections .fields-table .select .dashicons {
-  width: 17px;
-  height: 17px;
-  font-size: 17px;
-  line-height: 17px;
+  font-size: 15px;
 }
 .css-editor-snippet-browser {
   display: none;
@@ -453,6 +434,7 @@
   border-left: 0;
 }
 .socss-button {
+  cursor: pointer;
   line-height: 1em;
   display: inline-block;
   border: 1px solid #c0c0c0;
@@ -473,6 +455,12 @@
   border-color: #b0b0b0;
   background: #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.socss-button:hover .fa {
+  color: #333;
+}
+.socss-button .fa {
+  color: #555;
 }
 .CodeMirror-lint-tooltip,
 .CodeMirror-hints {

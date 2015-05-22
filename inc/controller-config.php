@@ -3,7 +3,7 @@
 return array (
 	'text' => array(
 		'title' => __('Text', 'so-css'),
-		'icon' => 'media-text',
+		'icon' => 'align-left',
 		'controllers' => array(
 			array(
 				'title' => __('Text Color', 'so-css'),
@@ -168,7 +168,7 @@ return array (
 
 	'decoration' => array(
 		'title' => __('Decoration', 'so-css'),
-		'icon' => 'admin-appearance',
+		'icon' => 'eyedropper',
 		'controllers' => array(
 			array(
 				'title' => __('Background Color', 'so-css'),
@@ -253,7 +253,7 @@ return array (
 
 	'layout' => array(
 		'title' => __('Layout', 'so-css'),
-		'icon' => 'align-left',
+		'icon' => 'columns',
 		'controllers' => array(
 			array(
 				'title' => __('Margin', 'so-css'),

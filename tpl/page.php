@@ -55,12 +55,12 @@
 				<div class="toolbar-action-buttons">
 
 					<a href="#visual" class="editor-visual socss-button">
-						<span class="dashicons dashicons-admin-appearance"></span>
+						<span class="fa fa-wrench"></span>
 					</a>
 
 					<a href="#expand" class="editor-expand socss-button">
-						<span class="dashicons dashicons-editor-expand"></span>
-						<span class="dashicons dashicons-editor-contract"></span>
+						<span class="fa fa-expand"></span>
+						<span class="fa fa-compress"></span>
 					</a>
 				</div>
 			</div>
@@ -88,13 +88,13 @@
 
 		<div id="so-custom-css-properties">
 
-			<a class="toolbar">
+			<div class="toolbar">
 				<select>
 				</select>
-				<div class="close">
-					<span class="dashicons dashicons-yes"></span>
+				<div class="close socss-button">
+					<span class="fa fa-check"></span>
 				</div>
-			</a>
+			</div>
 
 			<ul class="section-tabs">
 			</ul>

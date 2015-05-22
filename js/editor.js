@@ -599,7 +599,7 @@
 
         model: socss.model.cssRules,
 
-        tabTemplate: _.template('<li data-section="<%- id %>"><span class="dashicons dashicons-<%- icon %>"></span> <%- title %></li>'),
+        tabTemplate: _.template('<li data-section="<%- id %>"><span class="fa fa-<%- icon %>"></span> <%- title %></li>'),
         sectionTemplate: _.template('<div class="section" data-section="<%- id %>"><table class="fields-table"><tbody></tbody></table></div>'),
         controllerTemplate: _.template('<tr><th scope="row"><%- title %></th><td></td></tr>'),
 
@@ -1008,7 +1008,7 @@
 
     // A field that lets a user upload an image
     socss.view.properties.controllers.image = socss.view.propertyController.extend( {
-        template: _.template('<input type="text" value="" /> <span class="select socss-button"><span class="dashicons dashicons-upload"></span></span>'),
+        template: _.template('<input type="text" value="" /> <span class="select socss-button"><span class="fa fa-upload"></span></span>'),
 
         render: function(){
             var thisView = this;
@@ -1092,6 +1092,15 @@
             this.field.socssNumberField( {
 
             } );
+        }
+
+    } );
+
+
+    socss.view.properties.controllers.iconSelect = socss.view.propertyController.extend( {
+
+        render: function(){
+
         }
 
     } );
