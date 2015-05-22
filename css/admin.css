@@ -43,42 +43,8 @@
   margin: 0;
   padding: 0;
 }
-#so-custom-css-form .custom-css-toolbar .toolbar-function-buttons .toolbar-button {
-  display: inline-block;
-  border: 1px solid #c0c0c0;
-  background: #f6f6f6;
-  text-decoration: none;
-  padding: 8px 12px;
-  font-weight: bold;
-  color: #555;
-  font-size: 0.95em;
-  line-height: 1em;
-  margin-left: 5px;
-}
-#so-custom-css-form .custom-css-toolbar .toolbar-function-buttons .toolbar-button:hover {
-  border: 1px solid #b0b0b0;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
 #so-custom-css-form .custom-css-toolbar .toolbar-action-buttons {
   float: right;
-}
-#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons a {
-  display: inline-block;
-  border: 1px solid #c0c0c0;
-  background: #f6f6f6;
-  text-decoration: none;
-  font-weight: bold;
-  color: #555;
-  font-size: 0.95em;
-  padding: 5px;
-  line-height: 1em;
-  margin-left: 5px;
-}
-#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons a:hover {
-  border: 1px solid #b0b0b0;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 #so-custom-css-form .custom-css-toolbar .toolbar-action-buttons a.active {
   border-color: #b4c4cf;
@@ -179,6 +145,7 @@
   width: 338px;
   background: #ffffff;
   border: 1px solid #D0D0D0;
+  overflow-y: auto;
   z-index: 100000;
 }
 #so-custom-css-properties .toolbar {
@@ -277,18 +244,14 @@
   border: 1px solid #c0c0c0;
   width: 175px;
   box-sizing: border-box;
+  border-radius: 0;
 }
 #so-custom-css-properties .sections .fields-table .select {
   display: block;
   position: absolute;
   top: 1px;
   right: 1px;
-  border: 1px solid #c0c0c0;
-  background: #f6f6f6;
-  text-decoration: none;
-  padding: 3px 3px 4px 3px;
-  font-weight: bold;
-  color: #555;
+  padding: 4px;
   font-size: 0.95em;
   cursor: pointer;
 }
@@ -297,11 +260,6 @@
   height: 17px;
   font-size: 17px;
   line-height: 17px;
-}
-#so-custom-css-properties .sections .fields-table .select:hover {
-  border: 1px solid #b0b0b0;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .css-editor-snippet-browser {
   display: none;
@@ -426,6 +384,95 @@
   text-align: right;
   padding: 10px 20px;
   overflow: hidden;
+}
+.socss-field-measurement {
+  position: relative;
+}
+.socss-field-measurement input.socss-field-input {
+  min-height: 1.5em;
+  padding-right: 50px;
+  width: 120px !important;
+  box-sizing: border-box;
+}
+.socss-field-measurement .dashicons-arrow-down {
+  position: absolute;
+  top: 4px;
+  left: 97px;
+  cursor: pointer;
+}
+.socss-field-measurement .dropdown {
+  display: none;
+  background: #F5F5F5;
+  border: 1px solid #c0c0c0;
+  position: absolute;
+  top: 27px;
+  left: 71px;
+  width: 50px;
+  z-index: 2;
+  margin: 0;
+  box-sizing: border-box;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+}
+.socss-field-measurement .dropdown li {
+  padding: 5px 0;
+  text-align: center;
+  line-height: 1.1em;
+  font-size: 11px;
+  margin: 0;
+}
+.socss-field-measurement .dropdown li:hover,
+.socss-field-measurement .dropdown li.active {
+  background: #e8e8e8;
+  cursor: pointer;
+}
+.socss-field-measurement .units {
+  position: absolute;
+  top: 5px;
+  left: 12px;
+  color: #bbb;
+  pointer-events: none;
+}
+.socss-field-measurement .socss-diw {
+  position: absolute;
+  top: 1px;
+  left: 124px;
+}
+.socss-field-measurement .socss-diw .inc-button,
+.socss-field-measurement .socss-diw .dec-button {
+  cursor: pointer;
+  box-sizing: border-box;
+  float: left;
+  padding: 7px;
+  user-select: none;
+  text-align: center;
+  margin: 0;
+  width: 27px;
+  height: 27px;
+}
+.socss-field-measurement .socss-diw .inc-button {
+  border-left: 0;
+}
+.socss-button {
+  line-height: 1em;
+  display: inline-block;
+  border: 1px solid #c0c0c0;
+  background: #f6f6f6;
+  text-decoration: none;
+  padding: 6px;
+  font-weight: bold;
+  color: #555;
+  font-size: 0.95em;
+  margin-left: 5px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+.socss-button:hover {
+  border: 1px solid #b0b0b0;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .CodeMirror-lint-tooltip,
 .CodeMirror-hints {

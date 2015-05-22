@@ -54,11 +54,11 @@
 
 				<div class="toolbar-action-buttons">
 
-					<a href="#visual" class="editor-visual">
+					<a href="#visual" class="editor-visual socss-button">
 						<span class="dashicons dashicons-admin-appearance"></span>
 					</a>
 
-					<a href="#expand" class="editor-expand">
+					<a href="#expand" class="editor-expand socss-button">
 						<span class="dashicons dashicons-editor-expand"></span>
 						<span class="dashicons dashicons-editor-contract"></span>
 					</a>

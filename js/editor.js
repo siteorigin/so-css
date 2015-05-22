@@ -16,7 +16,7 @@
      */
     socss.view.toolbar = Backbone.View.extend({
 
-        button: _.template('<li><a href="#" class="toolbar-button"><%= text %></a></li>'),
+        button: _.template('<li><a href="#" class="toolbar-button socss-button"><%= text %></a></li>'),
 
         editor: null,
 
@@ -862,8 +862,6 @@
          * Render the property field controller
          */
         render: function () {
-            var thisView = this;
-
             this.$el.append($(this.template({})));
             this.field = this.$('input');
         },
@@ -926,6 +924,22 @@
             options = _.extend({silent: false}, options);
 
             this.setValue('', options);
+        },
+
+        /**
+         * Setup minitabs for a given field
+         * @param el
+         */
+        setupMiniTabs: function( el ){
+
+        },
+
+        /**
+         * setup a measurement field
+         * @param el
+         */
+        setupMeasurementField: function( el ){
+
         }
 
     });
@@ -992,8 +1006,9 @@
 
     } );
 
+    // A field that lets a user upload an image
     socss.view.properties.controllers.image = socss.view.propertyController.extend( {
-        template: _.template('<input type="text" value="" /> <span class="select"><span class="dashicons dashicons-upload"></span></span>'),
+        template: _.template('<input type="text" value="" /> <span class="select socss-button"><span class="dashicons dashicons-upload"></span></span>'),
 
         render: function(){
             var thisView = this;
@@ -1039,6 +1054,29 @@
                 thisView.media.close();
 
             }, this.media);
+        }
+
+    } );
+
+    // A simple measurement field
+    socss.view.properties.controllers.measurement = socss.view.propertyController.extend( {
+
+        render: function(){
+            this.$el.append($(this.template({})));
+            this.field = this.$('input');
+
+            // Setup the measurement field
+            this.field.socssMeasurementField( {
+
+            } );
+        },
+
+        setValue: function (val, options) {
+            options = _.extend({silent: false}, options);
+            this.field.val(val).trigger('measurement_refresh');
+            if (!options.silent) {
+                this.trigger('set_value', val);
+            }
         }
 
     } );

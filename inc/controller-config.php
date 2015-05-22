@@ -16,14 +16,16 @@ return array (
 				'title' => __('Font Size', 'so-css'),
 				'type' => 'measurement',
 				'args' => array(
-					'property' => 'font-size'
+					'property' => 'font-size',
+					'defaultUnit' => 'px',
 				)
 			),
 			array(
 				'title' => __('Line Height', 'so-css'),
 				'type' => 'measurement',
 				'args' => array(
-					'property' => 'line-height'
+					'property' => 'line-height',
+					'defaultUnit' => 'em',
 				)
 			),
 			array(
@@ -207,7 +209,7 @@ return array (
 				'title' => __('Background Size', 'so-css'),
 				'type' => 'select',
 				'args' => array(
-					'property' => 'background-repeat',
+					'property' => 'background-size',
 					'options' => array(
 						'auto' => __( 'auto', 'so-css' ),
 						'length' => __( 'length', 'so-css' ),
