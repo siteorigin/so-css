@@ -1081,6 +1081,20 @@
 
     } );
 
+    // A simple measurement field
+    socss.view.properties.controllers.number = socss.view.propertyController.extend( {
+
+        render: function(){
+            this.$el.append($(this.template({})));
+            this.field = this.$('input');
+
+            // Setup the measurement field
+            this.field.socssNumberField( {
+
+            } );
+        }
+
+    } );
 
 })(jQuery, _, socssOptions);
 

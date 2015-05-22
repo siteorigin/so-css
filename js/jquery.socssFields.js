@@ -194,11 +194,32 @@
 
     $.fn.socssNumberField = function( options ){
         options = $.extend(options, {
-            change: null
+            change: null,
+            increment: 1,
+            decrement: -1
         });
 
         return this.each( function(){
+
             var $$ = $(this);
+            var $p = $$.parent();
+            $p.addClass('socss-field-number');
+
+            // Now add the increment/decrement buttons
+            var $diw = $('<div class="socss-diw"></div>').appendTo($p);
+            var $dec = $('<div class="dec-button socss-button">-</div>').appendTo($diw);
+            var $inc = $('<div class="inc-button socss-button">+</div>').appendTo($diw);
+
+            // Increment is clicked
+            $diw.find('> div').click( function(e){
+                e.preventDefault();
+
+                var newVal = Math.ceil( Number($$.val()) + ( $(this).is( $dec ) ? options.decrement : options.increment ) );
+                console.log(newVal);
+
+                $$.val( newVal );
+                $$.trigger('change');
+            } );
         } );
     };
 
