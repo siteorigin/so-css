@@ -158,8 +158,8 @@
 
             // Now add the increment/decrement buttons
             var $diw = $('<div class="socss-diw"></div>').appendTo($p);
-            var $dec = $('<div class="dec-button socss-button">-</div>').appendTo($diw);
-            var $inc = $('<div class="inc-button socss-button">+</div>').appendTo($diw);
+            var $dec = $('<div class="dec-button socss-button"><span class="fa fa-minus"></span></div>').appendTo($diw);
+            var $inc = $('<div class="inc-button socss-button"><span class="fa fa-plus"></span></div>').appendTo($diw);
 
             // Increment is clicked
             $inc.click( function(){
