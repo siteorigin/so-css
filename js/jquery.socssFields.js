@@ -79,7 +79,13 @@
             var updateValue = function(){
                 var value = parseUnits( $fi.val() );
                 $fi.val( value.value );
-                $$.val( value.value + $p.data( 'unit' ) );
+
+                if( value.value === '' ) {
+                    $$.val( '' );
+                }
+                else {
+                    $$.val( value.value + $p.data( 'unit' ) );
+                }
             };
 
             var setUnit = function( unit ){
