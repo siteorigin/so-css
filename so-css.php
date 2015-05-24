@@ -334,6 +334,23 @@ class SiteOrigin_CSS {
 	function inspector_templates(){
 		include plugin_dir_path( __FILE__ ) . 'tpl/inspector-templates.php';
 	}
+
+	/**
+	 * Get a URL to tweet out the changes
+	 */
+	function get_tweet_url(){
+		$tweet = __('I just changed my site design using @SiteOrigin CSS (http://siteorigin.com/css/). What do you think?', 'so-css');
+		$tweet .= ' ';
+		$tweet .= get_site_url();
+
+		return add_query_arg(
+			'text',
+			urlencode($tweet),
+			'https://twitter.com/intent/tweet'
+		);
+
+
+	}
 }
 
 // Initialize the single

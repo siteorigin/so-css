@@ -3,9 +3,13 @@
 <div class="wrap">
 	<h2><?php _e( 'Custom CSS', 'so-css' ) ?></h2>
 
+
 	<?php if(isset($_POST['siteorigin_custom_css_save'])) : ?>
 		<div class="updated settings-error">
-			<p><?php _e('Custom CSS Updated', 'so-css') ?></p>
+			<p>
+				<?php _e('Site design updated.', 'so-css') ?>
+				<?php printf( __('<a href="%s" target="_blank">Tweet</a> about your changes to find out what your followers think.', 'so-css'),  esc_url( SiteOrigin_CSS::single()->get_tweet_url() ) ) ?>
+			</p>
 		</div>
 	<?php endif; ?>
 
