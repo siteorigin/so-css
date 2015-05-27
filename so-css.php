@@ -2,7 +2,7 @@
 /*
 Plugin Name: SiteOrigin CSS
 Description: An advanced CSS editor from SiteOrigin.
-Version: dev
+Version: 0.9
 Author: SiteOrigin
 Author URI: http://siteorigin.com
 Plugin URI: http://siteorigin.com/css-editor/
@@ -19,8 +19,6 @@ define('SOCSS_JS_SUFFIX', '');
 class SiteOrigin_CSS {
 	private $theme;
 	private $snippet_paths;
-
-	static $version = 'dev';
 
 	function __construct(){
 		$this->theme = basename( get_template_directory() );
