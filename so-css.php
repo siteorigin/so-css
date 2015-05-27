@@ -4,8 +4,8 @@ Plugin Name: SiteOrigin CSS
 Description: An advanced CSS editor from SiteOrigin.
 Version: 0.9
 Author: SiteOrigin
-Author URI: http://siteorigin.com
-Plugin URI: http://siteorigin.com/css-editor/
+Author URI: https://siteorigin.com
+Plugin URI: https://siteorigin.com/css/
 License: GPL3
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 */
