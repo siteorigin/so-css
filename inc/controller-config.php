@@ -245,11 +245,14 @@ return array (
 
 			array(
 				'title' => __('Opacity', 'so-css'),
-				'type' => 'slider',
+				'type' => 'number',
 				'args' => array(
 					'property' => 'opacity',
-					'max' => '0',
-					'min' => '1',
+					'default' => 1,
+					'max' => 0,
+					'min' => 1,
+					'increment' => 0.05,
+					'decrement' => -0.05,
 				)
 			),
 

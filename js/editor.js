@@ -1010,7 +1010,6 @@
 
             // Now add one for each of the option icons
             for ( var k in this.args.option_icons ) {
-                console.log(k);
                 $('<div class="select-tab"></div>')
                     .appendTo($tc)
                     .append(
@@ -1311,7 +1310,7 @@
             this.field = this.$('input');
 
             // Setup the measurement field
-            this.setupNumberField(this.field, {});
+            this.setupNumberField(this.field, this.args);
         },
 
         /**
@@ -1320,11 +1319,14 @@
          * @param options
          */
         setupNumberField: function($el, options){
-            options = $.extend(options, {
+            options = _.extend({
                 change: null,
+                default: 0,
                 increment: 1,
                 decrement: -1
-            });
+            }, options);
+
+            console.log(options);
 
             var $p = $el.parent();
             $p.addClass('socss-field-number');
@@ -1338,15 +1340,24 @@
             $diw.find('> div').click( function(e){
                 e.preventDefault();
 
-                var newVal = Math.ceil( Number($$.val()) + ( $(this).is( $dec ) ? options.decrement : options.increment ) );
-                console.log(newVal);
+                var val = options.default;
+                if( $el.val() !== '' ) {
+                    val = Number($el.val());
+                }
+                val = val + ( $(this).is( $dec ) ? options.decrement : options.increment );
 
-                $el.val( newVal );
+                val = Math.round(val*100)/100;
+
+                $el.val( val );
                 $el.trigger('change');
             } );
 
             return this;
         }
+
+    } );
+
+    socss.view.properties.controllers.borders = socss.view.propertyController.extend( {
 
     } );
 
