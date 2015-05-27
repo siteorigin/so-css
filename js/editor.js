@@ -108,7 +108,6 @@
          */
         setupEditor: function () {
             var thisView = this;
-
             this.registerCodeMirrorAutocomplete();
 
             // Setup the Codemirror instance
@@ -237,9 +236,6 @@
                 var cur = cm.getCursor(), token = cm.getTokenAt(cur);
                 var inner = CodeMirror.innerMode(cm.getMode(), token.state);
 
-                // console.log( token );
-                // console.log( inner.state.state );
-
                 // If we have a qualifier selected, then highlight that in the preview
                 if (token.type === 'qualifier' || token.type === 'tag' || token.type === 'builtin') {
                     var line = cm.getLine(cur.line);
@@ -356,7 +352,7 @@
         },
 
         /**
-         * This function lets an inspector let a
+         * Sets the inspector view that's being used by the editor
          */
         setInspector: function (inspector) {
             var thisView = this;
@@ -365,7 +361,7 @@
 
             // A selector is clicked in the inspector
             inspector.on('click_selector', function (selector) {
-                if (thisView.visualProperties.isVisible()) {
+                if ( thisView.visualProperties.isVisible() ) {
                     // Check if this selector already exists
                     var dropdown = thisView.visualProperties.$('.toolbar select');
                     dropdown.val( selector );
@@ -378,6 +374,11 @@
                         thisView.addEmptySelector(selector);
                         thisView.visualProperties.loadCSS( thisView.codeMirror.getValue(), selector );
                     }
+
+                    dropdown.addClass('highlighted');
+                    setTimeout(function(){
+                        dropdown.removeClass('highlighted');
+                    }, 2000);
                 }
                 else {
                     thisView.addEmptySelector(selector);
@@ -386,7 +387,7 @@
 
             // A property is clicked in the inspector
             inspector.on('click_property', function (property) {
-                if ( ! thisView.visualProperties.isVisible()) {
+                if ( ! thisView.visualProperties.isVisible() ) {
                     thisView.codeMirror.replaceSelection(property + ";\n  ");
                 }
             });
@@ -1375,7 +1376,7 @@
 
             if( !thisView.args.hasAll ) {
                 this.$('.select-tab').eq(0).remove();
-                this.$('.select-tab').attr('width', '25%');
+                this.$('.select-tab').css('width', '25%');
             }
 
             this.$('.select-tab').each( function(){
@@ -1408,10 +1409,9 @@
                             args: theseControllerArgs
                         } );
 
-                        // Setup and render the measurement controller
+                        // Setup and render the measurement controller and register it with the properties view
                         controller.render();
                         controller.initChangeEvents();
-
                         thisView.propertiesView.propertyControllers.push(controller);
 
                     }

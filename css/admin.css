@@ -1,3 +1,24 @@
+#siteorigin-custom-css {
+  margin: 0 0 0 -20px;
+}
+#siteorigin-custom-css h2 {
+  background: #f8f8f8;
+  padding: 20px;
+  border-bottom: 1px solid #d0d0d0;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.035);
+}
+#siteorigin-custom-css h2 .icon {
+  width: 40px;
+  height: auto;
+  margin: -8px 10px -8px 0;
+}
+#siteorigin-custom-css .updated {
+  margin: 0 20px 20px 20px ;
+}
+#siteorigin-custom-css #poststuff {
+  padding: 0 20px;
+}
 #so-custom-css-form {
   margin-right: 340px;
 }
@@ -159,6 +180,13 @@
   line-height: 1;
   font-size: 13px;
   max-width: 265px;
+  -webkit-transition: all 0.5s ease;
+  -moz-transition: all 0.5s ease;
+  -o-transition: all 0.5s ease;
+  transition: all 0.5s ease;
+}
+#so-custom-css-properties .toolbar select.highlighted {
+  background: #daeaf7;
 }
 #so-custom-css-properties .toolbar .close {
   float: right;
@@ -221,7 +249,7 @@
   vertical-align: top;
 }
 #so-custom-css-properties .sections .fields-table td {
-  padding-bottom: 8px;
+  padding: 0 0 8px 0  ;
 }
 #so-custom-css-properties .sections .fields-table input,
 #so-custom-css-properties .sections .fields-table select {
@@ -238,8 +266,8 @@
   top: 1px;
   right: 1px;
   padding: 5px;
-  font-size: 0.95em;
   cursor: pointer;
+  font-size: 15px;
 }
 #so-custom-css-properties .sections .fields-table .select-tabs {
   height: 29px;
@@ -256,18 +284,14 @@
   height: 27px;
   padding: 2px;
   border-right-width: 0;
-  background: #f2f2f2;
-  box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.05);
+  background: #f7f7f7;
 }
 #so-custom-css-properties .sections .fields-table .select-tabs .select-tab:last-child {
   border-right-width: 1px;
 }
 #so-custom-css-properties .sections .fields-table .select-tabs .select-tab:hover,
 #so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active {
-  background: #ffffff;
-}
-#so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active {
-  box-shadow: none;
+  background: #e9e9e9;
 }
 #so-custom-css-properties .sections .fields-table .select-tabs .select-tab .fa {
   font-size: 11px;
@@ -298,6 +322,12 @@
 }
 #so-custom-css-properties .sections .fields-table .side-tabs .side-tab .spacing-right {
   border-right-color: #12609b;
+}
+#so-custom-css-properties .sections .fields-table .sides .side > div {
+  margin-bottom: 5px;
+}
+#so-custom-css-properties .sections .fields-table .sides .side > div:last-child {
+  margin-bottom: 0;
 }
 .css-editor-snippet-browser {
   display: none;
@@ -472,7 +502,7 @@
 }
 .socss-diw {
   position: absolute;
-  top: 1px;
+  top: 0px;
   left: 124px;
 }
 .socss-diw .inc-button,
@@ -496,7 +526,7 @@
   line-height: 1em;
   display: inline-block;
   border: 1px solid #c0c0c0;
-  background: #f6f6f6;
+  background: #f7f7f7;
   text-decoration: none;
   padding: 6px;
   font-weight: bold;

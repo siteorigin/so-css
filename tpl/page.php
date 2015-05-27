@@ -1,10 +1,13 @@
 <?php $snippets = SiteOrigin_CSS::single()->get_snippets(); ?>
 
-<div class="wrap">
-	<h2><?php _e( 'Custom CSS', 'so-css' ) ?></h2>
+<div class="wrap" id="siteorigin-custom-css">
+	<h2>
+		<img src="<?php echo plugin_dir_url(__FILE__) . '../css/images/icon.png' ?>" class="icon" />
+		<?php _e( 'SiteOrigin CSS', 'so-css' ) ?>
+	</h2>
 
 
-	<?php if(isset($_POST['siteorigin_custom_css_save'])) : ?>
+	<?php if( isset($_POST['siteorigin_custom_css_save']) ) : ?>
 		<div class="updated settings-error">
 			<p>
 				<?php _e('Site design updated.', 'so-css') ?>
@@ -59,7 +62,7 @@
 				<div class="toolbar-action-buttons">
 
 					<a href="#visual" class="editor-visual socss-button">
-						<span class="fa fa-wrench"></span>
+						<span class="fa fa-eye"></span>
 					</a>
 
 					<a href="#expand" class="editor-expand socss-button">
@@ -86,9 +89,6 @@
 			<div class="decoration"></div>
 
 		</form>
-
-
-
 
 		<div id="so-custom-css-properties">
 
