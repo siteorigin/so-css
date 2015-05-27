@@ -297,11 +297,14 @@ return array (
 					)
 				)
 			),
-			array(
-				'title' => __('Positioning', 'so-css'),
-				'type' => 'spacing',
-				'args' => array( 'property' => 'padding', 'all' => false )
-			),
+//			array(
+//				'title' => __('Positioning', 'so-css'),
+//				'type' => 'position',
+//				'args' => array(
+//					'property' => 'padding',
+//					'all' => false
+//				)
+//			),
 			array(
 				'title' => __('Display', 'so-css'),
 				'type' => 'select',

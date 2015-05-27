@@ -240,10 +240,10 @@
   padding: 5px;
   font-size: 0.95em;
   cursor: pointer;
-  font-size: 15px;
 }
 #so-custom-css-properties .sections .fields-table .select-tabs {
   height: 29px;
+  margin: 0;
 }
 #so-custom-css-properties .sections .fields-table .select-tabs .select-tab {
   cursor: pointer;
@@ -271,6 +271,36 @@
 }
 #so-custom-css-properties .sections .fields-table .select-tabs .select-tab .fa {
   font-size: 11px;
+}
+#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li {
+  width: 20%;
+  text-align: center;
+  padding: 5px;
+  line-height: 0;
+}
+#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li div {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #aaa;
+}
+#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li .spacing-all {
+  border-color: #12609b;
+}
+#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li .spacing-top {
+  border-top-color: #12609b;
+}
+#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li .spacing-left {
+  border-left-color: #12609b;
+}
+#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li .spacing-bottom {
+  border-bottom-color: #12609b;
+}
+#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li .spacing-right {
+  border-right-color: #12609b;
+}
+#so-custom-css-properties .sections .fields-table .spacing-field .measurement {
+  position: relative;
 }
 .css-editor-snippet-browser {
   display: none;

@@ -700,7 +700,6 @@
                         // Setup and render the controller
                         controller.render();
                         controller.initChangeEvents();
-                        controller.on('change', thisView.updateMainEditor, thisView);
                     }
                 }
             }
@@ -772,7 +771,8 @@
          * Update the main editor with the value of the parsed CSS
          */
         updateMainEditor: function () {
-            this.editor.codeMirror.setValue(this.parser.getCSSForEditor(this.parsed));
+            console.log( this.parser.getCSSForEditor(this.parsed).trim() );
+            this.editor.codeMirror.setValue( this.parser.getCSSForEditor(this.parsed).trim() );
         },
 
         /**
@@ -862,7 +862,7 @@
          * Render the property field controller
          */
         render: function () {
-            this.$el.append($(this.template({})));
+            this.$el.append( $(this.template( {} )) );
             this.field = this.$('input');
         },
 
@@ -871,9 +871,9 @@
          */
         initChangeEvents: function () {
             var thisView = this;
-            this.field.on('change keyup', function () {
+            this.field.on( 'change keyup', function () {
                 thisView.trigger('change', $(this).val());
-            });
+            } );
         },
 
 
@@ -924,7 +924,7 @@
             options = _.extend({silent: false}, options);
 
             this.setValue('', options);
-        },
+        }
 
     });
 
@@ -1095,10 +1095,14 @@
     // A simple measurement field
     socss.view.properties.controllers.measurement = socss.view.propertyController.extend( {
 
+        wrapperClass: 'socss-field-measurement',
+
         render: function(){
             this.$el.append($(this.template({})));
             this.field = this.$('input');
             this.setupMeasurementField( this.field, {} );
+
+            console.log( this.args.property );
         },
 
         setValue: function (val, options) {
@@ -1127,8 +1131,6 @@
             'vmax'
         ],
 
-        wrapperClass: 'socss-field-measurement',
-
         parseUnits: function( value ){
             var escapeRegExp = function(str) {
                 return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
@@ -1155,6 +1157,10 @@
         setupMeasurementField: function( $el, options ){
             var thisView = this;
             var $p = $el.parent();
+
+            options = _.extend( {
+                defaultUnit: 'px'
+            }, options );
 
             $el.hide();
             $p.addClass( this.wrapperClass ).data('unit', options.defaultUnit);
@@ -1361,6 +1367,53 @@
 
     // Field for borders
     socss.view.properties.controllers.borders = socss.view.propertyController.extend( {
+
+    } );
+
+    // A spacing field for margin and padding
+    socss.view.properties.controllers.spacing = socss.view.propertyController.extend( {
+
+        template: _.template( $('#template-spacing-field').html().trim() ),
+        measurementFields: [],
+
+        render: function(){
+            var thisView = this;
+
+            this.$el.append( $(this.template({})) );
+            this.field = this.$el.find('input');
+
+            this.$('.select-tab').each( function(){
+                var dir = $(this).data('direction');
+
+                var container = $('<li class="measurement">')
+                    .appendTo( thisView.$('.measurements') )
+                    .hide();
+
+                // Create the measurement view
+                var controller = new socss.view.properties.controllers.measurement( {
+                    el: container,
+                    propertiesView: thisView.propertiesView,
+                    args: {
+                        property: dir === 'all' ? thisView.args.property : thisView.args.property + '-' + dir
+                    }
+                } );
+
+                // Setup and render the measurement controller
+                controller.render();
+                controller.initChangeEvents();
+
+                $(this).on( 'click', function(){
+                    thisView.$('.select-tab').removeClass('active');
+                    $(this).addClass('active');
+
+                    thisView.$('.measurements .measurement').hide();
+                    controller.$el.show();
+                } );
+
+                thisView.propertiesView.propertyControllers.push(controller);
+            } );
+            this.$('.select-tab').eq(0).click();
+        }
 
     } );
 
