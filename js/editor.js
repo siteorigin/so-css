@@ -92,7 +92,7 @@
             });
 
             this.toolbar.on('click_visual', function () {
-                thisView.visualProperties.loadCSS(thisView.codeMirror.getValue());
+                thisView.visualProperties.loadCSS( thisView.codeMirror.getValue() );
                 thisView.visualProperties.show();
             });
 
@@ -325,6 +325,10 @@
             }
         },
 
+        /**
+         * Add some CSS to the editor.
+         * @param css
+         */
         addCode: function (css) {
             var editor = this.codeMirror;
 
@@ -808,17 +812,37 @@
          */
         loadCSS: function (css, activeSelector) {
             this.css = css;
-            this.parsed = this.parser.compressCSS(this.parser.parseCSS(css));
+
+            // Load the CSS and combine rules
+            this.parsed = this.parser.compressCSS( this.parser.parseCSS(css) );
+            console.log(this.parsed);
 
             // Add the dropdown menu items
             var dropdown = this.$('.toolbar select').empty();
             for (var i = 0; i < this.parsed.length; i++) {
-                dropdown.append(
-                    $('<option>')
-                        .html(this.parsed[i].selector)
-                        .attr('val', this.parsed[i].selector)
-                        .data('selector', this.parsed[i])
-                );
+                var rule = this.parsed[i];
+
+                if( typeof rule.subStyles !== 'undefined' ) {
+
+                    for (var j = 0; j < rule.subStyles.length; j++) {
+                        var subRule = rule.subStyles[j];
+                        dropdown.append(
+                            $('<option>')
+                                .html( rule.selector + ': ' + subRule.selector )
+                                .attr( 'val', rule.selector + ': ' + subRule.selector )
+                                .data( 'selector', subRule )
+                        );
+                    }
+
+                }
+                else {
+                    dropdown.append(
+                        $('<option>')
+                            .html( rule.selector )
+                            .attr( 'val', rule.selector )
+                            .data( 'selector', rule )
+                    );
+                }
             }
 
             if (typeof activeSelector === 'undefined') {
