@@ -2,8 +2,7 @@
 
 	<div class="socss-toolbar">
 		<div class="socss-enable-inspector dashicons dashicons-search"></div>
-		<div class="socss-hierarchy">
-		</div>
+		<div class="socss-hierarchy"></div>
 	</div>
 
 	<div class="socss-selectors-window">

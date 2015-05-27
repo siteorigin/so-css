@@ -3,9 +3,13 @@
 <div class="wrap">
 	<h2><?php _e( 'Custom CSS', 'so-css' ) ?></h2>
 
+
 	<?php if(isset($_POST['siteorigin_custom_css_save'])) : ?>
 		<div class="updated settings-error">
-			<p><?php _e('Custom CSS Updated', 'so-css') ?></p>
+			<p>
+				<?php _e('Site design updated.', 'so-css') ?>
+				<?php printf( __('<a href="%s" target="_blank">Tweet</a> about your changes to find out what your followers think.', 'so-css'),  esc_url( SiteOrigin_CSS::single()->get_tweet_url() ) ) ?>
+			</p>
 		</div>
 	<?php endif; ?>
 
@@ -53,9 +57,14 @@
 				</div>
 
 				<div class="toolbar-action-buttons">
-					<a href="#" class="editor-expand">
-						<span class="dashicons dashicons-editor-expand"></span>
-						<span class="dashicons dashicons-no-alt"></span>
+
+					<a href="#visual" class="editor-visual socss-button">
+						<span class="fa fa-wrench"></span>
+					</a>
+
+					<a href="#expand" class="editor-expand socss-button">
+						<span class="fa fa-expand"></span>
+						<span class="fa fa-compress"></span>
 					</a>
 				</div>
 			</div>
@@ -77,6 +86,27 @@
 			<div class="decoration"></div>
 
 		</form>
+
+
+
+
+		<div id="so-custom-css-properties">
+
+			<div class="toolbar">
+				<select>
+				</select>
+				<div class="close socss-button">
+					<span class="fa fa-check"></span>
+				</div>
+			</div>
+
+			<ul class="section-tabs">
+			</ul>
+
+			<div class="sections">
+			</div>
+
+		</div>
 
 	</div>
 

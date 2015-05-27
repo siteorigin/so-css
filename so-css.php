@@ -127,26 +127,36 @@ class SiteOrigin_CSS {
 	function enqueue_admin_scripts( $page ){
 		if( $page != 'appearance_page_siteorigin_custom_css' ) return;
 
+		// Core WordPress stuff that we use
+		wp_enqueue_media();
+
 		// Enqueue the codemirror scripts. Call Underscore and Backbone dependencies so they're enqueued first to prevent conflicts.
-		wp_enqueue_script( 'codemirror', plugin_dir_url(__FILE__) . 'codemirror/lib/codemirror' . SOCSS_JS_SUFFIX . '.js', array( 'underscore', 'backbone' ), '5.2.0' );
-		wp_enqueue_script( 'codemirror-mode-css', plugin_dir_url(__FILE__) . 'codemirror/mode/css/css' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
+		wp_enqueue_script( 'codemirror', plugin_dir_url(__FILE__) . 'lib/codemirror/lib/codemirror' . SOCSS_JS_SUFFIX . '.js', array( 'underscore', 'backbone' ), '5.2.0' );
+		wp_enqueue_script( 'codemirror-mode-css', plugin_dir_url(__FILE__) . 'lib/codemirror/mode/css/css' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
 
 		// Add in all the linting libs
-		wp_enqueue_script( 'codemirror-lint', plugin_dir_url(__FILE__) . 'codemirror/addon/lint/lint' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror' ), '5.2.0' );
-		wp_enqueue_script( 'codemirror-lint-css', plugin_dir_url(__FILE__) . 'codemirror/addon/lint/css-lint' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror', 'codemirror-lint-css-lib' ), '5.2.0' );
+		wp_enqueue_script( 'codemirror-lint', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/lint/lint' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror' ), '5.2.0' );
+		wp_enqueue_script( 'codemirror-lint-css', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/lint/css-lint' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror', 'codemirror-lint-css-lib' ), '5.2.0' );
 		wp_enqueue_script( 'codemirror-lint-css-lib', plugin_dir_url(__FILE__) . 'js/csslint' . SOCSS_JS_SUFFIX . '.js', array(), '0.10.0' );
 
 		// The CodeMirror autocomplete library
-		wp_enqueue_script( 'codemirror-show-hint', plugin_dir_url(__FILE__) . 'codemirror/addon/hint/show-hint' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror' ), '5.2.0' );
+		wp_enqueue_script( 'codemirror-show-hint', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/hint/show-hint' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror' ), '5.2.0' );
 
 		// All the CodeMirror styles
-		wp_enqueue_style( 'codemirror', plugin_dir_url(__FILE__) . 'codemirror/lib/codemirror.css', array(), '5.2.0' );
-		wp_enqueue_style( 'codemirror-theme-neat', plugin_dir_url(__FILE__) . 'codemirror/theme/neat.css', array(), '5.2.0' );
-		wp_enqueue_style( 'codemirror-lint-css', plugin_dir_url(__FILE__) . 'codemirror/addon/lint/lint.css', array(), '5.2.0' );
-		wp_enqueue_style( 'codemirror-show-hint', plugin_dir_url(__FILE__) . 'codemirror/addon/hint/show-hint.css', array( ), '5.2.0' );
+		wp_enqueue_style( 'codemirror', plugin_dir_url(__FILE__) . 'lib/codemirror/lib/codemirror.css', array(), '5.2.0' );
+		wp_enqueue_style( 'codemirror-theme-neat', plugin_dir_url(__FILE__) . 'lib/codemirror/theme/neat.css', array(), '5.2.0' );
+		wp_enqueue_style( 'codemirror-lint-css', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/lint/lint.css', array(), '5.2.0' );
+		wp_enqueue_style( 'codemirror-show-hint', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/hint/show-hint.css', array( ), '5.2.0' );
 
 		// Enqueue the scripts for theme CSS processing
-		wp_enqueue_script( 'siteorigin-custom-css-parser', plugin_dir_url(__FILE__) . 'js/css-parser' . SOCSS_JS_SUFFIX . '.js', array( ), SOCSS_VERSION );
+		wp_enqueue_script( 'siteorigin-custom-css-parser', plugin_dir_url(__FILE__) . 'js/css' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
+
+		// There are conflicts between CSS linting and the built in WordPress color picker, so use something else
+		wp_enqueue_style('siteorigin-custom-css-minicolors', plugin_dir_url(__FILE__) . 'lib/minicolors/jquery.minicolors.css', array(), '2.1.7' );
+		wp_enqueue_script('siteorigin-custom-css-minicolors', plugin_dir_url(__FILE__) . 'lib/minicolors/jquery.minicolors' . SOCSS_JS_SUFFIX . '.js', array('jquery'), '2.1.7' );
+
+		// We need Font Awesome
+		wp_enqueue_style( 'siteorigin-custom-css-font-awesome', plugin_dir_url(__FILE__) . 'lib/fontawesome/css/font-awesome.min.css', array( ), SOCSS_VERSION );
 
 		// All the custom SiteOrigin CSS stuff
 		wp_enqueue_script( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'js/editor' . SOCSS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'siteorigin-custom-css-parser', 'codemirror' ), SOCSS_VERSION, true );
@@ -156,10 +166,25 @@ class SiteOrigin_CSS {
 			'themeCSS' => SiteOrigin_CSS::single()->get_theme_css(),
 			'homeURL' => add_query_arg( 'so_css_preview', '1', site_url() ),
 			'snippets' => $this->get_snippets(),
+
+			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() ),
+
+			'loc' => array(
+				'unchanged' => __('Unchanged', 'so-css'),
+				'select' => __('Select', 'so-css'),
+				'select_image' => __('Select Image', 'so-css'),
+			)
 		) );
 
 		// This is for the templates required by the CSS editor
 		add_action( 'admin_footer', array($this, 'action_admin_footer') );
+	}
+
+	/**
+	 * Get all the available property controllers
+	 */
+	function get_property_controllers() {
+		return include plugin_dir_path(__FILE__) . 'inc/controller-config.php';
 	}
 
 	/**
@@ -289,6 +314,8 @@ class SiteOrigin_CSS {
 	}
 
 	function enqueue_inspector_scripts(){
+		if( !current_user_can('edit_theme_options') ) return;
+
 		wp_enqueue_style( 'dashicons' );
 
 		wp_enqueue_script('siteorigin-css-sizes', plugin_dir_url(__FILE__) . 'js/jquery.sizes' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), '0.33' );
@@ -303,6 +330,23 @@ class SiteOrigin_CSS {
 
 	function inspector_templates(){
 		include plugin_dir_path( __FILE__ ) . 'tpl/inspector-templates.php';
+	}
+
+	/**
+	 * Get a URL to tweet out the changes
+	 */
+	function get_tweet_url(){
+		$tweet = __('I just changed my site design using @SiteOrigin CSS (http://siteorigin.com/css/). What do you think?', 'so-css');
+		$tweet .= ' ';
+		$tweet .= get_site_url();
+
+		return add_query_arg(
+			'text',
+			urlencode($tweet),
+			'https://twitter.com/intent/tweet'
+		);
+
+
 	}
 }
 

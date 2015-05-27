@@ -43,42 +43,8 @@
   margin: 0;
   padding: 0;
 }
-#so-custom-css-form .custom-css-toolbar .toolbar-function-buttons .toolbar-button {
-  display: inline-block;
-  border: 1px solid #c0c0c0;
-  background: #f6f6f6;
-  text-decoration: none;
-  padding: 8px 12px;
-  font-weight: bold;
-  color: #555;
-  font-size: 0.95em;
-  line-height: 1em;
-  margin-left: 5px;
-}
-#so-custom-css-form .custom-css-toolbar .toolbar-function-buttons .toolbar-button:hover {
-  border: 1px solid #b0b0b0;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
 #so-custom-css-form .custom-css-toolbar .toolbar-action-buttons {
   float: right;
-}
-#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons a {
-  display: inline-block;
-  border: 1px solid #c0c0c0;
-  background: #f6f6f6;
-  text-decoration: none;
-  font-weight: bold;
-  color: #555;
-  font-size: 0.95em;
-  padding: 5px;
-  line-height: 1em;
-  margin-left: 5px;
-}
-#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons a:hover {
-  border: 1px solid #b0b0b0;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 #so-custom-css-form .custom-css-toolbar .toolbar-action-buttons a.active {
   border-color: #b4c4cf;
@@ -90,11 +56,11 @@
   text-decoration: none;
   color: #666;
 }
-#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .dashicons {
-  font-size: 20px;
-}
-#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .dashicons-no-alt {
+#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .fa-compress {
   display: none;
+}
+#so-custom-css-form .custom-css-toolbar .fa {
+  font-size: 14px;
 }
 #so-custom-css-form .custom-css-container {
   border: 1px solid #D0D0D0;
@@ -134,10 +100,10 @@
   bottom: 0;
   width: 340px;
 }
-#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .dashicons-editor-expand {
+#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .fa-expand {
   display: none;
 }
-#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .dashicons-no-alt {
+#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .fa-compress {
   display: inline-block;
 }
 #so-custom-css-form.expanded .decoration {
@@ -168,6 +134,143 @@
   display: block;
   width: 100%;
   height: 100%;
+  overflow-x: hidden;
+}
+#so-custom-css-properties {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: -338px;
+  bottom: 0;
+  width: 338px;
+  background: #ffffff;
+  border: 1px solid #D0D0D0;
+  overflow-y: auto;
+  z-index: 100000;
+}
+#so-custom-css-properties .toolbar {
+  display: block;
+  padding: 7px 10px;
+  border-bottom: 1px solid #aaa;
+  background: #F6F6F6;
+  text-align: left;
+}
+#so-custom-css-properties .toolbar select {
+  line-height: 1;
+  font-size: 13px;
+  max-width: 265px;
+}
+#so-custom-css-properties .toolbar .close {
+  float: right;
+  margin: 2px 4px 0 0;
+}
+#so-custom-css-properties .section-tabs {
+  list-style: none;
+  height: auto;
+  margin: 0;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+#so-custom-css-properties .section-tabs li {
+  box-sizing: border-box;
+  float: left;
+  width: 33.333%;
+  padding: 8px 7px 7px 7px;
+  border: 1px solid #aaa;
+  background: #F6F6F6;
+  font-weight: bold;
+  border-top: 0;
+  border-left: 0;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+}
+#so-custom-css-properties .section-tabs li:hover {
+  background: #fff;
+}
+#so-custom-css-properties .section-tabs li .fa {
+  float: left;
+  display: block;
+  margin: 2px 6px 0 0;
+  color: #555;
+  font-size: 14px;
+}
+#so-custom-css-properties .section-tabs li:last-child {
+  border-right: 0;
+}
+#so-custom-css-properties .section-tabs li.active {
+  background: #e8e8e8;
+}
+#so-custom-css-properties .sections .section {
+  display: none;
+  padding: 5px;
+}
+#so-custom-css-properties .sections .fields-table {
+  width: 100%;
+}
+#so-custom-css-properties .sections .fields-table th,
+#so-custom-css-properties .sections .fields-table td {
+  position: relative;
+}
+#so-custom-css-properties .sections .fields-table th[scope="row"] {
+  font-weight: bold;
+  font-size: 12px;
+  padding-right: 10px;
+  text-align: left;
+  width: 38%;
+  vertical-align: top;
+}
+#so-custom-css-properties .sections .fields-table td {
+  padding-bottom: 8px;
+}
+#so-custom-css-properties .sections .fields-table input,
+#so-custom-css-properties .sections .fields-table select {
+  display: block;
+  margin: 0 25px 0 0;
+  border: 1px solid #c0c0c0;
+  width: 175px;
+  box-sizing: border-box;
+  border-radius: 0;
+}
+#so-custom-css-properties .sections .fields-table .select {
+  display: block;
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  padding: 5px;
+  font-size: 0.95em;
+  cursor: pointer;
+  font-size: 15px;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs {
+  height: 29px;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab {
+  cursor: pointer;
+  float: left;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  text-align: center;
+  border: 1px solid #c0c0c0;
+  height: 27px;
+  padding: 2px;
+  border-right-width: 0;
+  background: #f2f2f2;
+  box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.05);
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab:last-child {
+  border-right-width: 1px;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab:hover,
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active {
+  background: #ffffff;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active {
+  box-shadow: none;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab .fa {
+  font-size: 11px;
 }
 .css-editor-snippet-browser {
   display: none;
@@ -292,6 +395,103 @@
   text-align: right;
   padding: 10px 20px;
   overflow: hidden;
+}
+.socss-field-measurement {
+  position: relative;
+}
+.socss-field-measurement input.socss-field-input {
+  min-height: 1.5em;
+  padding-right: 50px;
+  width: 120px !important;
+  box-sizing: border-box;
+}
+.socss-field-measurement .dashicons-arrow-down {
+  position: absolute;
+  top: 4px;
+  left: 97px;
+  cursor: pointer;
+}
+.socss-field-measurement .dropdown {
+  display: none;
+  background: #F5F5F5;
+  border: 1px solid #c0c0c0;
+  position: absolute;
+  top: 27px;
+  left: 71px;
+  width: 50px;
+  z-index: 2;
+  margin: 0;
+  box-sizing: border-box;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+}
+.socss-field-measurement .dropdown li {
+  padding: 5px 0;
+  text-align: center;
+  line-height: 1.1em;
+  font-size: 11px;
+  margin: 0;
+}
+.socss-field-measurement .dropdown li:hover,
+.socss-field-measurement .dropdown li.active {
+  background: #e8e8e8;
+  cursor: pointer;
+}
+.socss-field-measurement .units {
+  position: absolute;
+  top: 5px;
+  left: 12px;
+  color: #bbb;
+  pointer-events: none;
+}
+.socss-diw {
+  position: absolute;
+  top: 1px;
+  left: 124px;
+}
+.socss-diw .inc-button,
+.socss-diw .dec-button {
+  cursor: pointer;
+  box-sizing: border-box;
+  float: left;
+  padding: 8px;
+  user-select: none;
+  text-align: center;
+  margin: 0;
+  width: 27px;
+  height: 27px;
+  font-size: 10px;
+}
+.socss-diw .inc-button {
+  border-left: 0;
+}
+.socss-button {
+  cursor: pointer;
+  line-height: 1em;
+  display: inline-block;
+  border: 1px solid #c0c0c0;
+  background: #f6f6f6;
+  text-decoration: none;
+  padding: 6px;
+  font-weight: bold;
+  color: #555;
+  font-size: 0.95em;
+  margin-left: 5px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+.socss-button:hover {
+  border-color: #b0b0b0;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.socss-button:hover .fa {
+  color: #333;
+}
+.socss-button .fa {
+  color: #555;
 }
 .CodeMirror-lint-tooltip,
 .CodeMirror-hints {
