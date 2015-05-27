@@ -249,8 +249,8 @@ return array (
 				'args' => array(
 					'property' => 'opacity',
 					'default' => 1,
-					'max' => 0,
-					'min' => 1,
+					'min' => 0,
+					'max' => 1,
 					'increment' => 0.05,
 					'decrement' => -0.05,
 				)

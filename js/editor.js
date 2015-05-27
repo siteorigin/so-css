@@ -926,14 +926,6 @@
             this.setValue('', options);
         },
 
-        /**
-         * Setup minitabs for a given field
-         * @param el
-         */
-        setupMiniTabs: function( el ){
-
-        }
-
     });
 
     socss.view.properties.controllers = {};
@@ -1323,7 +1315,9 @@
                 change: null,
                 default: 0,
                 increment: 1,
-                decrement: -1
+                decrement: -1,
+                max: null,
+                min: null
             }, options);
 
             console.log(options);
@@ -1348,6 +1342,14 @@
 
                 val = Math.round(val*100)/100;
 
+                if( options.max !== null ) {
+                    val = Math.min( options.max, val);
+                }
+
+                if( options.min !== null ) {
+                    val = Math.max( options.min, val);
+                }
+
                 $el.val( val );
                 $el.trigger('change');
             } );
@@ -1357,6 +1359,7 @@
 
     } );
 
+    // Field for borders
     socss.view.properties.controllers.borders = socss.view.propertyController.extend( {
 
     } );
