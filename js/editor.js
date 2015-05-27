@@ -932,14 +932,6 @@
          */
         setupMiniTabs: function( el ){
 
-        },
-
-        /**
-         * setup a measurement field
-         * @param el
-         */
-        setupMeasurementField: function( el ){
-
         }
 
     });
@@ -1115,11 +1107,7 @@
         render: function(){
             this.$el.append($(this.template({})));
             this.field = this.$('input');
-
-            // Setup the measurement field
-            this.field.socssMeasurementField( {
-
-            } );
+            this.setupMeasurementField( this.field, {} );
         },
 
         setValue: function (val, options) {
@@ -1128,6 +1116,189 @@
             if (!options.silent) {
                 this.trigger('set_value', val);
             }
+        },
+
+        units : [
+            'px',
+            '%',
+            'em',
+            'cm',
+            'mm',
+            'in',
+            'pt',
+            'pc',
+            'ex',
+            'ch',
+            'rem',
+            'vw',
+            'vh',
+            'vmin',
+            'vmax'
+        ],
+
+        wrapperClass: 'socss-field-measurement',
+
+        parseUnits: function( value ){
+            var escapeRegExp = function(str) {
+                return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+            };
+
+            var regexUnits = this.units.map(escapeRegExp);
+            var regex = new RegExp('([0-9\\.\\-]+)(' + regexUnits.join('|') + ')?', 'i');
+            var result = regex.exec( value );
+
+            if( result === null ) {
+                return {
+                    value: '',
+                    unit: ''
+                };
+            }
+            else {
+                return {
+                    value: result[1],
+                    unit: result[2] === undefined ? '' : result[2]
+                };
+            }
+        },
+
+        setupMeasurementField: function( $el, options ){
+            var thisView = this;
+            var $p = $el.parent();
+
+            $el.hide();
+            $p.addClass( this.wrapperClass ).data('unit', options.defaultUnit);
+
+            // Create the fake input field
+            var $fi = $('<input type="text" class="socss-field-input"/>').appendTo($p);
+            var $da = $('<span class="dashicons dashicons-arrow-down"></span>').appendTo($p);
+            var $dd = $('<ul class="dropdown"></ul>').appendTo($p);
+            var $u = $('<span class="units"></span>').html( options.defaultUnit ).appendTo( $p );
+
+            for( var i = 0; i < thisView.units.length; i++ ) {
+                var $o = $('<li></li>').html( thisView.units[i] ).data('unit', thisView.units[i]);
+                if( thisView.units[i] === options.defaultUnit ) {
+                    $o.addClass('active');
+                }
+                $dd.append( $o );
+            }
+
+            var updateValue = function(){
+                var value = thisView.parseUnits( $fi.val() );
+                $fi.val( value.value );
+
+                if( value.value === '' ) {
+                    $el.val( '' );
+                }
+                else {
+                    $el.val( value.value + $p.data( 'unit' ) );
+                }
+            };
+
+            var setUnit = function( unit ){
+                $u.html( unit );
+                $p.data( 'unit', unit );
+            };
+
+            $da.click( function(){
+                $dd.toggle();
+            } );
+
+            $dd.find('li').click( function(){
+                $dd.toggle();
+                $dd.find('li').removeClass('active');
+                $(this).addClass('active');
+                setUnit( $(this).data('unit') );
+                updateValue();
+                $el.trigger('change');
+            } );
+
+            $fi.on( 'keyup keydown', function(e){
+                var $$ = $(this);
+                var value = thisView.parseUnits( $$.val() );
+
+                var char = '';
+                if( e.type === 'keydown' ) {
+                    if(e.keyCode >= 48 && e.keyCode <= 57 ) {
+                        char = String.fromCharCode(e.keyCode);
+                    }
+                    else if( e.keyCode === 189 ) {
+                        char = '-';
+                    }
+                    else if( e.keyCode === 190 ) {
+                        char = '.';
+                    }
+                }
+
+                var $pl = $('<span class="socss-hidden-placeholder"></span>')
+                    .css( {
+                        'font-size' : '14px'
+                    } )
+                    .html( value.value + char )
+                    .appendTo( 'body' );
+                var width = $pl.width();
+                width = Math.min(width, 63);
+                $pl.remove();
+
+                $u.css('left', width + 12);
+            } );
+
+            $fi.on('keyup', function(){
+                updateValue();
+                $el.trigger('change');
+            } );
+
+            $el.on('measurement_refresh', function(){
+                var value = thisView.parseUnits( $el.val() );
+                $fi.val( value.value );
+
+                var unit = value.unit === '' ?  options.defaultUnit : value.unit;
+                $p.data( 'unit', unit );
+                $u.html( unit );
+
+                var $pl = $('<span class="socss-hidden-placeholder"></span>')
+                    .css({
+                        'font-size' : '14px'
+                    })
+                    .html( value.value )
+                    .appendTo( 'body' );
+                var width = $pl.width();
+                width = Math.min(width, 63);
+                $pl.remove();
+
+                $u.css('left', width + 12);
+            } );
+
+            // Now add the increment/decrement buttons
+            var $diw = $('<div class="socss-diw"></div>').appendTo($p);
+            var $dec = $('<div class="dec-button socss-button"><span class="fa fa-minus"></span></div>').appendTo($diw);
+            var $inc = $('<div class="inc-button socss-button"><span class="fa fa-plus"></span></div>').appendTo($diw);
+
+            // Increment is clicked
+            $inc.click( function(){
+                var value = thisView.parseUnits( $el.val() );
+                if( value.value === '' ) {
+                    return true;
+                }
+
+                var newVal = Math.ceil( value.value * 1.05 );
+
+                $fi.val( newVal );
+                updateValue();
+                $el.trigger('change').trigger('measurement_refresh');
+            } );
+
+            $dec.click( function(){
+                var value = thisView.parseUnits( $el.val() );
+                if( value.value === '' ) {
+                    return true;
+                }
+
+                var newVal = Math.floor( value.value / 1.05 );
+
+                $fi.val( newVal );
+                updateValue();
+                $el.trigger('change').trigger('measurement_refresh');
+            } );
         }
 
     } );
@@ -1140,9 +1311,41 @@
             this.field = this.$('input');
 
             // Setup the measurement field
-            this.field.socssNumberField( {
+            this.setupNumberField(this.field, {});
+        },
 
+        /**
+         * Setup the number field
+         * @param el
+         * @param options
+         */
+        setupNumberField: function($el, options){
+            options = $.extend(options, {
+                change: null,
+                increment: 1,
+                decrement: -1
+            });
+
+            var $p = $el.parent();
+            $p.addClass('socss-field-number');
+
+            // Now add the increment/decrement buttons
+            var $diw = $('<div class="socss-diw"></div>').appendTo($p);
+            var $dec = $('<div class="dec-button socss-button">-</div>').appendTo($diw);
+            var $inc = $('<div class="inc-button socss-button">+</div>').appendTo($diw);
+
+            // Increment is clicked
+            $diw.find('> div').click( function(e){
+                e.preventDefault();
+
+                var newVal = Math.ceil( Number($$.val()) + ( $(this).is( $dec ) ? options.decrement : options.increment ) );
+                console.log(newVal);
+
+                $el.val( newVal );
+                $el.trigger('change');
             } );
+
+            return this;
         }
 
     } );
