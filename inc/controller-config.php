@@ -258,9 +258,44 @@ return array (
 
 			array(
 				'title' => __('Borders', 'so-css'),
-				'type' => 'borders',
+				'type' => 'sides',
 				'args' => array(
-					'property' => 'border',
+					'controllers' => array(
+						array(
+							'type' => 'measurement',
+							'args' => array(
+								'property' => 'border-{dir}-width',
+								'propertyAll' => 'border-width',
+								'defaultUnit' => 'px'
+							)
+						),
+						array(
+							'type' => 'select',
+							'args' => array(
+								'property' => 'border-{dir}-style',
+								'propertyAll' => 'border-style',
+								'options' => array(
+									'hidden' => 'Hidden',
+									'dotted' => 'Dotted',
+									'dashed' => 'Dashed',
+									'solid' => 'Solid',
+									'double' => 'Double',
+									'groove' => 'Groove',
+									'ridge' => 'Ridge',
+									'inset' => 'Inset',
+									'outset' => 'Outset',
+								)
+							)
+						),
+						array(
+							'type' => 'color',
+							'args' => array(
+								'property' => 'border-{dir}-color',
+								'propertyAll' => 'border-color',
+							)
+						),
+					),
+					'hasAll' => true
 				)
 			),
 
@@ -275,17 +310,35 @@ return array (
 		'controllers' => array(
 			array(
 				'title' => __('Margin', 'so-css'),
-				'type' => 'spacing',
+				'type' => 'sides',
 				'args' => array(
-					'property' => 'margin',
+					'controllers' => array(
+						array(
+							'type' => 'measurement',
+							'args' => array(
+								'property' => 'margin-{dir}',
+								'propertyAll' => 'margin',
+								'defaultUnit' => 'px'
+							)
+						)
+					),
 					'hasAll' => true
 				)
 			),
 			array(
 				'title' => __('Padding', 'so-css'),
-				'type' => 'spacing',
+				'type' => 'sides',
 				'args' => array(
-					'property' => 'padding',
+					'controllers' => array(
+						array(
+							'type' => 'measurement',
+							'args' => array(
+								'property' => 'padding-{dir}',
+								'propertyAll' => 'padding',
+								'defaultUnit' => 'px'
+							)
+						)
+					),
 					'hasAll' => true
 				)
 			),
@@ -305,13 +358,20 @@ return array (
 			),
 			array(
 				'title' => __('Absolute Position', 'so-css'),
-				'type' => 'spacing',
+				'type' => 'sides',
 				'args' => array(
-					'property' => '',
+					'controllers' => array(
+						array(
+							'type' => 'measurement',
+							'args' => array(
+								'property' => '{dir}',
+								'defaultUnit' => 'px'
+							)
+						)
+					),
 					'hasAll' => false
 				)
 			),
-
 			array(
 				'title' => __('Width', 'so-css'),
 				'type' => 'measurement',

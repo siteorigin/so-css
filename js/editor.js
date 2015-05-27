@@ -771,7 +771,6 @@
          * Update the main editor with the value of the parsed CSS
          */
         updateMainEditor: function () {
-            console.log( this.parser.getCSSForEditor(this.parsed).trim() );
             this.editor.codeMirror.setValue( this.parser.getCSSForEditor(this.parsed).trim() );
         },
 
@@ -1101,8 +1100,6 @@
             this.$el.append($(this.template({})));
             this.field = this.$('input');
             this.setupMeasurementField( this.field, {} );
-
-            console.log( this.args.property );
         },
 
         setValue: function (val, options) {
@@ -1326,8 +1323,6 @@
                 min: null
             }, options);
 
-            console.log(options);
-
             var $p = $el.parent();
             $p.addClass('socss-field-number');
 
@@ -1365,16 +1360,12 @@
 
     } );
 
-    // Field for borders
-    socss.view.properties.controllers.borders = socss.view.propertyController.extend( {
 
-    } );
+    socss.view.properties.controllers.sides = socss.view.propertyController.extend( {
 
-    // A spacing field for margin and padding
-    socss.view.properties.controllers.spacing = socss.view.propertyController.extend( {
+        template: _.template( $('#template-sides-field').html().trim() ),
 
-        template: _.template( $('#template-spacing-field').html().trim() ),
-        measurementFields: [],
+        controllers: [],
 
         render: function(){
             var thisView = this;
@@ -1382,7 +1373,7 @@
             this.$el.append( $(this.template({})) );
             this.field = this.$el.find('input');
 
-            if( !this.args.hasAll ) {
+            if( !thisView.args.hasAll ) {
                 this.$('.select-tab').eq(0).remove();
                 this.$('.select-tab').attr('width', '25%');
             }
@@ -1390,41 +1381,54 @@
             this.$('.select-tab').each( function(){
                 var dir = $(this).data('direction');
 
-                var container = $('<li class="measurement">')
-                    .appendTo( thisView.$('.measurements') )
+                var container = $('<li class="side">')
+                    .appendTo( thisView.$('.sides') )
                     .hide();
 
-                // Create the measurement view
-                var property = '';
-                if( thisView.args.property === '' ) {
-                    property = dir;
-                }
-                else {
-                    property = dir === 'all' ? thisView.args.property : thisView.args.property + '-' + dir;
-                }
+                for( var i = 0; i < thisView.args.controllers.length; i++ ) {
 
-                var controller = new socss.view.properties.controllers.measurement( {
-                    el: container,
-                    propertiesView: thisView.propertiesView,
-                    args: {
-                        property: property
+                    var controllerArgs = thisView.args.controllers[i];
+
+                    if( typeof socss.view.properties.controllers[ controllerArgs.type ] ) {
+
+                        // Create the measurement view
+                        var property = '';
+                        if( dir === 'all' ) {
+                            property = controllerArgs.args.propertyAll;
+                        }
+                        else {
+                            property = controllerArgs.args.property.replace('{dir}', dir);
+                        }
+
+                        var theseControllerArgs = _.extend({}, controllerArgs.args, {property: property});
+
+                        var controller = new socss.view.properties.controllers[ controllerArgs.type ]( {
+                            el: $('<div>').appendTo( container ),
+                            propertiesView: thisView.propertiesView,
+                            args: theseControllerArgs
+                        } );
+
+                        // Setup and render the measurement controller
+                        controller.render();
+                        controller.initChangeEvents();
+
+                        thisView.propertiesView.propertyControllers.push(controller);
+
                     }
-                } );
 
-                // Setup and render the measurement controller
-                controller.render();
-                controller.initChangeEvents();
+                }
 
                 $(this).on( 'click', function(){
                     thisView.$('.select-tab').removeClass('active');
                     $(this).addClass('active');
 
-                    thisView.$('.measurements .measurement').hide();
-                    controller.$el.show();
+                    thisView.$('.sides .side').hide();
+                    container.show();
                 } );
 
-                thisView.propertiesView.propertyControllers.push(controller);
             } );
+
+            // Select the first tab by default
             this.$('.select-tab').eq(0).click();
         }
 

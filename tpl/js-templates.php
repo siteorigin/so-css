@@ -28,7 +28,7 @@
 	</div>
 </script>
 
-<script type="text/template" id="template-spacing-field">
+<script type="text/template" id="template-sides-field">
 	<div class="spacing-field">
 
 		<ul class="select-tabs side-tabs">
@@ -39,7 +39,7 @@
 			<li class="select-tab side-tab" data-direction="left"><div class="spacing-left"></div></li>
 		</ul>
 
-		<ul class="measurements">
+		<ul class="sides">
 
 		</ul>
 
