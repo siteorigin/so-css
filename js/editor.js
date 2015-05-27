@@ -1382,6 +1382,11 @@
             this.$el.append( $(this.template({})) );
             this.field = this.$el.find('input');
 
+            if( !this.args.hasAll ) {
+                this.$('.select-tab').eq(0).remove();
+                this.$('.select-tab').attr('width', '25%');
+            }
+
             this.$('.select-tab').each( function(){
                 var dir = $(this).data('direction');
 
@@ -1390,11 +1395,19 @@
                     .hide();
 
                 // Create the measurement view
+                var property = '';
+                if( thisView.args.property === '' ) {
+                    property = dir;
+                }
+                else {
+                    property = dir === 'all' ? thisView.args.property : thisView.args.property + '-' + dir;
+                }
+
                 var controller = new socss.view.properties.controllers.measurement( {
                     el: container,
                     propertiesView: thisView.propertiesView,
                     args: {
-                        property: dir === 'all' ? thisView.args.property : thisView.args.property + '-' + dir
+                        property: property
                     }
                 } );
 

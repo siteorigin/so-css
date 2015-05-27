@@ -276,12 +276,18 @@ return array (
 			array(
 				'title' => __('Margin', 'so-css'),
 				'type' => 'spacing',
-				'args' => array( 'property' => 'margin' )
+				'args' => array(
+					'property' => 'margin',
+					'hasAll' => true
+				)
 			),
 			array(
 				'title' => __('Padding', 'so-css'),
 				'type' => 'spacing',
-				'args' => array( 'property' => 'padding' )
+				'args' => array(
+					'property' => 'padding',
+					'hasAll' => true
+				)
 			),
 			array(
 				'title' => __('Position', 'so-css'),
@@ -297,14 +303,31 @@ return array (
 					)
 				)
 			),
-//			array(
-//				'title' => __('Positioning', 'so-css'),
-//				'type' => 'position',
-//				'args' => array(
-//					'property' => 'padding',
-//					'all' => false
-//				)
-//			),
+			array(
+				'title' => __('Absolute Position', 'so-css'),
+				'type' => 'spacing',
+				'args' => array(
+					'property' => '',
+					'hasAll' => false
+				)
+			),
+
+			array(
+				'title' => __('Width', 'so-css'),
+				'type' => 'measurement',
+				'args' => array(
+					'property' => 'width',
+					'defaultUnit' => 'px',
+				)
+			),
+			array(
+				'title' => __('Height', 'so-css'),
+				'type' => 'measurement',
+				'args' => array(
+					'property' => 'height',
+					'defaultUnit' => '%',
+				)
+			),
 			array(
 				'title' => __('Display', 'so-css'),
 				'type' => 'select',

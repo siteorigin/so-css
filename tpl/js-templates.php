@@ -31,12 +31,12 @@
 <script type="text/template" id="template-spacing-field">
 	<div class="spacing-field">
 
-		<ul class="tabs select-tabs">
-			<li class="select-tab" data-direction="all"><div class="spacing-all"></div></li>
-			<li class="select-tab" data-direction="top"><div class="spacing-top"></div></li>
-			<li class="select-tab" data-direction="right"><div class="spacing-right"></div></li>
-			<li class="select-tab" data-direction="bottom"><div class="spacing-bottom"></div></li>
-			<li class="select-tab" data-direction="left"><div class="spacing-left"></div></li>
+		<ul class="select-tabs side-tabs">
+			<li class="select-tab side-tab" data-direction="all"><div class="spacing-all"></div></li>
+			<li class="select-tab side-tab" data-direction="top"><div class="spacing-top"></div></li>
+			<li class="select-tab side-tab" data-direction="right"><div class="spacing-right"></div></li>
+			<li class="select-tab side-tab" data-direction="bottom"><div class="spacing-bottom"></div></li>
+			<li class="select-tab side-tab" data-direction="left"><div class="spacing-left"></div></li>
 		</ul>
 
 		<ul class="measurements">

@@ -272,35 +272,32 @@
 #so-custom-css-properties .sections .fields-table .select-tabs .select-tab .fa {
   font-size: 11px;
 }
-#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li {
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab {
   width: 20%;
   text-align: center;
   padding: 5px;
   line-height: 0;
 }
-#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li div {
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab div {
   display: inline-block;
   width: 10px;
   height: 10px;
   border: 2px solid #aaa;
 }
-#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li .spacing-all {
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab .spacing-all {
   border-color: #12609b;
 }
-#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li .spacing-top {
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab .spacing-top {
   border-top-color: #12609b;
 }
-#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li .spacing-left {
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab .spacing-left {
   border-left-color: #12609b;
 }
-#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li .spacing-bottom {
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab .spacing-bottom {
   border-bottom-color: #12609b;
 }
-#so-custom-css-properties .sections .fields-table .spacing-field ul.tabs li .spacing-right {
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab .spacing-right {
   border-right-color: #12609b;
-}
-#so-custom-css-properties .sections .fields-table .spacing-field .measurement {
-  position: relative;
 }
 .css-editor-snippet-browser {
   display: none;

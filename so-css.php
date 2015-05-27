@@ -334,7 +334,7 @@ class SiteOrigin_CSS {
 	 * Get a URL to tweet out the changes
 	 */
 	function get_tweet_url(){
-		$tweet = __('I just changed my site design using @SiteOrigin CSS (http://siteorigin.com/css/). What do you think?', 'so-css');
+		$tweet = __('I customized my site using @SiteOrigin CSS (http://siteorigin.com/css/). What do you think?', 'so-css');
 		$tweet .= ' ';
 		$tweet .= get_site_url();
 
