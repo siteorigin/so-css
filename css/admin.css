@@ -19,6 +19,14 @@
 #siteorigin-custom-css #poststuff {
   padding: 0 20px;
 }
+#siteorigin-custom-css #poststuff .postbox {
+  border: 1px solid #D0D0D0;
+}
+#siteorigin-custom-css #poststuff .postbox h3.hndle {
+  cursor: default;
+  border-bottom: 1px solid #D0D0D0;
+  background: #efefef;
+}
 #so-custom-css-form {
   margin-right: 340px;
 }
@@ -26,10 +34,10 @@
   width: 315px;
   float: right;
 }
-#so-custom-css-info p:first-child {
+#so-custom-css-info *:first-child {
   margin-top: 0;
 }
-#so-custom-css-info p:last-child {
+#so-custom-css-info *:last-child {
   margin-bottom: 0;
 }
 #so-custom-css-revisions ol {

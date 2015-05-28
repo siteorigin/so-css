@@ -794,9 +794,9 @@
          */
         hide: function () {
             this.editor.setExpand(this.editorExpandedBefore);
-            this.$el.animate({'left': -338}, 'fast', function(){
+            this.$el.animate( {'left': -338}, 'fast', function(){
                 $(this).hide();
-            });
+            } );
         },
 
         /**
@@ -815,7 +815,6 @@
 
             // Load the CSS and combine rules
             this.parsed = this.parser.compressCSS( this.parser.parseCSS(css) );
-            console.log(this.parsed);
 
             // Add the dropdown menu items
             var dropdown = this.$('.toolbar select').empty();

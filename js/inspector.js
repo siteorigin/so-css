@@ -262,35 +262,41 @@
         }
     } );
 
+    socss.parsedCss = {};
+    socss.fn.getParsedCss = function(){
+        // Load all the parsed CSS
+        if( Object.keys(socss.parsedCss).length === 0 ) {
+            var parser = new cssjs();
+            $('.socss-theme-styles').each(function(){
+                var $$ = $(this);
+                var p = parser.parseCSS( $$.html() );
+                socss.parsedCss[ $$.attr('id') ] = p;
+            });
+        }
+        return socss.parsedCss;
+    };
+
     /**
      * Function to get all the available page selectors
      */
     socss.fn.pageSelectors = function(){
         var selectors = [];
+        var parsedCss = socss.fn.getParsedCss();
 
-        if( document.styleSheets ) {
-            var stylesheet = null, ruleSpecificity;
-            for (var i = 0; i < document.styleSheets.length; i++) {
-                stylesheet = document.styleSheets[i];
-
-                if (stylesheet.rules === null || ( stylesheet.href !== null && stylesheet.href.indexOf('so-css/css/inspector.css') !== -1 )) {
-                    // Skip anything without rules or the inspector css
+        for( var k in parsedCss ) {
+            for( var i = 0; i < parsedCss[k].length; i++ ) {
+                if (typeof parsedCss[k][i].selector === 'undefined') {
                     continue;
                 }
 
-                for (var j = 0; j < stylesheet.rules.length; j++) {
-                    if (typeof stylesheet.rules[j].selectorText === 'undefined') {
-                        continue;
-                    }
-
-                    ruleSpecificity = SPECIFICITY.calculate(stylesheet.rules[j].selectorText);
-                    for (var k = 0; k < ruleSpecificity.length; k++) {
-                        selectors.push({
-                            'selector': ruleSpecificity[k].selector.trim(),
-                            'specificity': parseInt(ruleSpecificity[k].specificity.replace(/,/g, ''))
-                        });
-                    }
+                var ruleSpecificity = SPECIFICITY.calculate( parsedCss[k][i].selector );
+                for (var j = 0; j < ruleSpecificity.length; j++) {
+                    selectors.push({
+                        'selector': ruleSpecificity[j].selector.trim(),
+                        'specificity': parseInt(ruleSpecificity[j].specificity.replace(/,/g, ''))
+                    });
                 }
+
             }
         }
 
@@ -323,8 +329,7 @@
             return [];
         }
 
-        var stylesheet = null, ruleSpecificity;
-        var properties = [];
+        var elProperties = [];
 
         var trimFunc = function(e) {
             return e.trim();
@@ -338,47 +343,44 @@
             return e.split(':').map( trimFunc );
         };
 
-        for (var i = 0; i < document.styleSheets.length; i++) {
-            stylesheet = document.styleSheets[i];
 
-            if (stylesheet.rules === null || ( stylesheet.href !== null && stylesheet.href.indexOf('so-css/css/inspector.css') !== -1 )) {
-                // Skip anything without rules or the inspector css
-                continue;
-            }
+        var parsedCss = socss.fn.getParsedCss();
 
-            for (var j = 0; j < stylesheet.rules.length; j++) {
-                if (typeof stylesheet.rules[j].selectorText === 'undefined') {
+        for( var k in parsedCss ) {
+            for( var i = 0; i < parsedCss[k].length; i++ ) {
+                if (
+                    typeof parsedCss[k][i].selector === 'undefined' ||
+                    typeof parsedCss[k][i].type !== 'undefined' ||
+                    parsedCss[k][i].selector[0] === '@'
+                ) {
                     continue;
                 }
 
-                ruleSpecificity = SPECIFICITY.calculate(stylesheet.rules[j].selectorText);
-                for (var k = 0; k < ruleSpecificity.length; k++) {
-
-                    if( el.is( ruleSpecificity[k].selector ) ) {
-                        // Filter the stylesheet to get out all the properties
-                        var p = stylesheet.rules[j].style.cssText.split(';').map( trimFunc).filter( filterFunc).map( splitFunc );
-
-                        for( var l = 0; l < p.length; l++ ) {
-                            properties.push({
-                                'name' : p[l][0],
-                                'value' : p[l][1],
-                                'specificity' : parseInt(ruleSpecificity[k].specificity.replace(/,/g, ''))
+                var ruleSpecificity = SPECIFICITY.calculate( parsedCss[k][i].selector );
+                for (var j = 0; j < ruleSpecificity.length; j++) {
+                    if( el.is( ruleSpecificity[j].selector ) ) {
+                        for( var l = 0; l < parsedCss[k][i].rules.length; l++ ) {
+                            elProperties.push({
+                                'name' : parsedCss[k][i].rules[l].directive,
+                                'value' : parsedCss[k][i].rules[l].value,
+                                'specificity' : parseInt(ruleSpecificity[j].specificity.replace(/,/g, ''))
                             });
                         }
-
                     }
+
                 }
+
             }
         }
 
-        properties.sort( function(a,b) {
+        elProperties.sort( function(a,b) {
             return a.specificity > b.specificity ? 1 : -1;
         }).reverse();
 
         var returnProperties = {};
-        for( var i = 0; i < properties.length; i++ ) {
-            if( typeof returnProperties[properties[i].name] === 'undefined' ) {
-                returnProperties[properties[i].name] = properties[i].value;
+        for( var pi = 0; pi < elProperties.length; pi++ ) {
+            if( typeof returnProperties[elProperties[pi].name] === 'undefined' ) {
+                returnProperties[elProperties[pi].name] = elProperties[pi].value;
             }
         }
 

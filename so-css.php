@@ -37,6 +37,9 @@ class SiteOrigin_CSS {
 			add_filter( 'show_admin_bar', '__return_false' );
 			add_filter( 'wp_enqueue_scripts', array($this, 'enqueue_inspector_scripts') );
 			add_filter( 'wp_footer', array($this, 'inspector_templates') );
+
+			// We'll be grabbing all the enqueued scripts and outputting them
+			add_action( 'wp_enqueue_scripts', array($this, 'inline_inspector_scripts'), 100 );
 		}
 	}
 
@@ -316,6 +319,8 @@ class SiteOrigin_CSS {
 
 		wp_enqueue_style( 'dashicons' );
 
+		wp_enqueue_script( 'siteorigin-custom-css-parser', plugin_dir_url(__FILE__) . 'js/css' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
+
 		wp_enqueue_script('siteorigin-css-sizes', plugin_dir_url(__FILE__) . 'js/jquery.sizes' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), '0.33' );
 		wp_enqueue_script('siteorigin-css-specificity', plugin_dir_url(__FILE__) . 'js/specificity' . SOCSS_JS_SUFFIX . '.js', array( ) );
 		wp_enqueue_script('siteorigin-css-inspector', plugin_dir_url(__FILE__) . 'js/inspector' . SOCSS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone' ), SOCSS_VERSION, true );
@@ -327,7 +332,42 @@ class SiteOrigin_CSS {
 	}
 
 	function inspector_templates(){
+		if( !current_user_can('edit_theme_options') ) return;
+
 		include plugin_dir_path( __FILE__ ) . 'tpl/inspector-templates.php';
+	}
+
+	/**
+	 * Change the stylesheets to all be inline
+	 */
+	function inline_inspector_scripts(){
+		if( !current_user_can('edit_theme_options') ) return;
+
+		$regex = array(
+			"`^([\t\s]+)`ism"=>'',
+			"`^\/\*(.+?)\*\/`ism"=>"",
+			"`([\n\A;]+)\/\*(.+?)\*\/`ism"=>"$1",
+			"`([\n\A;\s]+)//(.+?)[\n\r]`ism"=>"$1\n",
+			"`(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+`ism"=>"\n"
+		);
+
+		$styles = wp_styles();
+		foreach( $styles->queue as $handle ) {
+			if( $handle === 'siteorigin-css-inspector' || $handle === 'dashicons' ) continue;
+			$style = $styles->registered[$handle];
+			if( empty($style->src) || substr($style->src, 0, 4) !== 'http' ) continue;
+			$response = wp_remote_get( $style->src );
+			if( is_wp_error($response) || $response['response']['code'] !== 200 || empty($response['body']) ) continue;
+
+			$css = $response['body'];
+			$css = preg_replace( array_keys($regex), $regex, $css );
+
+			?>
+			<script type="text/css" class="socss-theme-styles" id="socss-inlined-style-<?php echo sanitize_html_class( $handle ) ?>">
+				<?php echo strip_tags( $css ) ?>
+			</script>
+			<?php
+		}
 	}
 
 	/**
