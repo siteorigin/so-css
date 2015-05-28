@@ -177,6 +177,7 @@ class SiteOrigin_CSS {
 				'unchanged' => __('Unchanged', 'so-css'),
 				'select' => __('Select', 'so-css'),
 				'select_image' => __('Select Image', 'so-css'),
+				'leave' => __('Are you sure you want to leave without saving?', 'so-css'),
 			)
 		) );
 

@@ -111,7 +111,7 @@
             this.registerCodeMirrorAutocomplete();
 
             // Setup the Codemirror instance
-            this.codeMirror = CodeMirror.fromTextArea(this.$el.find('textarea.css-editor').get(0), {
+            this.codeMirror = CodeMirror.fromTextArea(this.$('textarea.css-editor').get(0), {
                 tabSize: 2,
                 mode: 'css',
                 theme: 'neat',
@@ -120,6 +120,18 @@
                 ],
                 lint: true
             });
+
+            // Make sure the user doesn't leave without saving
+            var startCss = this.$('textarea.css-editor').val();
+            this.$el.on('submit', function(){
+                startCss = thisView.codeMirror.getValue();
+            });
+            $(window).bind('beforeunload', function(){
+                if( thisView.codeMirror.getValue() !== startCss ) {
+                    return socssOptions.loc.leave;
+                }
+            });
+
 
             // Set the container to visible overflow once the editor is setup
             this.$el.find('.custom-css-container').css('overflow', 'visible');
