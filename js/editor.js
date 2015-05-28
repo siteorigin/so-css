@@ -451,10 +451,6 @@
                 return;
             }
 
-            if (!preview.is(':visible')) {
-                return;
-            }
-
             var head = preview.contents().find('head');
             if (head.find('style.siteorigin-custom-css').length === 0) {
                 head.append('<style class="siteorigin-custom-css" type="text/css"></style>');
@@ -951,6 +947,7 @@
 
     });
 
+    // All the value controllers
     socss.view.properties.controllers = {};
 
     // The color controller
@@ -1021,7 +1018,8 @@
 
             var $tc = $('<div class="select-tabs"></div>').appendTo( this.$el );
 
-            var $none = $('<div class="select-tab" data-value=""></div>').appendTo($tc);
+            // Add the none value
+            $('<div class="select-tab" data-value=""><span class="fa fa-circle-o"></span></div>').appendTo($tc);
 
             // Now add one for each of the option icons
             for ( var k in this.args.option_icons ) {
@@ -1471,4 +1469,11 @@ jQuery(function ($) {
     editor.setSnippets(socssOptions.snippets);
 
     window.socss.mainEditor = editor;
+
+    // This is for hiding the getting started video
+    $('#so-custom-css-getting-started a.hide').click( function(e){
+        e.preventDefault();
+        $('#so-custom-css-getting-started').slideUp();
+        $.get( $(this).attr('href') );
+    } );
 });

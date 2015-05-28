@@ -33,6 +33,9 @@ class SiteOrigin_CSS {
 		add_action( 'load-appearance_page_siteorigin_custom_css', array($this, 'add_help_tab') );
 		add_action( 'admin_footer', array($this, 'action_admin_footer') );
 
+		// The request to hide the getting started video
+		add_action( 'wp_ajax_socss_hide_getting_started', array( $this, 'admin_action_hide_getting_started' ) );
+
 		if( isset($_GET['so_css_preview']) && !is_admin() ) {
 			add_filter( 'show_admin_bar', '__return_false' );
 			add_filter( 'wp_enqueue_scripts', array($this, 'enqueue_inspector_scripts') );
@@ -207,6 +210,18 @@ class SiteOrigin_CSS {
 		}
 
 		include plugin_dir_path(__FILE__).'/tpl/page.php';
+	}
+
+	/**
+	 *
+	 */
+	function admin_action_hide_getting_started(){
+		if( !isset($_GET['_wpnonce']) || !wp_verify_nonce( $_GET['_wpnonce'], 'hide' ) ) return;
+
+		$user = wp_get_current_user();
+		if( !empty($user) ) {
+			update_user_meta( $user->ID, 'socss_hide_gs', true );
+		}
 	}
 
 	/**

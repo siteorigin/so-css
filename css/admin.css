@@ -26,6 +26,22 @@
   cursor: default;
   border-bottom: 1px solid #D0D0D0;
   background: #efefef;
+  position: relative;
+}
+#siteorigin-custom-css #poststuff .postbox h3.hndle .hide {
+  position: absolute;
+  top: 50%;
+  line-height: 1em;
+  margin-top: -0.5em;
+  right: 12px;
+}
+#siteorigin-custom-css #poststuff #so-custom-css-getting-started .inside {
+  padding: 0 6px 6px 6px;
+}
+#siteorigin-custom-css #poststuff #so-custom-css-getting-started .inside img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 #so-custom-css-form {
   margin-right: 340px;
@@ -247,6 +263,18 @@
 #so-custom-css-properties .sections .fields-table th,
 #so-custom-css-properties .sections .fields-table td {
   position: relative;
+  zoom: 1;
+}
+#so-custom-css-properties .sections .fields-table th:before,
+#so-custom-css-properties .sections .fields-table td:before {
+  content: '';
+  display: block;
+}
+#so-custom-css-properties .sections .fields-table th:after,
+#so-custom-css-properties .sections .fields-table td:after {
+  content: '';
+  display: table;
+  clear: both;
 }
 #so-custom-css-properties .sections .fields-table th[scope="row"] {
   font-weight: bold;
@@ -278,8 +306,8 @@
   font-size: 15px;
 }
 #so-custom-css-properties .sections .fields-table .select-tabs {
-  height: 29px;
   margin: 0;
+  height: 40px;
 }
 #so-custom-css-properties .sections .fields-table .select-tabs .select-tab {
   cursor: pointer;
@@ -289,10 +317,14 @@
   box-sizing: border-box;
   text-align: center;
   border: 1px solid #c0c0c0;
-  height: 27px;
-  padding: 2px;
+  padding: 4px 2px;
   border-right-width: 0;
   background: #f7f7f7;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab .fa {
+  line-height: 14px;
+  font-size: 14px;
+  color: #777;
 }
 #so-custom-css-properties .sections .fields-table .select-tabs .select-tab:last-child {
   border-right-width: 1px;
@@ -301,8 +333,12 @@
 #so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active {
   background: #e9e9e9;
 }
-#so-custom-css-properties .sections .fields-table .select-tabs .select-tab .fa {
-  font-size: 11px;
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab:hover .fa,
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active .fa {
+  color: #333;
+}
+#so-custom-css-properties .sections .fields-table .side-tabs {
+  height: 26px;
 }
 #so-custom-css-properties .sections .fields-table .side-tabs .side-tab {
   width: 20%;

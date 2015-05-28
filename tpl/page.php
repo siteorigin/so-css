@@ -11,7 +11,7 @@
 		<div class="updated settings-error">
 			<p>
 				<?php _e('Site design updated.', 'so-css') ?>
-				<?php printf( __('<a href="%s" target="_blank">Tweet</a> about your changes to find out what your followers think.', 'so-css'),  esc_url( SiteOrigin_CSS::single()->get_tweet_url() ) ) ?>
+				<?php printf( __('<a href="%s" target="_blank">Tweet</a> your new design to find out what your followers think.', 'so-css'),  esc_url( SiteOrigin_CSS::single()->get_tweet_url() ) ) ?>
 			</p>
 		</div>
 	<?php endif; ?>
@@ -25,6 +25,23 @@
 
 	<div id="poststuff">
 		<div id="so-custom-css-info">
+
+			<?php
+			$user = wp_get_current_user();
+			if( !get_user_meta( $user->ID, 'socss_hide_gs' ) ) {
+				?>
+				<div class="postbox" id="so-custom-css-getting-started">
+					<h3 class="hndle">
+						<span><?php _e('Getting Started', 'so-css') ?></span>
+						<a href="<?php echo wp_nonce_url( admin_url('admin-ajax.php?action=socss_hide_getting_started'), 'hide' ) ?>" class="hide"><?php _e('Dismiss', 'so-css') ?></a>
+					</h3>
+					<div class="inside">
+						<a href="https://siteorigin.com/css/getting-started/" target="_blank"><img src="<?php echo plugin_dir_url(__FILE__).'../css/images/video.jpg' ?>" /></a>
+					</div>
+				</div>
+				<?php
+			}
+			?>
 
 			<div class="postbox" id="so-custom-css-revisions">
 				<h3 class="hndle"><span><?php _e('CSS Revisions', 'so-css') ?></span></h3>
