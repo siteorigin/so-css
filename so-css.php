@@ -30,7 +30,7 @@ class SiteOrigin_CSS {
 		// All the admin actions
 		add_action( 'admin_menu', array($this, 'action_admin_menu') );
 		add_action( 'admin_enqueue_scripts', array($this, 'enqueue_admin_scripts') );
-		add_action( 'load-appearance_page_siteorigin_custom_css', array($this, 'add_help_tab') );
+		add_action( 'load-appearance_page_so_custom_css', array($this, 'add_help_tab') );
 		add_action( 'admin_footer', array($this, 'action_admin_footer') );
 
 		// The request to hide the getting started video
@@ -78,7 +78,7 @@ class SiteOrigin_CSS {
 	 * Action to run on the admin action.
 	 */
 	function action_admin_menu(){
-		add_theme_page( __( 'Custom CSS', 'so-css' ), __( 'Custom CSS', 'so-css' ), 'edit_theme_options', 'siteorigin_custom_css', array( $this, 'display_admin_page' ) );
+		add_theme_page( __( 'Custom CSS', 'so-css' ), __( 'Custom CSS', 'so-css' ), 'edit_theme_options', 'so_custom_css', array( $this, 'display_admin_page' ) );
 
 		if ( current_user_can('edit_theme_options') && isset( $_POST['siteorigin_custom_css_save'] ) ) {
 			check_admin_referer( 'custom_css', '_sononce' );
@@ -129,7 +129,7 @@ class SiteOrigin_CSS {
 	}
 
 	function enqueue_admin_scripts( $page ){
-		if( $page != 'appearance_page_siteorigin_custom_css' ) return;
+		if( $page != 'appearance_page_so_custom_css' ) return;
 
 		// Core WordPress stuff that we use
 		wp_enqueue_media();

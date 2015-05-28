@@ -279,11 +279,12 @@
             }
 
             var found = this.findBySelector(cssObjectArray, obj.selector); //found compressed
-            if (found.length !== 0) {
+            if ( found.length !== 0 ) {
                 compressed.push(found[0]);
                 done[obj.selector] = true;
             }
         }
+
         return compressed;
     };
 

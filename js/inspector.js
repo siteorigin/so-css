@@ -51,6 +51,7 @@
 
                 e.preventDefault();
                 e.stopPropagation();
+
                 var $$ = $(this);
                 $$.blur();
                 thisView.setActiveEl( thisView.hoverEl );
@@ -190,6 +191,8 @@
 
                     thisView.trigger( 'click_property', $(this).data('property') );
                 });
+
+            this.trigger('set_active_element', el, selectors);
         }
 
     } );

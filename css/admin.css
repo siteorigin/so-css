@@ -226,16 +226,18 @@
   box-sizing: border-box;
   float: left;
   width: 33.333%;
-  padding: 8px 7px 7px 7px;
+  padding: 10px 7px;
   border: 1px solid #aaa;
   background: #F6F6F6;
   font-weight: bold;
   border-top: 0;
   border-left: 0;
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 1em;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
+  color: #666;
 }
 #so-custom-css-properties .section-tabs li:hover {
   background: #fff;
@@ -243,22 +245,27 @@
 #so-custom-css-properties .section-tabs li .fa {
   float: left;
   display: block;
-  margin: 2px 6px 0 0;
-  color: #555;
-  font-size: 14px;
+  margin: -1px 6px -1px 0;
+  font-size: 15px;
+  color: #666;
 }
 #so-custom-css-properties .section-tabs li:last-child {
   border-right: 0;
 }
 #so-custom-css-properties .section-tabs li.active {
+  color: #444;
   background: #e8e8e8;
+}
+#so-custom-css-properties .section-tabs li.active .fa {
+  color: #333;
 }
 #so-custom-css-properties .sections .section {
   display: none;
-  padding: 5px;
+  padding: 10px;
 }
 #so-custom-css-properties .sections .fields-table {
   width: 100%;
+  padding-top: 5px;
 }
 #so-custom-css-properties .sections .fields-table th,
 #so-custom-css-properties .sections .fields-table td {
@@ -281,11 +288,11 @@
   font-size: 12px;
   padding-right: 10px;
   text-align: left;
-  width: 38%;
+  width: 36%;
   vertical-align: top;
 }
 #so-custom-css-properties .sections .fields-table td {
-  padding: 0 0 8px 0  ;
+  padding: 0 0 12px 0  ;
 }
 #so-custom-css-properties .sections .fields-table input,
 #so-custom-css-properties .sections .fields-table select {
@@ -299,7 +306,7 @@
 #so-custom-css-properties .sections .fields-table .select {
   display: block;
   position: absolute;
-  top: 1px;
+  top: 0px;
   right: 1px;
   padding: 5px;
   cursor: pointer;

@@ -18,7 +18,7 @@
 
 	<?php if(!empty($revision)) : ?>
 		<div class="updated settings-error">
-			<p><?php _e('Viewing a revision. Save CSS to use this revision.', 'so-css') ?></p>
+			<p><?php _e('Viewing a revision. Save CSS to keep using this revision.', 'so-css') ?></p>
 		</div>
 	<?php endif; ?>
 
@@ -65,7 +65,7 @@
 
 		</div>
 
-		<form action="<?php echo esc_url( admin_url('themes.php?page=siteorigin_custom_css') ) ?>" method="POST" id="so-custom-css-form">
+		<form action="<?php echo esc_url( admin_url('themes.php?page=so_custom_css') ) ?>" method="POST" id="so-custom-css-form">
 
 			<div class="custom-css-toolbar">
 				<div class="toolbar-function-buttons">

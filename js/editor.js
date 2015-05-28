@@ -378,23 +378,7 @@
             // A selector is clicked in the inspector
             inspector.on('click_selector', function (selector) {
                 if ( thisView.visualProperties.isVisible() ) {
-                    // Check if this selector already exists
-                    var dropdown = thisView.visualProperties.$('.toolbar select');
-                    dropdown.val( selector );
-                    if( dropdown.val() === selector ) {
-                        // Trigger a change event to load the existing selector
-                        dropdown.change();
-                    }
-                    else {
-                        // The selector doesn't exist, so add it to the CSS, then reload
-                        thisView.addEmptySelector(selector);
-                        thisView.visualProperties.loadCSS( thisView.codeMirror.getValue(), selector );
-                    }
-
-                    dropdown.addClass('highlighted');
-                    setTimeout(function(){
-                        dropdown.removeClass('highlighted');
-                    }, 2000);
+                    thisView.visualProperties.addSelector(selector);
                 }
                 else {
                     thisView.addEmptySelector(selector);
@@ -405,6 +389,12 @@
             inspector.on('click_property', function (property) {
                 if ( ! thisView.visualProperties.isVisible() ) {
                     thisView.codeMirror.replaceSelection(property + ";\n  ");
+                }
+            });
+
+            inspector.on('set_active_element', function(el, selectors){
+                if ( thisView.visualProperties.isVisible() && selectors.length ) {
+                    thisView.visualProperties.addSelector( selectors[0].selector );
                 }
             });
         }
@@ -760,7 +750,7 @@
                 });
             }
 
-            this.updateMainEditor();
+            this.updateMainEditor( false );
         },
 
         /**
@@ -783,8 +773,20 @@
         /**
          * Update the main editor with the value of the parsed CSS
          */
-        updateMainEditor: function () {
-            this.editor.codeMirror.setValue( this.parser.getCSSForEditor(this.parsed).trim() );
+        updateMainEditor: function ( compress ) {
+            var css;
+            if( typeof compress === 'undefined' || compress === true  ) {
+                css = this.parser.compressCSS( this.parsed );
+                // Also remove any empty selectors
+                css = css.filter( function(v){
+                    return v.rules.length > 0;
+                } );
+            }
+            else {
+                css = this.parsed;
+            }
+
+            this.editor.codeMirror.setValue( this.parser.getCSSForEditor( css ).trim() );
         },
 
         /**
@@ -805,6 +807,9 @@
             this.$el.animate( {'left': -338}, 'fast', function(){
                 $(this).hide();
             } );
+
+            // Update the main editor with compressed CSS when we close the properties editor
+            this.updateMainEditor( true );
         },
 
         /**
@@ -867,6 +872,32 @@
             for (var i = 0; i < this.propertyControllers.length; i++) {
                 this.propertyControllers[i].refreshFromRule();
             }
+        },
+
+        /**
+         * Add or select a selector.
+         *
+         * @param selector
+         */
+        addSelector: function(selector) {
+            // Check if this selector already exists
+            var dropdown = this.$('.toolbar select');
+            dropdown.val( selector );
+
+            if( dropdown.val() === selector ) {
+                // Trigger a change event to load the existing selector
+                dropdown.change();
+            }
+            else {
+                // The selector doesn't exist, so add it to the CSS, then reload
+                this.editor.addEmptySelector(selector);
+                this.loadCSS( this.editor.codeMirror.getValue(), selector );
+            }
+
+            dropdown.addClass('highlighted');
+            setTimeout(function(){
+                dropdown.removeClass('highlighted');
+            }, 2000);
         }
 
     });
@@ -1212,7 +1243,11 @@
 
             var updateValue = function(){
                 var value = thisView.parseUnits( $fi.val() );
-                $fi.val( value.value );
+
+                if( value.unit !== '' && value.unit !== $p.data( 'unit' ) ) {
+                    $fi.val( value.value );
+                    setUnit( value.unit );
+                }
 
                 if( value.value === '' ) {
                     $el.val( '' );
@@ -1225,6 +1260,7 @@
             var setUnit = function( unit ){
                 $u.html( unit );
                 $p.data( 'unit', unit );
+                $fi.trigger('keydown');
             };
 
             $da.click( function(){
@@ -1233,8 +1269,6 @@
 
             $dd.find('li').click( function(){
                 $dd.toggle();
-                $dd.find('li').removeClass('active');
-                $(this).addClass('active');
                 setUnit( $(this).data('unit') );
                 updateValue();
                 $el.trigger('change');
@@ -1242,7 +1276,6 @@
 
             $fi.on( 'keyup keydown', function(e){
                 var $$ = $(this);
-                var value = thisView.parseUnits( $$.val() );
 
                 var char = '';
                 if( e.type === 'keydown' ) {
@@ -1261,7 +1294,7 @@
                     .css( {
                         'font-size' : '14px'
                     } )
-                    .html( value.value + char )
+                    .html( $fi.val() + char )
                     .appendTo( 'body' );
                 var width = $pl.width();
                 width = Math.min(width, 63);
@@ -1270,7 +1303,7 @@
                 $u.css('left', width + 12);
             } );
 
-            $fi.on('keyup', function(){
+            $fi.on('keyup', function(e){
                 updateValue();
                 $el.trigger('change');
             } );
