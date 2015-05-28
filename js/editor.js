@@ -779,7 +779,10 @@
                 css = this.parser.compressCSS( this.parsed );
                 // Also remove any empty selectors
                 css = css.filter( function(v){
-                    return v.rules.length > 0;
+                    return (
+                        typeof v.type !== 'undefined' ||
+                        v.rules.length > 0
+                    );
                 } );
             }
             else {
