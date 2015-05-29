@@ -75,6 +75,11 @@
 
         },
 
+        /**
+         * Set the element that's currently being hovered
+         *
+         * @param hoverEl
+         */
         setHoverEl: function( hoverEl ){
             this.hoverEl = hoverEl;
             this.hl.highlight( hoverEl );
@@ -361,16 +366,20 @@
 
                 var ruleSpecificity = SPECIFICITY.calculate( parsedCss[k][i].selector );
                 for (var j = 0; j < ruleSpecificity.length; j++) {
-                    if( el.is( ruleSpecificity[j].selector ) ) {
-                        for( var l = 0; l < parsedCss[k][i].rules.length; l++ ) {
-                            elProperties.push({
-                                'name' : parsedCss[k][i].rules[l].directive,
-                                'value' : parsedCss[k][i].rules[l].value,
-                                'specificity' : parseInt(ruleSpecificity[j].specificity.replace(/,/g, ''))
-                            });
+                    try {
+                        if( el.is( ruleSpecificity[j].selector ) ) {
+                            for( var l = 0; l < parsedCss[k][i].rules.length; l++ ) {
+                                elProperties.push({
+                                    'name' : parsedCss[k][i].rules[l].directive,
+                                    'value' : parsedCss[k][i].rules[l].value,
+                                    'specificity' : parseInt(ruleSpecificity[j].specificity.replace(/,/g, ''))
+                                });
+                            }
                         }
                     }
-
+                    catch( e ) {
+                        // For now, we're just going to ignore rules that trigger jQuery errors
+                    }
                 }
 
             }

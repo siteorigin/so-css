@@ -84,6 +84,10 @@
   background: #f6f6f6;
   cursor: pointer;
 }
+#socss-inspector-interface .socss-selectors-window strong,
+#socss-inspector-interface .socss-properties-window strong {
+  font-weight: bold;
+}
 #socss-inspector-interface .socss-selectors-window {
   position: absolute;
   top: 29px;
@@ -113,6 +117,8 @@ body.socss-active #socss-inspector-interface .socss-toolbar .socss-enable-inspec
   border-right: 1px solid #aaa;
   background-color: #f3f3f3;
   color: #005a67;
+  height: 30px;
+  width: 30px;
 }
 body.socss-inactive {
   padding-bottom: 29px !important;
