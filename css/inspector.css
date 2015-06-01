@@ -35,6 +35,9 @@
   top: 0;
   left: 5px;
   bottom: 0;
+  height: 30px;
+  width: 30px;
+  box-sizing: border-box;
 }
 #socss-inspector-interface .socss-toolbar .socss-enable-inspector:hover {
   cursor: pointer;
@@ -117,8 +120,6 @@ body.socss-active #socss-inspector-interface .socss-toolbar .socss-enable-inspec
   border-right: 1px solid #aaa;
   background-color: #f3f3f3;
   color: #005a67;
-  height: 30px;
-  width: 30px;
 }
 body.socss-inactive {
   padding-bottom: 29px !important;
