@@ -2,7 +2,7 @@
 /*
 Plugin Name: SiteOrigin CSS
 Description: An advanced CSS editor from SiteOrigin.
-Version: 0.9
+Version: 1.0
 Author: SiteOrigin
 Author URI: https://siteorigin.com
 Plugin URI: https://siteorigin.com/css/
