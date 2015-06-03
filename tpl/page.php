@@ -32,7 +32,7 @@
 				?>
 				<div class="postbox" id="so-custom-css-getting-started">
 					<h3 class="hndle">
-						<span><?php _e('Getting Started', 'so-css') ?></span>
+						<span><?php _e('Getting Started Video', 'so-css') ?></span>
 						<a href="<?php echo wp_nonce_url( admin_url('admin-ajax.php?action=socss_hide_getting_started'), 'hide' ) ?>" class="hide"><?php _e('Dismiss', 'so-css') ?></a>
 					</h3>
 					<div class="inside">
