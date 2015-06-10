@@ -29,6 +29,7 @@ class SiteOrigin_CSS {
 
 		// All the admin actions
 		add_action( 'admin_menu', array($this, 'action_admin_menu') );
+		add_action( 'admin_menu', array($this, 'admin_menu_remove'), 1 );
 		add_action( 'admin_enqueue_scripts', array($this, 'enqueue_admin_scripts') );
 		add_action( 'load-appearance_page_so_custom_css', array($this, 'add_help_tab') );
 		add_action( 'admin_footer', array($this, 'action_admin_footer') );
@@ -111,6 +112,13 @@ class SiteOrigin_CSS {
 				update_option( 'siteorigin_custom_css_revisions[' . $theme . ']', $revisions );
 			}
 		}
+	}
+
+	/**
+	 * Remove the old CSS editor admin menu item
+	 */
+	function admin_menu_remove(){
+		remove_action( 'admin_menu', 'siteorigin_custom_css_admin_menu' );
 	}
 
 	/**
