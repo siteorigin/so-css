@@ -1,4 +1,4 @@
-=== SiteOrigin Widgets Bundle ===
+=== SiteOrigin CSS ===
 Tags: css, design, edit, customize
 Requires at least: 3.9
 Tested up to: 4.2
