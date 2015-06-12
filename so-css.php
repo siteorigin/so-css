@@ -33,6 +33,7 @@ class SiteOrigin_CSS {
 		// All the admin actions
 		add_action( 'admin_menu', array($this, 'action_admin_menu') );
 		add_action( 'admin_enqueue_scripts', array($this, 'enqueue_admin_scripts') );
+		add_action( 'admin_enqueue_scripts', array($this, 'dequeue_admin_scripts'), 100 );
 		add_action( 'load-appearance_page_so_custom_css', array($this, 'add_help_tab') );
 		add_action( 'admin_footer', array($this, 'action_admin_footer') );
 
@@ -186,6 +187,18 @@ class SiteOrigin_CSS {
 
 		// This is for the templates required by the CSS editor
 		add_action( 'admin_footer', array($this, 'action_admin_footer') );
+	}
+
+	/**
+	 * @param $page
+	 */
+	function dequeue_admin_scripts( $page ) {
+		if( $page != 'appearance_page_so_custom_css' ) return;
+
+		// Dequeue the core WordPress color picker on the custom CSS page.
+		// This script causes conflicts and other plugins seem to be enqueueing it on the SO CSS admin page.
+		wp_dequeue_script('wp-color-picker');
+		wp_dequeue_style('wp-color-picker');
 	}
 
 	/**
