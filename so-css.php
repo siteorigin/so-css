@@ -10,6 +10,9 @@ License: GPL3
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 */
 
+// Handle the legacy CSS editor that came with SiteOrigin themes
+include plugin_dir_path(__FILE__) . '/inc/legacy.php';
+
 define('SOCSS_VERSION', '1.0');
 define('SOCSS_JS_SUFFIX', '');
 
@@ -25,11 +28,10 @@ class SiteOrigin_CSS {
 		$this->snippet_paths = array();
 
 		// Main header actions
-		add_action( 'wp_head', array($this, 'action_wp_head') );
+		add_action( 'wp_head', array($this, 'action_wp_head'), 20 );
 
 		// All the admin actions
 		add_action( 'admin_menu', array($this, 'action_admin_menu') );
-		add_action( 'admin_menu', array($this, 'admin_menu_remove'), 1 );
 		add_action( 'admin_enqueue_scripts', array($this, 'enqueue_admin_scripts') );
 		add_action( 'load-appearance_page_so_custom_css', array($this, 'add_help_tab') );
 		add_action( 'admin_footer', array($this, 'action_admin_footer') );
@@ -112,13 +114,6 @@ class SiteOrigin_CSS {
 				update_option( 'siteorigin_custom_css_revisions[' . $theme . ']', $revisions );
 			}
 		}
-	}
-
-	/**
-	 * Remove the old CSS editor admin menu item
-	 */
-	function admin_menu_remove(){
-		remove_action( 'admin_menu', 'siteorigin_custom_css_admin_menu' );
 	}
 
 	/**
