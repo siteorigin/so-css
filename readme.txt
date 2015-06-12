@@ -36,6 +36,10 @@ We're committed to keeping SiteOrigin CSS free. You can install it on as many si
 
 There's an ever-growing collection of awesome WordPress themes, and now with SiteOrigin CSS you can edit every single one of them to your heart's content. No matter what theme you're using, SiteOrigin CSS will work perfectly.
 
+= Actively Developed =
+
+We're actively developing SiteOrigin CSS. Keep track of what's happening over on [GitHub](https://github.com/siteorigin/so-css/).
+
 == Installation ==
 
 1. Upload and install SiteOrigin CSS in the same way you'd install any other plugin.
@@ -48,6 +52,11 @@ There's an ever-growing collection of awesome WordPress themes, and now with Sit
 4. Code completion for all your theme's selectors.
 
 == Changelog ==
+
+= 1.0.1 =
+* Fixed conflicts with CSS editor in SiteOrigin themes.
+* Force dequeue scripts that cause problems with main editing interface.
+* Made it easier to follow links with inspector enabled.
 
 = 1.0 =
 * Initial release.
