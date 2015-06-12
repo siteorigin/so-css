@@ -1,5 +1,9 @@
 <div id="socss-inspector-interface" class="socss-element">
 
+	<div class="socss-link">
+		Navigate to: <a href="#"></a>
+	</div>
+
 	<div class="socss-toolbar">
 		<div class="socss-enable-inspector dashicons dashicons-search"></div>
 		<div class="socss-hierarchy"></div>

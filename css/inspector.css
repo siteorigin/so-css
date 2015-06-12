@@ -12,6 +12,21 @@
   font-size: 14px;
   border-top: 1px solid #a3a3a3;
 }
+#socss-inspector-interface .socss-link {
+  box-sizing: border-box;
+  background: #f3f3f3;
+  box-shadow: 0 -2px 2px rgba(0, 0, 0, 0.05);
+  border-top: 1px solid #a3a3a3;
+  position: absolute;
+  top: -29px;
+  height: 28px;
+  padding: 6px 15px;
+  width: 100%;
+  font-size: 13px;
+  text-align: right;
+  line-height: 1em;
+  display: none;
+}
 #socss-inspector-interface .socss-toolbar {
   box-sizing: border-box;
   background: #e6e6e6;
