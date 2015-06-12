@@ -1,7 +1,7 @@
 <div id="socss-inspector-interface" class="socss-element">
 
 	<div class="socss-link">
-		Navigate to: <a href="#"></a>
+		<?php _e('Navigate To: ', 'so-css') ?>: <a href="#"></a>
 	</div>
 
 	<div class="socss-toolbar">

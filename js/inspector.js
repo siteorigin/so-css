@@ -202,7 +202,7 @@
             var linkContainer = this.$('.socss-link');
             if( link.length ) {
                 linkContainer.show().find('a')
-                    .html( link.attr('href').replace(/\?so_css_preview=1/, '') )
+                    .html( link.attr('href').replace(/[\?&]*so_css_preview=1/, '') )
                     .attr('href', link.attr('href') );
             }
             else {
