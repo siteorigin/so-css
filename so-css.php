@@ -383,10 +383,13 @@ class SiteOrigin_CSS {
 			"`(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+`ism"=>"\n"
 		);
 
-		$styles = wp_styles();
-		foreach( $styles->queue as $handle ) {
+		global $wp_styles;
+		if( empty($wp_styles->queue) ) return;
+
+		// Make each of the scripts inline
+		foreach( $wp_styles->queue as $handle ) {
 			if( $handle === 'siteorigin-css-inspector' || $handle === 'dashicons' ) continue;
-			$style = $styles->registered[$handle];
+			$style = $wp_styles->registered[$handle];
 			if( empty($style->src) || substr($style->src, 0, 4) !== 'http' ) continue;
 			$response = wp_remote_get( $style->src );
 			if( is_wp_error($response) || $response['response']['code'] !== 200 || empty($response['body']) ) continue;
