@@ -1,3 +1,48 @@
+#siteorigin-custom-css {
+  margin: 0 0 0 -20px;
+}
+#siteorigin-custom-css h2 {
+  background: #f8f8f8;
+  padding: 20px;
+  border-bottom: 1px solid #d0d0d0;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.035);
+}
+#siteorigin-custom-css h2 .icon {
+  width: 40px;
+  height: auto;
+  margin: -8px 10px -8px 0;
+}
+#siteorigin-custom-css .updated {
+  margin: 0 20px 20px 20px ;
+}
+#siteorigin-custom-css #poststuff {
+  padding: 0 20px;
+}
+#siteorigin-custom-css #poststuff .postbox {
+  border: 1px solid #D0D0D0;
+}
+#siteorigin-custom-css #poststuff .postbox h3.hndle {
+  cursor: default;
+  border-bottom: 1px solid #D0D0D0;
+  background: #efefef;
+  position: relative;
+}
+#siteorigin-custom-css #poststuff .postbox h3.hndle .hide {
+  position: absolute;
+  top: 50%;
+  line-height: 1em;
+  margin-top: -0.5em;
+  right: 12px;
+}
+#siteorigin-custom-css #poststuff #so-custom-css-getting-started .inside {
+  padding: 0 6px 6px 6px;
+}
+#siteorigin-custom-css #poststuff #so-custom-css-getting-started .inside img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 #so-custom-css-form {
   margin-right: 340px;
 }
@@ -5,10 +50,10 @@
   width: 315px;
   float: right;
 }
-#so-custom-css-info p:first-child {
+#so-custom-css-info *:first-child {
   margin-top: 0;
 }
-#so-custom-css-info p:last-child {
+#so-custom-css-info *:last-child {
   margin-bottom: 0;
 }
 #so-custom-css-revisions ol {
@@ -19,22 +64,65 @@
   margin: 0;
   line-height: 2.2em;
 }
-#custom-css-container {
+#so-custom-css-form .custom-css-preview iframe {
+  display: none;
+}
+#so-custom-css-form .custom-css-toolbar {
+  border: 1px solid #D0D0D0;
+  border-bottom: none;
+  background: #efefef;
+  padding: 8px 10px;
+  overflow: auto;
+}
+#so-custom-css-form .custom-css-toolbar .toolbar-function-buttons {
+  float: left;
+}
+#so-custom-css-form .custom-css-toolbar .toolbar-function-buttons .toolbar-functions-dropdown {
+  display: none;
+}
+#so-custom-css-form .custom-css-toolbar .toolbar-function-buttons ul.toolbar-buttons {
+  margin: 0;
+}
+#so-custom-css-form .custom-css-toolbar .toolbar-function-buttons ul.toolbar-buttons li {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons {
+  float: right;
+}
+#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons a.active {
+  border-color: #b4c4cf;
+  background-color: #e9f9ff;
+  color: #596872;
+}
+#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand {
+  float: right;
+  text-decoration: none;
+  color: #666;
+}
+#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .fa-compress {
+  display: none;
+}
+#so-custom-css-form .custom-css-toolbar .fa {
+  font-size: 14px;
+}
+#so-custom-css-form .custom-css-container {
   border: 1px solid #D0D0D0;
   background: #f7f7f7;
   cursor: text;
   overflow: hidden;
 }
-#custom-css-container .CodeMirror {
+#so-custom-css-form .custom-css-container .CodeMirror {
   height: auto;
 }
-#custom-css-container .CodeMirror-scroll {
+#so-custom-css-form .custom-css-container .CodeMirror-scroll {
   min-height: 300px;
 }
-#custom-css-container .CodeMirror-lines {
+#so-custom-css-form .custom-css-container .CodeMirror-lines {
   padding: 8px 0 8px 0;
 }
-#custom-css-container textarea {
+#so-custom-css-form .custom-css-container textarea {
   border: 0;
   padding: 8px 0 8px 4px;
   width: 100%;
@@ -42,48 +130,9 @@
   display: block;
   font-family: monospace;
   font-size: 13px;
-  line-height: 1em;
+  line-height: 1.4em;
   border-left: 1px solid #ddd;
   margin-left: 16px;
-}
-#custom-css-toolbar {
-  border: 1px solid #D0D0D0;
-  border-bottom: none;
-  background: #efefef;
-  padding: 8px 10px;
-  overflow: auto;
-}
-#custom-css-toolbar a.toolbar-button {
-  line-height: 1em;
-  display: inline-block;
-  border: 1px solid #c0c0c0;
-  background: #f6f6f6;
-  text-decoration: none;
-  padding: 8px 14px;
-  font-weight: bold;
-  color: #555;
-  font-size: 0.95em;
-}
-#custom-css-toolbar a.toolbar-button:hover {
-  border: 1px solid #b0b0b0;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-#custom-css-toolbar #css-editor-expand {
-  float: right;
-  text-decoration: none;
-  color: #666;
-  padding: 5px;
-  line-height: 1em;
-}
-#custom-css-toolbar #css-editor-expand .dashicons {
-  font-size: 20px;
-}
-#custom-css-toolbar #css-editor-expand .dashicons-no-alt {
-  display: none;
-}
-#so-custom-css-form #custom-css-preview iframe {
-  display: none;
 }
 #so-custom-css-form .decoration {
   display: none;
@@ -94,12 +143,12 @@
   top: 0;
   left: 0;
   bottom: 0;
-  width: 320px;
+  width: 340px;
 }
-#so-custom-css-form.expanded #custom-css-toolbar #css-editor-expand .dashicons-editor-expand {
+#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .fa-expand {
   display: none;
 }
-#so-custom-css-form.expanded #custom-css-toolbar #css-editor-expand .dashicons-no-alt {
+#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .fa-compress {
   display: inline-block;
 }
 #so-custom-css-form.expanded .decoration {
@@ -107,7 +156,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 319px;
+  left: 339px;
   width: 2px;
   background: rgba(0, 0, 0, 0.1);
 }
@@ -117,21 +166,224 @@
 #so-custom-css-form.expanded .submit {
   display: none;
 }
-#so-custom-css-form.expanded #custom-css-preview {
+#so-custom-css-form.expanded .custom-css-preview {
   position: fixed;
   display: block;
   top: 0;
   right: 0;
   bottom: 0;
-  left: 320px;
+  left: 340px;
   background: #ffffff;
 }
-#so-custom-css-form.expanded #custom-css-preview iframe {
+#so-custom-css-form.expanded .custom-css-preview iframe {
   display: block;
   width: 100%;
   height: 100%;
+  overflow-x: hidden;
 }
-#snippet-browser #snippet-browser-overlay {
+#so-custom-css-properties {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: -338px;
+  bottom: 0;
+  width: 338px;
+  background: #ffffff;
+  border: 1px solid #D0D0D0;
+  overflow-y: auto;
+  z-index: 100000;
+}
+#so-custom-css-properties .toolbar {
+  display: block;
+  padding: 7px 10px;
+  border-bottom: 1px solid #aaa;
+  background: #F6F6F6;
+  text-align: left;
+}
+#so-custom-css-properties .toolbar select {
+  line-height: 1;
+  font-size: 13px;
+  max-width: 265px;
+  -webkit-transition: all 0.5s ease;
+  -moz-transition: all 0.5s ease;
+  -o-transition: all 0.5s ease;
+  transition: all 0.5s ease;
+}
+#so-custom-css-properties .toolbar select.highlighted {
+  background: #daeaf7;
+}
+#so-custom-css-properties .toolbar .close {
+  float: right;
+  margin: 2px 4px 0 0;
+}
+#so-custom-css-properties .section-tabs {
+  list-style: none;
+  height: auto;
+  margin: 0;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+#so-custom-css-properties .section-tabs li {
+  box-sizing: border-box;
+  float: left;
+  width: 33.333%;
+  padding: 10px 7px;
+  border: 1px solid #aaa;
+  background: #F6F6F6;
+  font-weight: bold;
+  border-top: 0;
+  border-left: 0;
+  font-size: 13px;
+  line-height: 1em;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  color: #666;
+}
+#so-custom-css-properties .section-tabs li:hover {
+  background: #fff;
+}
+#so-custom-css-properties .section-tabs li .fa {
+  float: left;
+  display: block;
+  margin: -1px 6px -1px 0;
+  font-size: 15px;
+  color: #666;
+}
+#so-custom-css-properties .section-tabs li:last-child {
+  border-right: 0;
+}
+#so-custom-css-properties .section-tabs li.active {
+  color: #444;
+  background: #e8e8e8;
+}
+#so-custom-css-properties .section-tabs li.active .fa {
+  color: #333;
+}
+#so-custom-css-properties .sections .section {
+  display: none;
+  padding: 10px;
+}
+#so-custom-css-properties .sections .fields-table {
+  width: 100%;
+  padding-top: 5px;
+}
+#so-custom-css-properties .sections .fields-table th,
+#so-custom-css-properties .sections .fields-table td {
+  position: relative;
+  zoom: 1;
+}
+#so-custom-css-properties .sections .fields-table th:before,
+#so-custom-css-properties .sections .fields-table td:before {
+  content: '';
+  display: block;
+}
+#so-custom-css-properties .sections .fields-table th:after,
+#so-custom-css-properties .sections .fields-table td:after {
+  content: '';
+  display: table;
+  clear: both;
+}
+#so-custom-css-properties .sections .fields-table th[scope="row"] {
+  font-weight: bold;
+  font-size: 12px;
+  padding-right: 10px;
+  text-align: left;
+  width: 36%;
+  vertical-align: top;
+}
+#so-custom-css-properties .sections .fields-table td {
+  padding: 0 0 12px 0  ;
+}
+#so-custom-css-properties .sections .fields-table input,
+#so-custom-css-properties .sections .fields-table select {
+  display: block;
+  margin: 0 25px 0 0;
+  border: 1px solid #c0c0c0;
+  width: 175px;
+  box-sizing: border-box;
+  border-radius: 0;
+}
+#so-custom-css-properties .sections .fields-table .select {
+  display: block;
+  position: absolute;
+  top: 0px;
+  right: 1px;
+  padding: 5px;
+  cursor: pointer;
+  font-size: 15px;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs {
+  margin: 0;
+  height: 40px;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab {
+  cursor: pointer;
+  float: left;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  text-align: center;
+  border: 1px solid #c0c0c0;
+  padding: 4px 2px;
+  border-right-width: 0;
+  background: #f7f7f7;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab .fa {
+  line-height: 14px;
+  font-size: 14px;
+  color: #777;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab:last-child {
+  border-right-width: 1px;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab:hover,
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active {
+  background: #e9e9e9;
+}
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab:hover .fa,
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active .fa {
+  color: #333;
+}
+#so-custom-css-properties .sections .fields-table .side-tabs {
+  height: 26px;
+}
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab {
+  width: 20%;
+  text-align: center;
+  padding: 5px;
+  line-height: 0;
+}
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab div {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #aaa;
+}
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab .spacing-all {
+  border-color: #12609b;
+}
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab .spacing-top {
+  border-top-color: #12609b;
+}
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab .spacing-left {
+  border-left-color: #12609b;
+}
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab .spacing-bottom {
+  border-bottom-color: #12609b;
+}
+#so-custom-css-properties .sections .fields-table .side-tabs .side-tab .spacing-right {
+  border-right-color: #12609b;
+}
+#so-custom-css-properties .sections .fields-table .sides .side > div {
+  margin-bottom: 5px;
+}
+#so-custom-css-properties .sections .fields-table .sides .side > div:last-child {
+  margin-bottom: 0;
+}
+.css-editor-snippet-browser {
+  display: none;
+}
+.css-editor-snippet-browser .snippet-browser-overlay {
   position: fixed;
   z-index: 100000;
   top: 0;
@@ -140,13 +392,13 @@
   bottom: 0;
   background: rgba(0, 0, 0, 0.8);
 }
-#snippet-browser #snippet-browser-dialog > div {
+.css-editor-snippet-browser .snippet-browser-dialog > div {
   position: fixed;
   z-index: 100001;
   background: #fff;
   box-sizing: border-box;
 }
-#snippet-browser #snippet-browser-dialog .toolbar {
+.css-editor-snippet-browser .snippet-browser-dialog .toolbar {
   top: 40px;
   left: 40px;
   right: 40px;
@@ -155,14 +407,14 @@
   border-bottom: 1px solid #dddddd;
   overflow: hidden;
 }
-#snippet-browser #snippet-browser-dialog .toolbar h1 {
+.css-editor-snippet-browser .snippet-browser-dialog .toolbar h1 {
   padding: 0 16px;
   font-size: 22px;
   line-height: 50px;
   margin: 0;
   color: #444;
 }
-#snippet-browser #snippet-browser-dialog .toolbar .close {
+.css-editor-snippet-browser .snippet-browser-dialog .toolbar .close {
   cursor: pointer;
   color: #777;
   background-color: transparent;
@@ -178,10 +430,10 @@
   text-decoration: none;
   box-sizing: border-box;
 }
-#snippet-browser #snippet-browser-dialog .toolbar .close:hover {
+.css-editor-snippet-browser .snippet-browser-dialog .toolbar .close:hover {
   background: #dddddd;
 }
-#snippet-browser #snippet-browser-dialog .toolbar .close .icon:before {
+.css-editor-snippet-browser .snippet-browser-dialog .toolbar .close .icon:before {
   content: '\f158';
   font: normal 20px/1 'dashicons';
   vertical-align: middle;
@@ -189,7 +441,7 @@
   -moz-osx-font-smoothing: grayscale;
   color: #666;
 }
-#snippet-browser #snippet-browser-dialog .sidebar {
+.css-editor-snippet-browser .snippet-browser-dialog .sidebar {
   top: 90px;
   left: 40px;
   bottom: 90px;
@@ -199,25 +451,24 @@
   padding: 16px;
   overflow: auto;
 }
-#snippet-browser #snippet-browser-dialog .sidebar #snippet-search {
+.css-editor-snippet-browser .snippet-browser-dialog .sidebar .snippet-search {
   width: 100%;
   margin-bottom: 20px;
   padding: 8px;
 }
-#snippet-browser #snippet-browser-dialog .sidebar .snippets {
+.css-editor-snippet-browser .snippet-browser-dialog .sidebar .snippets {
   margin: 0;
 }
-#snippet-browser #snippet-browser-dialog .sidebar .snippets .snippet {
+.css-editor-snippet-browser .snippet-browser-dialog .sidebar .snippets .snippet {
   cursor: pointer;
-  margin-bottom: 0.5em;
   font-size: 1.1em;
   line-height: 1.35em;
   margin-bottom: 20px;
 }
-#snippet-browser #snippet-browser-dialog .sidebar .snippets .snippet.active {
+.css-editor-snippet-browser .snippet-browser-dialog .sidebar .snippets .snippet.active {
   font-weight: bold;
 }
-#snippet-browser #snippet-browser-dialog .main {
+.css-editor-snippet-browser .snippet-browser-dialog .main {
   top: 90px;
   left: 340px;
   right: 40px;
@@ -225,24 +476,24 @@
   background: #fff;
   overflow: auto;
 }
-#snippet-browser #snippet-browser-dialog .main .snippet-view {
+.css-editor-snippet-browser .snippet-browser-dialog .main .snippet-view {
   padding: 20px;
 }
-#snippet-browser #snippet-browser-dialog .main .snippet-view .snippet-title {
+.css-editor-snippet-browser .snippet-browser-dialog .main .snippet-view .snippet-title {
   margin: 0 0 0.75em 0;
   padding: 0;
 }
-#snippet-browser #snippet-browser-dialog .main .snippet-view .snippet-description {
+.css-editor-snippet-browser .snippet-browser-dialog .main .snippet-view .snippet-description {
   font-size: 1.1em;
   color: #666;
   margin-bottom: 2em;
 }
-#snippet-browser #snippet-browser-dialog .main .snippet-view .snippet-code {
+.css-editor-snippet-browser .snippet-browser-dialog .main .snippet-view .snippet-code {
   padding: 20px;
   border: 1px solid #d0d0d0;
   background: #f8f8f8;
 }
-#snippet-browser #snippet-browser-dialog .buttons {
+.css-editor-snippet-browser .snippet-browser-dialog .buttons {
   bottom: 40px;
   left: 40px;
   right: 40px;
@@ -253,6 +504,105 @@
   padding: 10px 20px;
   overflow: hidden;
 }
-.CodeMirror-lint-tooltip {
+.socss-field-measurement {
+  position: relative;
+}
+.socss-field-measurement input.socss-field-input {
+  min-height: 1.5em;
+  padding-right: 50px;
+  width: 120px !important;
+  box-sizing: border-box;
+}
+.socss-field-measurement .dashicons-arrow-down {
+  position: absolute;
+  top: 4px;
+  left: 97px;
+  cursor: pointer;
+}
+.socss-field-measurement .dropdown {
+  display: none;
+  background: #F5F5F5;
+  border: 1px solid #c0c0c0;
+  position: absolute;
+  top: 27px;
+  left: 71px;
+  width: 50px;
+  z-index: 2;
+  margin: 0;
+  box-sizing: border-box;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+}
+.socss-field-measurement .dropdown li {
+  padding: 5px 0;
+  text-align: center;
+  line-height: 1.1em;
+  font-size: 11px;
+  margin: 0;
+}
+.socss-field-measurement .dropdown li:hover,
+.socss-field-measurement .dropdown li.active {
+  background: #e8e8e8;
+  cursor: pointer;
+}
+.socss-field-measurement .units {
+  position: absolute;
+  top: 5px;
+  left: 12px;
+  color: #bbb;
+  pointer-events: none;
+}
+.socss-diw {
+  position: absolute;
+  top: 0px;
+  left: 124px;
+}
+.socss-diw .inc-button,
+.socss-diw .dec-button {
+  cursor: pointer;
+  box-sizing: border-box;
+  float: left;
+  padding: 8px;
+  user-select: none;
+  text-align: center;
+  margin: 0;
+  width: 27px;
+  height: 27px;
+  font-size: 10px;
+}
+.socss-diw .inc-button {
+  border-left: 0;
+}
+.socss-button {
+  cursor: pointer;
+  line-height: 1em;
+  display: inline-block;
+  border: 1px solid #c0c0c0;
+  background: #f7f7f7;
+  text-decoration: none;
+  padding: 6px;
+  font-weight: bold;
+  color: #555;
+  font-size: 0.95em;
+  margin-left: 5px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+.socss-button:hover {
+  border-color: #b0b0b0;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.socss-button:hover .fa {
+  color: #333;
+}
+.socss-button .fa {
+  color: #555;
+}
+.CodeMirror-lint-tooltip,
+.CodeMirror-hints {
+  /* This is above the editor in full-screen mode */
   z-index: 100002;
 }

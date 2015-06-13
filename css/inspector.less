@@ -1,0 +1,252 @@
+#socss-inspector-interface {
+	display: none;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 220px;
+	background: #ffffff;
+	box-shadow: 0 -2px 2px rgba(0,0,0,0.05);
+	z-index: 99999 + 1;
+
+	font-family: "Arial", sans-serif;
+	font-size: 14px;
+	border-top: 1px solid #a3a3a3;
+
+	.socss-link {
+		box-sizing: border-box;
+		background: #f3f3f3;
+		box-shadow: 0 -2px 2px rgba(0,0,0,0.05);
+		border-top: 1px solid #a3a3a3;
+		position: absolute;
+		top: -29px;
+		height: 28px;
+		padding: 6px 15px;
+		width: 100%;
+		font-size: 13px;
+		text-align: right;
+		line-height: 1em;
+		display: none;
+	}
+
+	.socss-toolbar {
+		box-sizing: border-box;
+		background: #e6e6e6;
+		padding: 0 4px;
+		user-select: none;
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 30px;
+		overflow: hidden;
+
+		.socss-enable-inspector {
+			font-size: 20px;
+			display: inline-block;
+			padding: 5px;
+			color: #777;
+			border-left: 1px solid transparent;
+			border-right: 1px solid transparent;
+			position: absolute;
+			top: 0;
+			left: 5px;
+			bottom: 0;
+
+			height: 30px;
+			width: 30px;
+
+			box-sizing: border-box;
+
+			&:hover {
+				cursor: pointer;
+				background-color: #f3f3f3;
+				color: #596872;
+			}
+		}
+
+		.socss-hierarchy {
+			position: absolute;
+			top: 0;
+			right: 20px;
+			left: 40px;
+			bottom: 0;
+			display: block;
+			padding-left: 10px;
+			overflow: hidden;
+			white-space: nowrap;
+			background: #e6e6e6;
+
+			.socss-selector {
+				font-size: 12px;
+				line-height: 1em;
+				padding: 9px 20px 9px 9px;
+				display: inline-block;
+				background: url(./images/separator.png) top right no-repeat;
+				background-size: contain;
+				cursor: pointer;
+
+				&:last-child {
+					background: none;
+					padding-right: 9px;
+				}
+			}
+
+		}
+	}
+
+	.socss-selectors-window,
+	.socss-properties-window {
+		overflow-y: scroll;
+		font-family: "Courier New", "Lucida Console", Courier, monospace;
+		font-size: 13px;
+		border-top: 1px solid #a3a3a3;
+
+		> div {
+			line-height: 1.2em;
+			padding: 4px 10px;
+			white-space: nowrap;
+
+			&:hover {
+				background: #f6f6f6;
+				cursor: pointer;
+			}
+		}
+
+		strong{
+			font-weight: bold;
+		}
+	}
+
+	.socss-selectors-window {
+		position: absolute;
+		top: 29px;
+		left: 0;
+		right: 50%;
+		bottom: 0;
+
+		background: #fff;
+		border-right: 1px solid #aaa;
+	}
+
+	.socss-properties-window {
+		position: absolute;
+		top: 29px;
+		right: 0;
+		left: 50%;
+		bottom: 0;
+
+		background: #fff;
+	}
+}
+
+body.socss-active {
+	padding-bottom: 200px !important;
+
+	#socss-inspector-interface {
+		display: block;
+		height: 200px;
+
+		.socss-toolbar .socss-enable-inspector {
+			border-left: 1px solid #aaa;
+			border-right: 1px solid #aaa;
+			background-color: #f3f3f3;
+			color: #005a67;
+		}
+	}
+}
+
+body.socss-inactive {
+	padding-bottom: 29px !important;
+
+	#socss-inspector-interface {
+		display: block;
+		height: 29px;
+
+		.socss-selectors-window,
+		.socss-attributes-window {
+			display: none;
+		}
+	}
+}
+
+.socss-inspector-hover {
+	pointer-events: none;
+	position: absolute;
+
+	/* Same index as the admin bar */
+	z-index: 99999;
+
+	border: 1px dashed rgba(0,117,203,1);
+	background: rgba(0,117,203,0.15);
+
+	box-sizing: border-box;
+
+	.socss-guide {
+		display: none;
+	}
+
+	.socss-guide-margin,
+	.socss-guide-padding {
+		position: absolute;
+
+		&.socss-guide-top,
+		&.socss-guide-bottom {
+			right: 0;
+			left: 0;
+		}
+
+		&.socss-guide-left,
+		&.socss-guide-right {
+			top: 0;
+			bottom: 0;
+		}
+	}
+
+	.socss-guide-margin {
+
+		background: rgba(20,126,74,0.25);
+
+		&.socss-guide-top {
+			bottom: 100%;
+		}
+
+		&.socss-guide-bottom {
+			top: 100%;
+		}
+
+		&.socss-guide-left {
+			right: 100%;
+		}
+
+		&.socss-guide-right {
+			left: 100%;
+		}
+	}
+
+	.socss-guide-padding {
+
+		background: rgba(0,117,203,0.25);
+
+		&.socss-guide-top {
+			top: 0;
+		}
+
+		&.socss-guide-bottom {
+			bottom: 0;
+		}
+
+		&.socss-guide-left {
+			left: 0;
+		}
+
+		&.socss-guide-right {
+			right: 0;
+		}
+	}
+}
+
+body, html {
+	max-width: 100% !important;
+	overflow-x: hidden !important;
+}
