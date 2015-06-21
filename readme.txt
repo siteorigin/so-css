@@ -51,6 +51,14 @@ We're actively developing SiteOrigin CSS. Keep track of what's happening over on
 3. A full CSS editor that works in real-time with a preview of your site.
 4. Code completion for all your theme's selectors.
 
+== Documentation ==
+
+[Documentation](https://siteorigin.com/css/getting-started/) is available on SiteOrigin.
+
+== Support ==
+
+We offer free support on the [SiteOrigin support forums](https://siteorigin.com/thread/).
+
 == Changelog ==
 
 = 1.0.1 =
