@@ -61,6 +61,10 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.0.2 =
+* Dequeue functionality the conflicted with WordPress color picker, if it's enqueued.
+* Removed wp_styles for compatibility with older versions of WordPress
+
 = 1.0.1 =
 * Fixed conflicts with CSS editor in SiteOrigin themes.
 * Force dequeue scripts that cause problems with main editing interface.
