@@ -2,7 +2,7 @@
 /*
 Plugin Name: SiteOrigin CSS
 Description: An advanced CSS editor from SiteOrigin.
-Version: 1.0.1
+Version: 1.0.2
 Author: SiteOrigin
 Author URI: https://siteorigin.com
 Plugin URI: https://siteorigin.com/css/
@@ -13,7 +13,7 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 // Handle the legacy CSS editor that came with SiteOrigin themes
 include plugin_dir_path(__FILE__) . '/inc/legacy.php';
 
-define('SOCSS_VERSION', '1.0.1');
+define('SOCSS_VERSION', '1.0.2');
 define('SOCSS_JS_SUFFIX', '');
 
 /**
