@@ -2,7 +2,7 @@
 /*
 Plugin Name: SiteOrigin CSS
 Description: An advanced CSS editor from SiteOrigin.
-Version: 1.0.1
+Version: 1.0.2
 Author: SiteOrigin
 Author URI: https://siteorigin.com
 Plugin URI: https://siteorigin.com/css/
@@ -13,7 +13,7 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 // Handle the legacy CSS editor that came with SiteOrigin themes
 include plugin_dir_path(__FILE__) . '/inc/legacy.php';
 
-define('SOCSS_VERSION', '1.0.1');
+define('SOCSS_VERSION', '1.0.2');
 define('SOCSS_JS_SUFFIX', '');
 
 /**
@@ -32,8 +32,8 @@ class SiteOrigin_CSS {
 
 		// All the admin actions
 		add_action( 'admin_menu', array($this, 'action_admin_menu') );
-		add_action( 'admin_enqueue_scripts', array($this, 'enqueue_admin_scripts') );
-		add_action( 'admin_enqueue_scripts', array($this, 'dequeue_admin_scripts'), 100 );
+		add_action( 'admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'), 20 );
+		add_action( 'admin_enqueue_scripts', array($this, 'dequeue_admin_scripts'), 19 );
 		add_action( 'load-appearance_page_so_custom_css', array($this, 'add_help_tab') );
 		add_action( 'admin_footer', array($this, 'action_admin_footer') );
 
@@ -142,10 +142,12 @@ class SiteOrigin_CSS {
 		wp_enqueue_script( 'codemirror', plugin_dir_url(__FILE__) . 'lib/codemirror/lib/codemirror' . SOCSS_JS_SUFFIX . '.js', array( 'underscore', 'backbone' ), '5.2.0' );
 		wp_enqueue_script( 'codemirror-mode-css', plugin_dir_url(__FILE__) . 'lib/codemirror/mode/css/css' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
 
-		// Add in all the linting libs
-		wp_enqueue_script( 'codemirror-lint', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/lint/lint' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror' ), '5.2.0' );
-		wp_enqueue_script( 'codemirror-lint-css', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/lint/css-lint' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror', 'codemirror-lint-css-lib' ), '5.2.0' );
-		wp_enqueue_script( 'codemirror-lint-css-lib', plugin_dir_url(__FILE__) . 'js/csslint' . SOCSS_JS_SUFFIX . '.js', array(), '0.10.0' );
+		if( !wp_script_is( 'wp-color-picker' ) ) {
+			// Add in all the linting libs
+			wp_enqueue_script( 'codemirror-lint', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/lint/lint' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror' ), '5.2.0' );
+			wp_enqueue_script( 'codemirror-lint-css', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/lint/css-lint' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror', 'codemirror-lint-css-lib' ), '5.2.0' );
+			wp_enqueue_script( 'codemirror-lint-css-lib', plugin_dir_url(__FILE__) . 'js/csslint' . SOCSS_JS_SUFFIX . '.js', array(), '0.10.0' );
+		}
 
 		// The CodeMirror autocomplete library
 		wp_enqueue_script( 'codemirror-show-hint', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/hint/show-hint' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror' ), '5.2.0' );
@@ -383,10 +385,13 @@ class SiteOrigin_CSS {
 			"`(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+`ism"=>"\n"
 		);
 
-		$styles = wp_styles();
-		foreach( $styles->queue as $handle ) {
+		global $wp_styles;
+		if( empty($wp_styles->queue) ) return;
+
+		// Make each of the scripts inline
+		foreach( $wp_styles->queue as $handle ) {
 			if( $handle === 'siteorigin-css-inspector' || $handle === 'dashicons' ) continue;
-			$style = $styles->registered[$handle];
+			$style = $wp_styles->registered[$handle];
 			if( empty($style->src) || substr($style->src, 0, 4) !== 'http' ) continue;
 			$response = wp_remote_get( $style->src );
 			if( is_wp_error($response) || $response['response']['code'] !== 200 || empty($response['body']) ) continue;

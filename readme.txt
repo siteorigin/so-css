@@ -30,7 +30,7 @@ SiteOrigin CSS has a powerful CSS editor, the likes of which you'd usually only 
 
 = It's Free =
 
-We're committed to keeping SiteOrigin CSS free. You can install it on as many sites as you like without ever worrying about licensing. All future updates and upgrades will be free, and we even offer free support over on our friendly support forums.
+We're committed to keeping SiteOrigin CSS, free. You can install it on as many sites as you like without ever worrying about licensing. All future updates and upgrades will be free, and we even offer free support over on our friendly support forums.
 
 = Works With Any Theme =
 
@@ -51,7 +51,19 @@ We're actively developing SiteOrigin CSS. Keep track of what's happening over on
 3. A full CSS editor that works in real-time with a preview of your site.
 4. Code completion for all your theme's selectors.
 
+== Documentation ==
+
+[Documentation](https://siteorigin.com/css/getting-started/) is available on SiteOrigin.
+
+== Support ==
+
+We offer free support on the [SiteOrigin support forums](https://siteorigin.com/thread/).
+
 == Changelog ==
+
+= 1.0.2 =
+* Dequeue functionality that conflicted with WordPress color picker, if it's enqueued.
+* Removed wp_styles for compatibility with older versions of WordPress
 
 = 1.0.1 =
 * Fixed conflicts with CSS editor in SiteOrigin themes.
