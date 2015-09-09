@@ -52,7 +52,7 @@
 							foreach($custom_css_revisions as $time => $css) {
 								?>
 								<li>
-									<a href="<?php echo add_query_arg(array('theme' => $theme, 'time' => $time)) ?>" class="load-css-revision"><?php echo date('j F Y @ H:i:s', $time) ?></a>
+									<a href="<?php echo add_query_arg(array('theme' => $theme, 'time' => $time)) ?>" class="load-css-revision"><?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?></a>
 									(<?php printf(__('%d chars', 'so-css'), strlen($css)) ?>)
 								</li>
 								<?php
