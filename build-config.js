@@ -18,6 +18,7 @@ module.exports = {
     js: {
         src: [
             'js/**/*.js',
+            'lib/**/*.js',
             '!{build,build/**}',                // Ignore build/ and contents
             '!{tests,tests/**}',                // Ignore tests/ and contents
             '!{tmp,tmp/**}'                     // Ignore dist/ and contents
