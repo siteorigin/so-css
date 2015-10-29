@@ -1,7 +1,7 @@
 === SiteOrigin CSS ===
 Tags: css, design, edit, customize
 Requires at least: 3.9
-Tested up to: 4.2.2
+Tested up to: 4.3.1
 Stable tag: trunk
 License: GPLv3 or later
 Contributors: gpriday
@@ -60,6 +60,11 @@ We're actively developing SiteOrigin CSS. Keep track of what's happening over on
 We offer free support on the [SiteOrigin support forums](https://siteorigin.com/thread/).
 
 == Changelog ==
+
+= 1.0.3 - 29 October 2015=
+* Changed video image
+* Adjust revision times by GMT offset.
+* Don't overwrite media queries sub styles, rather just append them.
 
 = 1.0.2 =
 * Dequeue functionality that conflicted with WordPress color picker, if it's enqueued.
