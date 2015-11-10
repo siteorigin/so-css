@@ -61,6 +61,9 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.0.4 - 10 November 2015=
+* Fixed CSS parsing when going into visual mode.
+
 = 1.0.3 - 29 October 2015=
 * Changed video image
 * Adjust revision times by GMT offset.
