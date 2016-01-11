@@ -113,6 +113,7 @@
             // Setup the Codemirror instance
             this.codeMirror = CodeMirror.fromTextArea(this.$('textarea.css-editor').get(0), {
                 tabSize: 2,
+                lineNumbers: true,
                 mode: 'css',
                 theme: 'neat',
                 gutters: [
