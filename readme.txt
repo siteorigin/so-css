@@ -61,6 +61,9 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.0.5 - 21 January 2016=
+* Updated to latest version of Code Mirror.
+
 = 1.0.4 - 10 November 2015=
 * Fixed CSS parsing when going into visual mode.
 
