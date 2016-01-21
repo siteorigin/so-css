@@ -1,7 +1,7 @@
 === SiteOrigin CSS ===
 Tags: css, design, edit, customize
 Requires at least: 3.9
-Tested up to: 4.3.1
+Tested up to: 4.4.1
 Stable tag: trunk
 License: GPLv2 or later
 Contributors: gpriday
@@ -60,6 +60,9 @@ We're actively developing SiteOrigin CSS. Keep track of what's happening over on
 We offer free support on the [SiteOrigin support forums](https://siteorigin.com/thread/).
 
 == Changelog ==
+
+= 1.0.5 - 21 January 2016=
+* Updated to latest version of Code Mirror.
 
 = 1.0.4 - 10 November 2015=
 * Fixed CSS parsing when going into visual mode.
