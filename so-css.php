@@ -13,7 +13,7 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 // Handle the legacy CSS editor that came with SiteOrigin themes
 include plugin_dir_path(__FILE__) . '/inc/legacy.php';
 
-define('SOCSS_VERSION', '1.0.2');
+define('SOCSS_VERSION', 'dev');
 define('SOCSS_JS_SUFFIX', '');
 
 /**
@@ -41,6 +41,8 @@ class SiteOrigin_CSS {
 		add_action( 'wp_ajax_socss_hide_getting_started', array( $this, 'admin_action_hide_getting_started' ) );
 
 		if( isset($_GET['so_css_preview']) && !is_admin() ) {
+
+			add_action('plugins_loaded', array($this, 'disable_ngg_resource_manager'));
 			add_filter( 'show_admin_bar', '__return_false' );
 			add_filter( 'wp_enqueue_scripts', array($this, 'enqueue_inspector_scripts') );
 			add_filter( 'wp_footer', array($this, 'inspector_templates') );
@@ -48,6 +50,13 @@ class SiteOrigin_CSS {
 			// We'll be grabbing all the enqueued scripts and outputting them
 			add_action( 'wp_enqueue_scripts', array($this, 'inline_inspector_scripts'), 100 );
 		}
+	}
+
+	function disable_ngg_resource_manager() {
+		if( !current_user_can('edit_theme_options') ) return;
+
+		//The NextGen Gallery plugin does some weird interfering with the output buffer.
+		define('NGG_DISABLE_RESOURCE_MANAGER', true);
 	}
 
 	/**
@@ -369,6 +378,8 @@ class SiteOrigin_CSS {
 		if( !current_user_can('edit_theme_options') ) return;
 
 		include plugin_dir_path( __FILE__ ) . 'tpl/inspector-templates.php';
+
+		define('NGG_DISABLE_RESOURCE_MANAGER', false);
 	}
 
 	/**
