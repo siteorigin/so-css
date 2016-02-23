@@ -378,8 +378,6 @@ class SiteOrigin_CSS {
 		if( !current_user_can('edit_theme_options') ) return;
 
 		include plugin_dir_path( __FILE__ ) . 'tpl/inspector-templates.php';
-
-		define('NGG_DISABLE_RESOURCE_MANAGER', false);
 	}
 
 	/**
