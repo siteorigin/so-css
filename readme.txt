@@ -62,6 +62,11 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.0.6 - 24 February 2016=
+* Disabled autocompletion on single item (automatic autocompletion).
+* Fixed conflict with NextGen Gallery.
+* Only display relevant linting messages.
+
 = 1.0.5 - 21 January 2016=
 * Updated to latest version of Code Mirror.
 
