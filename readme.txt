@@ -3,6 +3,7 @@ Tags: css, design, edit, customize
 Requires at least: 3.9
 Tested up to: 4.4.1
 Stable tag: trunk
+Build time: unbuilt
 License: GPLv2 or later
 Contributors: gpriday
 
@@ -60,6 +61,11 @@ We're actively developing SiteOrigin CSS. Keep track of what's happening over on
 We offer free support on the [SiteOrigin support forums](https://siteorigin.com/thread/).
 
 == Changelog ==
+
+= 1.0.6 - 24 February 2016=
+* Disabled autocompletion on single item (automatic autocompletion).
+* Fixed conflict with NextGen Gallery.
+* Only display relevant linting messages.
 
 = 1.0.5 - 21 January 2016=
 * Updated to latest version of Code Mirror.

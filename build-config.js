@@ -24,6 +24,9 @@ module.exports = {
             '!{tmp,tmp/**}'                     // Ignore dist/ and contents
         ]
     },
+    bust: {
+        src: []
+    },
     copy: {
         src: [
             '**/!(*.js|*.less)',                // Everything except .js and .less files
