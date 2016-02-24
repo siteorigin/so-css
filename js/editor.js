@@ -270,7 +270,9 @@
                     ( e.keyCode === 51 && e.shiftKey ) ||
                     ( e.keyCode === 189 && e.shiftKey )
                 ) {
-                    cm.showHint(e);
+                    cm.showHint( {
+                        completeSingle: false
+                    } );
                 }
             });
         },
