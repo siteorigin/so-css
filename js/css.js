@@ -17,7 +17,7 @@
         this.cssRegex = new RegExp('([\\s\\S]*?){([\\s\\S]*?)}', 'gi');
         this.cssMediaQueryRegex = '((@media [\\s\\S]*?){([\\s\\S]*?}\\s*?)})';
         this.cssKeyframeRegex = '((@.*?keyframes [\\s\\S]*?){([\\s\\S]*?}\\s*?)})';
-        this.combinedCSSRegex = '((\\s*?@media[\\s\\S]*?){([\\s\\S]*?)}\\s*?})|(([\\s\\S]*?){([\\s\\S]*?)})'; //to match css & media queries together
+        this.combinedCSSRegex = '((\\s*?(?:\\/\\*[\\s\\S]*?\\*\\/)?\\s*?@media[\\s\\S]*?){([\\s\\S]*?)}\\s*?})|(([\\s\\S]*?){([\\s\\S]*?)})'; //to match css & media queries together
         this.cssCommentsRegex = '(\\/\\*[\\s\\S]*?\\*\\/)';
         this.cssImportStatementRegex = new RegExp('@import .*?;', 'gi');
     };
@@ -442,7 +442,7 @@
                 }
             }
             else {
-                cssObject.subStyles = minimalObject.subStyles; //TODO, make this intelligent too
+                cssObject.subStyles = cssObject.subStyles.concat(minimalObject.subStyles); //TODO, make this intelligent too
             }
 
         }

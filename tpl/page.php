@@ -8,12 +8,7 @@
 
 
 	<?php if( isset($_POST['siteorigin_custom_css_save']) ) : ?>
-		<div class="updated settings-error">
-			<p>
-				<?php _e('Site design updated.', 'so-css') ?>
-				<?php printf( __('<a href="%s" target="_blank">Tweet</a> your new design to find out what your followers think.', 'so-css'),  esc_url( SiteOrigin_CSS::single()->get_tweet_url() ) ) ?>
-			</p>
-		</div>
+		<div class="updated settings-error"><p><?php _e('Site design updated.', 'so-css') ?></p></div>
 	<?php endif; ?>
 
 	<?php if(!empty($revision)) : ?>
@@ -52,7 +47,7 @@
 							foreach($custom_css_revisions as $time => $css) {
 								?>
 								<li>
-									<a href="<?php echo add_query_arg(array('theme' => $theme, 'time' => $time)) ?>" class="load-css-revision"><?php echo date('j F Y @ H:i:s', $time) ?></a>
+									<a href="<?php echo add_query_arg(array('theme' => $theme, 'time' => $time)) ?>" class="load-css-revision"><?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?></a>
 									(<?php printf(__('%d chars', 'so-css'), strlen($css)) ?>)
 								</li>
 								<?php
