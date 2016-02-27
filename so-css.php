@@ -37,6 +37,9 @@ class SiteOrigin_CSS {
 		add_action( 'load-appearance_page_so_custom_css', array($this, 'add_help_tab') );
 		add_action( 'admin_footer', array($this, 'action_admin_footer') );
 
+		// Add the action links.
+		add_action( 'plugin_action_links_' . plugin_basename(__FILE__), array($this, 'plugin_action_links') );
+
 		// The request to hide the getting started video
 		add_action( 'wp_ajax_socss_hide_getting_started', array( $this, 'admin_action_hide_getting_started' ) );
 
@@ -224,6 +227,13 @@ class SiteOrigin_CSS {
 	 */
 	function action_admin_footer(){
 		include plugin_dir_path( __FILE__ ) . 'tpl/js-templates.php';
+	}
+
+	function plugin_action_links( $links ){
+		if( isset($links['edit']) ) unset( $links['edit'] );
+		$links['css_editor'] = '<a href="' . admin_url('plugins.php?page=so-widgets-plugins') . '">'.__('CSS Editor', 'so-css').'</a>';
+		$links['support'] = '<a href="https://siteorigin.com/thread/" target="_blank">'.__('Support', 'so-css').'</a>';
+		return $links;
 	}
 
 	function display_admin_page(){
