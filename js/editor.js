@@ -92,7 +92,7 @@
             });
 
             this.toolbar.on('click_visual', function () {
-                thisView.visualProperties.loadCSS( thisView.codeMirror.getValue() );
+                thisView.visualProperties.loadCSS( thisView.codeMirror.getValue().trim() );
                 thisView.visualProperties.show();
             });
 
@@ -111,24 +111,37 @@
             this.registerCodeMirrorAutocomplete();
 
             // Setup the Codemirror instance
-            this.codeMirror = CodeMirror.fromTextArea(this.$('textarea.css-editor').get(0), {
+            var $textArea = this.$('textarea.css-editor');
+            var initValue = $textArea.val();
+            // Pad with empty lines so the editor takes up all the white space. To try make sure user gets copy/paste
+            // options in context menu.
+            var newlineMatches = initValue.match(/\n/gm); 
+            var lineCount = newlineMatches ? newlineMatches.length+1 : 1;
+            var numPadLines = 15 - lineCount;
+            var paddedValue = initValue;
+            for(var i = 0; i < numPadLines; i++) {
+                paddedValue += '\n';
+            }
+            $textArea.val(paddedValue);
+            this.codeMirror = CodeMirror.fromTextArea($textArea.get(0), {
                 tabSize: 2,
                 lineNumbers: true,
                 mode: 'css',
                 theme: 'neat',
+                inputStyle: 'contenteditable', //necessary to allow context menu (right click) copy/paste etc.
                 gutters: [
                     "CodeMirror-lint-markers"
                 ],
-                lint: true
+                lint: true,
             });
 
             // Make sure the user doesn't leave without saving
-            var startCss = this.$('textarea.css-editor').val();
             this.$el.on('submit', function(){
-                startCss = thisView.codeMirror.getValue();
+                initValue = thisView.codeMirror.getValue().trim();
             });
             $(window).bind('beforeunload', function(){
-                if( thisView.codeMirror.getValue() !== startCss ) {
+                var editorValue = thisView.codeMirror.getValue().trim();
+                if( editorValue !== initValue ) {
                     return socssOptions.loc.leave;
                 }
             });
@@ -463,7 +476,7 @@
             var style = head.find('style.siteorigin-custom-css');
 
             // Update the CSS after a short delay
-            var css = this.editor.codeMirror.getValue();
+            var css = this.editor.codeMirror.getValue().trim();
             style.html(css);
         },
 
@@ -897,7 +910,7 @@
             else {
                 // The selector doesn't exist, so add it to the CSS, then reload
                 this.editor.addEmptySelector(selector);
-                this.loadCSS( this.editor.codeMirror.getValue(), selector );
+                this.loadCSS( this.editor.codeMirror.getValue().trim(), selector );
             }
 
             dropdown.addClass('highlighted');
