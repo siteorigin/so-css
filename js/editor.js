@@ -115,7 +115,8 @@
             var initValue = $textArea.val();
             // Pad with empty lines so the editor takes up all the white space. To try make sure user gets copy/paste
             // options in context menu.
-            var lineCount = initValue.match(/\n/gm).length+1;
+            var newlineMatches = initValue.match(/\n/gm); 
+            var lineCount = newlineMatches ? newlineMatches.length+1 : 1;
             var numPadLines = 15 - lineCount;
             var paddedValue = initValue;
             for(var i = 0; i < numPadLines; i++) {
