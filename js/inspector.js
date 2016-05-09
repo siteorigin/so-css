@@ -9,6 +9,27 @@
         view : { },
         fn : {}
     };
+    
+    var getSelectorSpecificity = function(selector, useParts) {
+        var specificities = [];
+        var ruleSpecificity = SPECIFICITY.calculate( selector );
+        for (var i = 0; i < ruleSpecificity.length; i++) {
+            var specificity = ruleSpecificity[ i ];
+            if ( useParts ) {
+                for ( var j = 0; j < specificity.parts.length; j++ ) {
+                    var specificityPart = specificity.parts[ j ];
+                    // Recursive call to add specificities for parts.
+                    specificities = specificities.concat(getSelectorSpecificity(specificityPart.selector));
+                }
+            } else {
+                specificities.push({
+                    'selector': specificity.selector.trim(),
+                    'specificity': parseInt(specificity.specificity.replace(/,/g, ''))
+                });
+            }
+        }
+        return specificities;
+    };
 
     /**
      * This is the main view for the app
@@ -308,15 +329,8 @@
                 if (typeof parsedCss[k][i].selector === 'undefined') {
                     continue;
                 }
-
-                var ruleSpecificity = SPECIFICITY.calculate( parsedCss[k][i].selector );
-                for (var j = 0; j < ruleSpecificity.length; j++) {
-                    selectors.push({
-                        'selector': ruleSpecificity[j].selector.trim(),
-                        'specificity': parseInt(ruleSpecificity[j].specificity.replace(/,/g, ''))
-                    });
-                }
-
+                
+                selectors = selectors.concat( getSelectorSpecificity( parsedCss[ k ][ i ].selector ) );
             }
         }
 
@@ -324,14 +338,13 @@
         $('body *').each(function(){
             var $$ = $(this);
             var elName = socss.fn.elSelector( $$ );
-            var ruleSpecificity = SPECIFICITY.calculate( elName );
-            for (var k = 0; k < ruleSpecificity.length; k++) {
-                selectors.push({
-                    'selector': ruleSpecificity[k].selector.trim(),
-                    'specificity': parseInt(ruleSpecificity[k].specificity.replace(/,/g, ''))
-                });
-            }
+            
+            selectors = selectors.concat(getSelectorSpecificity(elName));
         });
+    
+        var $body = $('body');
+        var bName = socss.fn.elSelector($body);
+        selectors = selectors.concat(getSelectorSpecificity(bName, true));
 
         selectors = _.uniq( selectors, false, function( a ){
             return a.selector;
@@ -417,7 +430,7 @@
             elName += '#' + el.attr('id');
         }
         if( el.attr('class') !== undefined ) {
-            elName += '.' + el.attr('class').replace(/\s+/, '.');
+            elName += '.' + el.attr('class').replace(/\s+/g, '.');
         }
 
         if( elName === '' ) {
