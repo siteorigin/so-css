@@ -62,18 +62,23 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
-= 1.0.6 - 24 February 2016=
+= 1.0.7 - 4 July 2016 =
+* Ensure user can copy/paste in editor via context menu.
+* Added plugin action links
+* Add classes on `body` element to selectors window.
+
+= 1.0.6 - 24 February 2016 =
 * Disabled autocompletion on single item (automatic autocompletion).
 * Fixed conflict with NextGen Gallery.
 * Only display relevant linting messages.
 
-= 1.0.5 - 21 January 2016=
+= 1.0.5 - 21 January 2016 =
 * Updated to latest version of Code Mirror.
 
-= 1.0.4 - 10 November 2015=
+= 1.0.4 - 10 November 2015 =
 * Fixed CSS parsing when going into visual mode.
 
-= 1.0.3 - 29 October 2015=
+= 1.0.3 - 29 October 2015 =
 * Changed video image
 * Adjust revision times by GMT offset.
 * Don't overwrite media queries sub styles, rather just append them.
