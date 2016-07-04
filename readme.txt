@@ -62,7 +62,7 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
-= 1.0.6 - 4 July 2016 =
+= 1.0.7 - 4 July 2016 =
 * Ensure user can copy/paste in editor via context menu.
 * Added plugin action links
 * Add classes on `body` element to selectors window.
