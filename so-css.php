@@ -231,7 +231,7 @@ class SiteOrigin_CSS {
 
 	function plugin_action_links( $links ){
 		if( isset($links['edit']) ) unset( $links['edit'] );
-		$links['css_editor'] = '<a href="' . admin_url('plugins.php?page=so-widgets-plugins') . '">'.__('CSS Editor', 'so-css').'</a>';
+		$links['css_editor'] = '<a href="' . admin_url('themes.php?page=so_custom_css') . '">'.__('CSS Editor', 'so-css').'</a>';
 		$links['support'] = '<a href="https://siteorigin.com/thread/" target="_blank">'.__('Support', 'so-css').'</a>';
 		return $links;
 	}
