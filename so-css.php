@@ -45,7 +45,7 @@ class SiteOrigin_CSS {
 
 		if( isset($_GET['so_css_preview']) && !is_admin() ) {
 
-			add_action('plugins_loaded', array($this, 'disable_ngg_resource_manager'));
+			add_action( 'plugins_loaded', array($this, 'disable_ngg_resource_manager') );
 			add_filter( 'show_admin_bar', '__return_false' );
 			add_filter( 'wp_enqueue_scripts', array($this, 'enqueue_inspector_scripts') );
 			add_filter( 'wp_footer', array($this, 'inspector_templates') );
@@ -242,7 +242,7 @@ class SiteOrigin_CSS {
 		$custom_css = get_option( 'siteorigin_custom_css[' . $theme . ']', '' );
 		$custom_css_revisions = get_option('siteorigin_custom_css_revisions[' . $theme . ']');
 
-		if(!empty($_GET['theme']) && $_GET['theme'] == $theme && !empty($_GET['time']) && !empty($custom_css_revisions[$_GET['time']])) {
+		if( !empty( $_GET['theme'] ) && $_GET['theme'] == $theme && !empty( $_GET['time'] ) && !empty( $custom_css_revisions[$_GET['time']] ) ) {
 			$custom_css = $custom_css_revisions[$_GET['time']];
 			$revision = true;
 		}
@@ -257,7 +257,7 @@ class SiteOrigin_CSS {
 		if( !isset($_GET['_wpnonce']) || !wp_verify_nonce( $_GET['_wpnonce'], 'hide' ) ) return;
 
 		$user = wp_get_current_user();
-		if( !empty($user) ) {
+		if( !empty( $user ) ) {
 			update_user_meta( $user->ID, 'socss_hide_gs', true );
 		}
 	}
@@ -424,23 +424,6 @@ class SiteOrigin_CSS {
 			</script>
 			<?php
 		}
-	}
-
-	/**
-	 * Get a URL to tweet out the changes
-	 */
-	function get_tweet_url(){
-		$tweet = __('I changed my site design using @SiteOrigin CSS (http://siteorigin.com/css/). What do you think?', 'so-css');
-		$tweet .= ' ';
-		$tweet .= get_site_url();
-
-		return add_query_arg(
-			'text',
-			urlencode($tweet),
-			'https://twitter.com/intent/tweet'
-		);
-
-
 	}
 }
 
