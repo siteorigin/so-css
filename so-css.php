@@ -8,6 +8,7 @@ Author URI: https://siteorigin.com
 Plugin URI: https://siteorigin.com/css/
 License: GPL3
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
+Text Domain: so-css
 */
 
 // Handle the legacy CSS editor that came with SiteOrigin themes
@@ -28,6 +29,7 @@ class SiteOrigin_CSS {
 		$this->snippet_paths = array();
 
 		// Main header actions
+		add_action( 'plugins_loaded', array($this, 'set_plugin_textdomain') );
 		add_action( 'wp_head', array($this, 'action_wp_head'), 20 );
 
 		// All the admin actions
@@ -88,6 +90,10 @@ class SiteOrigin_CSS {
 		echo "<style id='" . sanitize_html_class($this->theme) . "-custom-css' class='siteorigin-custom-css' type='text/css'>\n";
 		echo self::sanitize_css( $custom_css ) . "\n";
 		echo "</style>\n";
+	}
+
+	function set_plugin_textdomain(){
+		load_plugin_textdomain('so-css', false, plugin_dir_path( __FILE__ ). '/languages/');
 	}
 
 	/**
