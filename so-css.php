@@ -57,13 +57,6 @@ class SiteOrigin_CSS {
 		}
 	}
 
-	function disable_ngg_resource_manager() {
-		if( !current_user_can('edit_theme_options') ) return;
-
-		//The NextGen Gallery plugin does some weird interfering with the output buffer.
-		define('NGG_DISABLE_RESOURCE_MANAGER', true);
-	}
-
 	/**
 	 * Get a singleton of the SiteOrigin CSS.
 	 *
@@ -430,6 +423,13 @@ class SiteOrigin_CSS {
 			</script>
 			<?php
 		}
+	}
+
+	function disable_ngg_resource_manager() {
+		if( !current_user_can('edit_theme_options') ) return;
+
+		//The NextGen Gallery plugin does some weird interfering with the output buffer.
+		define('NGG_DISABLE_RESOURCE_MANAGER', true);
 	}
 }
 
