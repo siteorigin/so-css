@@ -669,6 +669,12 @@
          */
         render: function () {
             var thisView = this;
+            
+            // Clean up for potential re-renders
+            this.$('.section-tabs').empty();
+            this.$('.sections').empty();
+            this.$('.toolbar select').off();
+            thisView.propertyControllers = [];
 
             var controllers = socssOptions.propertyControllers;
 
@@ -879,7 +885,9 @@
             if (typeof activeSelector === 'undefined') {
                 activeSelector = dropdown.find('option').eq(0).attr('val');
             }
-            dropdown.val(activeSelector).change();
+            if(!_.isEmpty(activeSelector)) {
+                dropdown.val(activeSelector).change();
+            }
         },
 
         /**
