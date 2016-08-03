@@ -776,6 +776,42 @@
         },
 
         /**
+         * Adds the @ rule value if it doesn't already exist.
+         * Currently this only supports @imports, but should be expanded to include other @ rules later.
+         * 
+         * @param atRule
+         * @param value
+         */
+        setAtRuleValue: function (atRule, value) {
+            if(atRule !== 'imports') {
+                return;
+            }
+            
+            // get @ rules
+            // check if any have the same value
+            // if not, then add the new @ rule
+            var exists = _.chain( this.parsed )
+              .filter( function ( rule ) {
+                return rule.selector.charAt( 0 ) === '@';
+              } )
+              .any( function ( rule ) {
+                return rule.type === atRule && rule.styles === value;
+              } ).value();
+            
+            if ( !exists ) {
+                var newRule = {
+                    selector: '@' + atRule,
+                    styles: value,
+                    type: atRule
+                };
+                // Add it to the top!
+                this.parsed.unshift( newRule );
+            }
+            
+            this.updateMainEditor( false );
+        },
+
+        /**
          * Get the rule value for the active selector
          * @param rule
          */
