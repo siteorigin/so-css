@@ -894,7 +894,12 @@
             var dropdown = this.$('.toolbar select').empty();
             for (var i = 0; i < this.parsed.length; i++) {
                 var rule = this.parsed[i];
-
+                
+                // Exclude @imports statements
+                if(rule.type === 'imports') {
+                    continue;
+                }
+                  
                 if( typeof rule.subStyles !== 'undefined' ) {
 
                     for (var j = 0; j < rule.subStyles.length; j++) {
