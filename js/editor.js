@@ -776,39 +776,47 @@
         },
 
         /**
-         * Adds the @ rule value if it doesn't already exist.
-         * Currently this only supports @imports, but should be expanded to include other @ rules later.
+         * Adds the @import rule value if it doesn't already exist.
          * 
          * @param atRule
          * @param value
          */
-        setAtRuleValue: function (atRule, value) {
-            if(atRule !== 'imports') {
-                return;
-            }
+        addImport: function (value) {
             
-            // get @ rules
+            // get @import rules
             // check if any have the same value
             // if not, then add the new @ rule
-            var exists = _.chain( this.parsed )
-              .filter( function ( rule ) {
-                return rule.selector.charAt( 0 ) === '@';
-              } )
-              .any( function ( rule ) {
-                return rule.type === atRule && rule.styles === value;
-              } ).value();
+          
+            var importRules = _.filter( this.parsed, function ( selector ) {
+                return selector.selector.startsWith('@import');
+            } );
+            var exists = _.any( importRules, function ( rule ) {
+                return rule.styles === value;
+              } );
             
             if ( !exists ) {
                 var newRule = {
-                    selector: '@' + atRule,
+                    selector: '@imports',
                     styles: value,
-                    type: atRule
+                    type: 'imports'
                 };
-                // Add it to the top!
+                // Add it to the top! @import statements must precede other rule types.
                 this.parsed.unshift( newRule );
             }
             
             this.updateMainEditor( false );
+        },
+    
+        /**
+         * Find @import which completely or partially contains the specified value.
+         *
+         * @param value
+         */
+        findImport: function(value) {
+            
+            return _.find( this.parsed, function ( selector ) {
+                return selector.selector.startsWith('@import') && selector.styles.indexOf(value) > -1;
+            } );
         },
 
         /**
