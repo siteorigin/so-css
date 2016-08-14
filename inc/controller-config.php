@@ -110,7 +110,7 @@ return array (
 			),
 			array(
 				'title' => __('Font Family', 'so-css'),
-				'type' => 'font-select',
+				'type' => 'font_select',
 				'args' => array(
 					'property' => 'font-family',
 				)

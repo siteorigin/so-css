@@ -1,4 +1,8 @@
-<?php $snippets = SiteOrigin_CSS::single()->get_snippets(); ?>
+<?php
+/**
+ * @var $custom_css_revisions array Saved revisions for the current theme.
+ */
+$snippets = SiteOrigin_CSS::single()->get_snippets(); ?>
 
 <div class="wrap" id="siteorigin-custom-css">
 	<h2>
@@ -43,12 +47,18 @@
 				<div class="inside">
 					<ol data-confirm="<?php esc_attr_e('Are you sure you want to load this revision?', 'so-css') ?>">
 						<?php
-						if( is_array($custom_css_revisions) ) {
-							foreach($custom_css_revisions as $time => $css) {
+						if ( is_array( $custom_css_revisions ) ) {
+							$is_current = true;
+							foreach ( $custom_css_revisions as $time => $css ) {
 								?>
 								<li>
-									<a href="<?php echo add_query_arg(array('theme' => $theme, 'time' => $time)) ?>" class="load-css-revision"><?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?></a>
-									(<?php printf(__('%d chars', 'so-css'), strlen($css)) ?>)
+									<?php if ( $is_current ) : ?>
+										<?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?> (Current)
+										<?php $is_current = false; ?>
+									<?php else : ?>
+										<a href="<?php echo esc_url( add_query_arg( array( 'theme' => $theme, 'time' => $time ) ) ) ?>" class="load-css-revision"><?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?></a>
+										(<?php printf(__('%d chars', 'so-css'), strlen($css)) ?>)
+									<?php endif; ?>
 								</li>
 								<?php
 							}
