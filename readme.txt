@@ -62,6 +62,12 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.0.8 - 15 August 2016 =
+* Fixed action link.
+* Support for GlotPress.
+* Removed unused code.
+* Handling of @imports for future addons.
+
 = 1.0.7 - 4 July 2016 =
 * Ensure user can copy/paste in editor via context menu.
 * Added plugin action links
