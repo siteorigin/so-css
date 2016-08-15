@@ -669,6 +669,12 @@
          */
         render: function () {
             var thisView = this;
+            
+            // Clean up for potential re-renders
+            this.$('.section-tabs').empty();
+            this.$('.sections').empty();
+            this.$('.toolbar select').off();
+            thisView.propertyControllers = [];
 
             var controllers = socssOptions.propertyControllers;
 
@@ -770,6 +776,50 @@
         },
 
         /**
+         * Adds the @import rule value if it doesn't already exist.
+         * 
+         * @param atRule
+         * @param value
+         */
+        addImport: function (value) {
+            
+            // get @import rules
+            // check if any have the same value
+            // if not, then add the new @ rule
+          
+            var importRules = _.filter( this.parsed, function ( selector ) {
+                return selector.selector.startsWith('@import');
+            } );
+            var exists = _.any( importRules, function ( rule ) {
+                return rule.styles === value;
+              } );
+            
+            if ( !exists ) {
+                var newRule = {
+                    selector: '@imports',
+                    styles: value,
+                    type: 'imports'
+                };
+                // Add it to the top! @import statements must precede other rule types.
+                this.parsed.unshift( newRule );
+            }
+            
+            this.updateMainEditor( false );
+        },
+    
+        /**
+         * Find @import which completely or partially contains the specified value.
+         *
+         * @param value
+         */
+        findImport: function(value) {
+            
+            return _.find( this.parsed, function ( selector ) {
+                return selector.selector.startsWith('@import') && selector.styles.indexOf(value) > -1;
+            } );
+        },
+
+        /**
          * Get the rule value for the active selector
          * @param rule
          */
@@ -852,7 +902,12 @@
             var dropdown = this.$('.toolbar select').empty();
             for (var i = 0; i < this.parsed.length; i++) {
                 var rule = this.parsed[i];
-
+                
+                // Exclude @imports statements
+                if(rule.type === 'imports') {
+                    continue;
+                }
+                  
                 if( typeof rule.subStyles !== 'undefined' ) {
 
                     for (var j = 0; j < rule.subStyles.length; j++) {
@@ -879,7 +934,9 @@
             if (typeof activeSelector === 'undefined') {
                 activeSelector = dropdown.find('option').eq(0).attr('val');
             }
-            dropdown.val(activeSelector).change();
+            if(!_.isEmpty(activeSelector)) {
+                dropdown.val(activeSelector).change();
+            }
         },
 
         /**

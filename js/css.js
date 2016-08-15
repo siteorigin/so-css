@@ -240,7 +240,7 @@
             }
 
         }
-        if (found.length < 2) {
+        if (selector === '@imports' || found.length < 2) {
             return found;
         }
         else {
@@ -279,8 +279,8 @@
             }
 
             var found = this.findBySelector(cssObjectArray, obj.selector); //found compressed
-            if ( found.length !== 0 ) {
-                compressed.push(found[0]);
+            if ( found.length > 0 ) {
+                compressed = compressed.concat(found);
                 done[obj.selector] = true;
             }
         }

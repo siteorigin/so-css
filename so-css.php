@@ -8,6 +8,7 @@ Author URI: https://siteorigin.com
 Plugin URI: https://siteorigin.com/css/
 License: GPL3
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
+Text Domain: so-css
 */
 
 // Handle the legacy CSS editor that came with SiteOrigin themes
@@ -28,6 +29,7 @@ class SiteOrigin_CSS {
 		$this->snippet_paths = array();
 
 		// Main header actions
+		add_action( 'plugins_loaded', array($this, 'set_plugin_textdomain') );
 		add_action( 'wp_head', array($this, 'action_wp_head'), 20 );
 
 		// All the admin actions
@@ -45,7 +47,7 @@ class SiteOrigin_CSS {
 
 		if( isset($_GET['so_css_preview']) && !is_admin() ) {
 
-			add_action('plugins_loaded', array($this, 'disable_ngg_resource_manager'));
+			add_action( 'plugins_loaded', array($this, 'disable_ngg_resource_manager') );
 			add_filter( 'show_admin_bar', '__return_false' );
 			add_filter( 'wp_enqueue_scripts', array($this, 'enqueue_inspector_scripts') );
 			add_filter( 'wp_footer', array($this, 'inspector_templates') );
@@ -53,13 +55,6 @@ class SiteOrigin_CSS {
 			// We'll be grabbing all the enqueued scripts and outputting them
 			add_action( 'wp_enqueue_scripts', array($this, 'inline_inspector_scripts'), 100 );
 		}
-	}
-
-	function disable_ngg_resource_manager() {
-		if( !current_user_can('edit_theme_options') ) return;
-
-		//The NextGen Gallery plugin does some weird interfering with the output buffer.
-		define('NGG_DISABLE_RESOURCE_MANAGER', true);
 	}
 
 	/**
@@ -88,6 +83,10 @@ class SiteOrigin_CSS {
 		echo "<style id='" . sanitize_html_class($this->theme) . "-custom-css' class='siteorigin-custom-css' type='text/css'>\n";
 		echo self::sanitize_css( $custom_css ) . "\n";
 		echo "</style>\n";
+	}
+
+	function set_plugin_textdomain(){
+		load_plugin_textdomain('so-css', false, plugin_dir_path( __FILE__ ). '/languages/');
 	}
 
 	/**
@@ -231,7 +230,7 @@ class SiteOrigin_CSS {
 
 	function plugin_action_links( $links ){
 		if( isset($links['edit']) ) unset( $links['edit'] );
-		$links['css_editor'] = '<a href="' . admin_url('plugins.php?page=so-widgets-plugins') . '">'.__('CSS Editor', 'so-css').'</a>';
+		$links['css_editor'] = '<a href="' . admin_url('themes.php?page=so_custom_css') . '">'.__('CSS Editor', 'so-css').'</a>';
 		$links['support'] = '<a href="https://siteorigin.com/thread/" target="_blank">'.__('Support', 'so-css').'</a>';
 		return $links;
 	}
@@ -242,7 +241,7 @@ class SiteOrigin_CSS {
 		$custom_css = get_option( 'siteorigin_custom_css[' . $theme . ']', '' );
 		$custom_css_revisions = get_option('siteorigin_custom_css_revisions[' . $theme . ']');
 
-		if(!empty($_GET['theme']) && $_GET['theme'] == $theme && !empty($_GET['time']) && !empty($custom_css_revisions[$_GET['time']])) {
+		if( !empty( $_GET['theme'] ) && $_GET['theme'] == $theme && !empty( $_GET['time'] ) && !empty( $custom_css_revisions[$_GET['time']] ) ) {
 			$custom_css = $custom_css_revisions[$_GET['time']];
 			$revision = true;
 		}
@@ -257,7 +256,7 @@ class SiteOrigin_CSS {
 		if( !isset($_GET['_wpnonce']) || !wp_verify_nonce( $_GET['_wpnonce'], 'hide' ) ) return;
 
 		$user = wp_get_current_user();
-		if( !empty($user) ) {
+		if( !empty( $user ) ) {
 			update_user_meta( $user->ID, 'socss_hide_gs', true );
 		}
 	}
@@ -426,21 +425,11 @@ class SiteOrigin_CSS {
 		}
 	}
 
-	/**
-	 * Get a URL to tweet out the changes
-	 */
-	function get_tweet_url(){
-		$tweet = __('I changed my site design using @SiteOrigin CSS (http://siteorigin.com/css/). What do you think?', 'so-css');
-		$tweet .= ' ';
-		$tweet .= get_site_url();
+	function disable_ngg_resource_manager() {
+		if( !current_user_can('edit_theme_options') ) return;
 
-		return add_query_arg(
-			'text',
-			urlencode($tweet),
-			'https://twitter.com/intent/tweet'
-		);
-
-
+		//The NextGen Gallery plugin does some weird interfering with the output buffer.
+		define('NGG_DISABLE_RESOURCE_MANAGER', true);
 	}
 }
 

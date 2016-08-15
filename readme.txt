@@ -1,7 +1,7 @@
 === SiteOrigin CSS ===
 Tags: css, design, edit, customize
 Requires at least: 3.9
-Tested up to: 4.4.1
+Tested up to: 4.6
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv2 or later
@@ -61,6 +61,12 @@ We're actively developing SiteOrigin CSS. Keep track of what's happening over on
 We offer free support on the [SiteOrigin support forums](https://siteorigin.com/thread/).
 
 == Changelog ==
+
+= 1.0.8 - 15 August 2016 =
+* Fixed action link.
+* Support for GlotPress.
+* Removed unused code.
+* Handling of @imports for future addons.
 
 = 1.0.7 - 4 July 2016 =
 * Ensure user can copy/paste in editor via context menu.
