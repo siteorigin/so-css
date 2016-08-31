@@ -813,10 +813,21 @@
          * @param value
          */
         findImport: function(value) {
-            
             return _.find( this.parsed, function ( selector ) {
                 return selector.selector.startsWith('@import') && selector.styles.indexOf(value) > -1;
             } );
+        },
+        
+        /**
+         * Find @import which completely or partially contains the identifier value and update it's styles property.
+         *
+         * @param identifier
+         * @param value
+         */
+        updateImport: function(identifier, value) {
+            var importRule = this.findImport(identifier);
+            importRule.styles = value.styles;
+            this.updateMainEditor(false);
         },
 
         /**
