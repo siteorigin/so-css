@@ -781,7 +781,7 @@
          * @param atRule
          * @param value
          */
-        addImport: function (value) {
+        addImport: function (newRule) {
             
             // get @import rules
             // check if any have the same value
@@ -791,16 +791,12 @@
                 return selector.selector.startsWith('@import');
             } );
             var exists = _.any( importRules, function ( rule ) {
-                return rule.styles === value;
+                return rule.styles === newRule.styles;
               } );
             
             if ( !exists ) {
-                var newRule = {
-                    selector: '@imports',
-                    styles: value,
-                    type: 'imports'
-                };
-                // Add it to the top! @import statements must precede other rule types.
+                // Add it to the top!
+                // @import statements must precede other rule types.
                 this.parsed.unshift( newRule );
             }
             
