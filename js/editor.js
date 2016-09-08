@@ -660,7 +660,7 @@
          * Initialize the properties editor with a new model
          */
         initialize: function ( attr ) {
-            this.parser = new cssjs();
+            this.parser = window.css;
             this.editor = attr.editor;
         },
 
@@ -752,23 +752,29 @@
          * @param value
          */
         setRuleValue: function (rule, value) {
-            if (typeof this.activeSelector === 'undefined' || typeof this.activeSelector.rules === 'undefined') {
+            if (
+              typeof this.activeSelector === 'undefined' ||
+              typeof this.activeSelector.declarations === 'undefined' ||
+              value === ''
+            ) {
                 return;
             }
-
+    
+            var declarations = this.activeSelector.declarations;
             var newRule = true;
-            for (var i = 0; i < this.activeSelector.rules.length; i++) {
-                if (this.activeSelector.rules[i].directive === rule) {
-                    this.activeSelector.rules[i].value = value;
+            for (var i = 0; i < declarations.length; i++) {
+                if (declarations[i].property === rule) {
+                    declarations[i].value = value;
                     newRule = false;
                     break;
                 }
             }
 
             if (newRule) {
-                this.activeSelector.rules.push({
-                    directive: rule,
-                    value: value
+                declarations.push({
+                    property: rule,
+                    value: value,
+                    type: 'declaration',
                 });
             }
 
@@ -778,8 +784,8 @@
         /**
          * Adds the @import rule value if it doesn't already exist.
          * 
-         * @param atRule
-         * @param value
+         * @param newRule
+         * 
          */
         addImport: function (newRule) {
             
@@ -831,13 +837,14 @@
          * @param rule
          */
         getRuleValue: function (rule) {
-            if (typeof this.activeSelector === 'undefined' || typeof this.activeSelector.rules === 'undefined') {
+            if (typeof this.activeSelector === 'undefined' || typeof this.activeSelector.declarations === 'undefined') {
                 return '';
             }
-
-            for (var i = 0; i < this.activeSelector.rules.length; i++) {
-                if (this.activeSelector.rules[i].directive === rule) {
-                    return this.activeSelector.rules[i].value;
+    
+            var declarations = this.activeSelector.declarations; 
+            for (var i = 0; i < declarations.length; i++) {
+                if (declarations[i].property === rule) {
+                    return declarations[i].value;
                 }
             }
             return '';
@@ -847,22 +854,8 @@
          * Update the main editor with the value of the parsed CSS
          */
         updateMainEditor: function ( compress ) {
-            var css;
-            if( typeof compress === 'undefined' || compress === true  ) {
-                css = this.parser.compressCSS( this.parsed );
-                // Also remove any empty selectors
-                css = css.filter( function(v){
-                    return (
-                        typeof v.type !== 'undefined' ||
-                        v.rules.length > 0
-                    );
-                } );
-            }
-            else {
-                css = this.parsed;
-            }
-
-            this.editor.codeMirror.setValue( this.parser.getCSSForEditor( css ).trim() );
+          //TODO: add back compress option to remove/merge duplicated CSS selectors.
+          this.editor.codeMirror.setValue( this.parser.stringify( this.parsed ) );
         },
 
         /**
@@ -902,27 +895,29 @@
         loadCSS: function (css, activeSelector) {
             this.css = css;
 
-            // Load the CSS and combine rules
-            this.parsed = this.parser.compressCSS( this.parser.parseCSS(css) );
+            // Load the CSS
+            this.parsed = this.parser.parse(css, {silent:true});
+            var rules = this.parsed.stylesheet.rules;
 
             // Add the dropdown menu items
             var dropdown = this.$('.toolbar select').empty();
-            for (var i = 0; i < this.parsed.length; i++) {
-                var rule = this.parsed[i];
+            for (var i = 0; i < rules.length; i++) {
+                var rule = rules[i];
                 
-                // Exclude @imports statements
-                if(rule.type === 'imports') {
+                // Exclude @import statements
+                if(rule.type === 'import' || rule.type === 'comment') {
                     continue;
                 }
                   
-                if( typeof rule.subStyles !== 'undefined' ) {
+                if( rule.type === 'media' ) {
 
-                    for (var j = 0; j < rule.subStyles.length; j++) {
-                        var subRule = rule.subStyles[j];
+                    for (var j = 0; j < rule.rules.length; j++) {
+                        var mediaRule = '@media ' + rule.media;
+                        var subRule = rule.rules[j];
                         dropdown.append(
                             $('<option>')
-                                .html( rule.selector + ': ' + subRule.selector )
-                                .attr( 'val', rule.selector + ': ' + subRule.selector )
+                                .html( mediaRule + ': ' + subRule.selectors[0] )
+                                .attr( 'val', mediaRule + ': ' + subRule.selectors[0] )
                                 .data( 'selector', subRule )
                         );
                     }
@@ -931,8 +926,8 @@
                 else {
                     dropdown.append(
                         $('<option>')
-                            .html( rule.selector )
-                            .attr( 'val', rule.selector )
+                            .html( rule.selectors[0] )
+                            .attr( 'val', rule.selectors[0] )
                             .data( 'selector', rule )
                     );
                 }
