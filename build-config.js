@@ -24,6 +24,11 @@ module.exports = {
             '!{tmp,tmp/**}'                     // Ignore dist/ and contents
         ]
     },
+    browserify : {
+        src: 'js/main.js',
+        dest: 'js/',
+        fileName: 'css.js',
+    },
     bust: {
         src: []
     },
