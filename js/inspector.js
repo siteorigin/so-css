@@ -330,8 +330,10 @@
                 if (typeof rules[i].selectors === 'undefined') {
                     continue;
                 }
-                
-                selectors = selectors.concat( getSelectorSpecificity( rules[i].selectors[0] ) );
+    
+                for(var j = 0; j < rules[i].selectors.length; j++) {
+                    selectors = selectors.concat( getSelectorSpecificity( rules[i].selectors[j] ) );
+                }
             }
         }
 
@@ -379,35 +381,55 @@
 
 
         var parsedCss = socss.fn.getParsedCss();
+    
+        var isAtRule = function (ruleType) {
+            switch(ruleType) {
+                case 'charset':
+                case 'custom-media':
+                case 'document':
+                case 'font-face':
+                case 'host':
+                case 'import':
+                case 'keyframes':
+                case 'keyframe':
+                case 'media':
+                case 'namespace':
+                case 'page':
+                case 'supports':
+                    return true;
+                  
+            }
+            return false;
+        };
 
         for( var k in parsedCss ) {
             var rules = parsedCss[k].stylesheet.rules;
             for( var i = 0; i < rules.length; i++ ) {
                 var rule = rules[i];
                 if (
-                    typeof rule.selectors === 'undefined' ||
-                    typeof rule.type !== 'undefined' ||
-                    rule.selectors[0].charAt(0) === '@'
+                    typeof rule.selectors === 'undefined' || isAtRule(rule.type)
                 ) {
                     continue;
                 }
-
-                var ruleSpecificity = SPECIFICITY.calculate( rule.selectors[0] );
-                for (var j = 0; j < ruleSpecificity.length; j++) {
-                    try {
-                        if( el.is( ruleSpecificity[j].selector ) ) {
-                            var declarations = rule.declarations;
-                            for( var l = 0; l < declarations.length; l++ ) {
-                                elProperties.push({
-                                    'name' : declarations.property,
-                                    'value' : declarations.value,
-                                    'specificity' : parseInt(ruleSpecificity[j].specificity.replace(/,/g, ''))
-                                });
+                
+                for(var j = 0; j < rule.selectors.length; j++) {
+                    var ruleSpecificity = SPECIFICITY.calculate( rule.selectors[j] );
+                    for (var l = 0; l < ruleSpecificity.length; l++) {
+                        try {
+                            if ( el.is( ruleSpecificity[l].selector ) ) {
+                                var declarations = rule.declarations;
+                                for (var l = 0; l < declarations.length; l++) {
+                                    elProperties.push({
+                                        'name': declarations.property,
+                                        'value': declarations.value,
+                                        'specificity': parseInt( ruleSpecificity[l].specificity.replace( /,/g, '' ) )
+                                    });
+                                }
                             }
                         }
-                    }
-                    catch( e ) {
-                        // For now, we're just going to ignore rules that trigger jQuery errors
+                        catch (e) {
+                            // For now, we're just going to ignore rules that trigger jQuery errors
+                        }
                     }
                 }
 

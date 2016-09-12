@@ -916,8 +916,8 @@
                         var subRule = rule.rules[j];
                         dropdown.append(
                             $('<option>')
-                                .html( mediaRule + ': ' + subRule.selectors[0] )
-                                .attr( 'val', mediaRule + ': ' + subRule.selectors[0] )
+                                .html( mediaRule + ': ' + subRule.selectors.join(',') )
+                                .attr( 'val', mediaRule + ': ' + subRule.selectors.join(',') )
                                 .data( 'selector', subRule )
                         );
                     }
@@ -926,8 +926,8 @@
                 else {
                     dropdown.append(
                         $('<option>')
-                            .html( rule.selectors[0] )
-                            .attr( 'val', rule.selectors[0] )
+                            .html( rule.selectors.join(',') )
+                            .attr( 'val', rule.selectors.join(',') )
                             .data( 'selector', rule )
                     );
                 }
