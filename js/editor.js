@@ -793,17 +793,17 @@
             // check if any have the same value
             // if not, then add the new @ rule
           
-            var importRules = _.filter( this.parsed, function ( selector ) {
-                return selector.selector.startsWith('@import');
+            var importRules = _.filter( this.parsed.stylesheet.rules, function ( rule) {
+                return rule.type === 'import';
             } );
             var exists = _.any( importRules, function ( rule ) {
-                return rule.styles === newRule.styles;
+                return rule.import === newRule.import;
               } );
             
             if ( !exists ) {
                 // Add it to the top!
                 // @import statements must precede other rule types.
-                this.parsed.unshift( newRule );
+                this.parsed.stylesheet.rules.unshift( newRule );
             }
             
             this.updateMainEditor( false );
@@ -815,20 +815,20 @@
          * @param value
          */
         findImport: function(value) {
-            return _.find( this.parsed, function ( selector ) {
-                return selector.selector.startsWith('@import') && selector.styles.indexOf(value) > -1;
+            return _.find( this.parsed.stylesheet.rules, function ( rule ) {
+                return rule.type === 'import' && rule.import.indexOf(value) > -1;
             } );
         },
         
         /**
-         * Find @import which completely or partially contains the identifier value and update it's styles property.
+         * Find @import which completely or partially contains the identifier value and update it's import property.
          *
          * @param identifier
          * @param value
          */
         updateImport: function(identifier, value) {
             var importRule = this.findImport(identifier);
-            importRule.styles = value.styles;
+            importRule.import = value.import;
             this.updateMainEditor(false);
         },
 
