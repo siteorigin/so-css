@@ -762,10 +762,14 @@
     
             var declarations = this.activeSelector.declarations;
             var newRule = true;
+            var valueChanged = false;
             for (var i = 0; i < declarations.length; i++) {
                 if (declarations[i].property === rule) {
-                    declarations[i].value = value;
                     newRule = false;
+                    if ( declarations[i].value !== value ) {
+                        declarations[i].value = value;
+                        valueChanged = true;
+                    }
                     break;
                 }
             }
@@ -777,8 +781,10 @@
                     type: 'declaration',
                 });
             }
-
-            this.updateMainEditor( false );
+            
+            if ( valueChanged ) {
+                this.updateMainEditor(false);
+            }
         },
 
         /**
@@ -804,9 +810,9 @@
                 // Add it to the top!
                 // @import statements must precede other rule types.
                 this.parsed.stylesheet.rules.unshift( newRule );
+                this.updateMainEditor( false );
             }
             
-            this.updateMainEditor( false );
         },
     
         /**
@@ -827,9 +833,15 @@
          * @param value
          */
         updateImport: function(identifier, value) {
+            var valueChanged = false;
             var importRule = this.findImport(identifier);
-            importRule.import = value.import;
-            this.updateMainEditor(false);
+            if ( importRule.import !== value.import ) {
+                importRule.import = value.import;
+            }
+            
+            if ( valueChanged ) {
+                this.updateMainEditor(false);
+            }
         },
 
         /**
