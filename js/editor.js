@@ -660,7 +660,7 @@
          * Initialize the properties editor with a new model
          */
         initialize: function ( attr ) {
-            this.parser = new cssjs();
+            this.parser = window.css;
             this.editor = attr.editor;
         },
 
@@ -752,34 +752,46 @@
          * @param value
          */
         setRuleValue: function (rule, value) {
-            if (typeof this.activeSelector === 'undefined' || typeof this.activeSelector.rules === 'undefined') {
+            if (
+              typeof this.activeSelector === 'undefined' ||
+              typeof this.activeSelector.declarations === 'undefined' ||
+              value === ''
+            ) {
                 return;
             }
-
+    
+            var declarations = this.activeSelector.declarations;
             var newRule = true;
-            for (var i = 0; i < this.activeSelector.rules.length; i++) {
-                if (this.activeSelector.rules[i].directive === rule) {
-                    this.activeSelector.rules[i].value = value;
+            var valueChanged = false;
+            for (var i = 0; i < declarations.length; i++) {
+                if (declarations[i].property === rule) {
                     newRule = false;
+                    if ( declarations[i].value !== value ) {
+                        declarations[i].value = value;
+                        valueChanged = true;
+                    }
                     break;
                 }
             }
 
             if (newRule) {
-                this.activeSelector.rules.push({
-                    directive: rule,
-                    value: value
+                declarations.push({
+                    property: rule,
+                    value: value,
+                    type: 'declaration',
                 });
             }
-
-            this.updateMainEditor( false );
+            
+            if ( valueChanged ) {
+                this.updateMainEditor(false);
+            }
         },
 
         /**
          * Adds the @import rule value if it doesn't already exist.
          * 
-         * @param atRule
-         * @param value
+         * @param newRule
+         * 
          */
         addImport: function (newRule) {
             
@@ -787,20 +799,20 @@
             // check if any have the same value
             // if not, then add the new @ rule
           
-            var importRules = _.filter( this.parsed, function ( selector ) {
-                return selector.selector.startsWith('@import');
+            var importRules = _.filter( this.parsed.stylesheet.rules, function ( rule) {
+                return rule.type === 'import';
             } );
             var exists = _.any( importRules, function ( rule ) {
-                return rule.styles === newRule.styles;
+                return rule.import === newRule.import;
               } );
             
             if ( !exists ) {
                 // Add it to the top!
                 // @import statements must precede other rule types.
-                this.parsed.unshift( newRule );
+                this.parsed.stylesheet.rules.unshift( newRule );
+                this.updateMainEditor( false );
             }
             
-            this.updateMainEditor( false );
         },
     
         /**
@@ -809,21 +821,27 @@
          * @param value
          */
         findImport: function(value) {
-            return _.find( this.parsed, function ( selector ) {
-                return selector.selector.startsWith('@import') && selector.styles.indexOf(value) > -1;
+            return _.find( this.parsed.stylesheet.rules, function ( rule ) {
+                return rule.type === 'import' && rule.import.indexOf(value) > -1;
             } );
         },
         
         /**
-         * Find @import which completely or partially contains the identifier value and update it's styles property.
+         * Find @import which completely or partially contains the identifier value and update it's import property.
          *
          * @param identifier
          * @param value
          */
         updateImport: function(identifier, value) {
+            var valueChanged = false;
             var importRule = this.findImport(identifier);
-            importRule.styles = value.styles;
-            this.updateMainEditor(false);
+            if ( importRule.import !== value.import ) {
+                importRule.import = value.import;
+            }
+            
+            if ( valueChanged ) {
+                this.updateMainEditor(false);
+            }
         },
 
         /**
@@ -831,13 +849,14 @@
          * @param rule
          */
         getRuleValue: function (rule) {
-            if (typeof this.activeSelector === 'undefined' || typeof this.activeSelector.rules === 'undefined') {
+            if (typeof this.activeSelector === 'undefined' || typeof this.activeSelector.declarations === 'undefined') {
                 return '';
             }
-
-            for (var i = 0; i < this.activeSelector.rules.length; i++) {
-                if (this.activeSelector.rules[i].directive === rule) {
-                    return this.activeSelector.rules[i].value;
+    
+            var declarations = this.activeSelector.declarations; 
+            for (var i = 0; i < declarations.length; i++) {
+                if (declarations[i].property === rule) {
+                    return declarations[i].value;
                 }
             }
             return '';
@@ -847,22 +866,8 @@
          * Update the main editor with the value of the parsed CSS
          */
         updateMainEditor: function ( compress ) {
-            var css;
-            if( typeof compress === 'undefined' || compress === true  ) {
-                css = this.parser.compressCSS( this.parsed );
-                // Also remove any empty selectors
-                css = css.filter( function(v){
-                    return (
-                        typeof v.type !== 'undefined' ||
-                        v.rules.length > 0
-                    );
-                } );
-            }
-            else {
-                css = this.parsed;
-            }
-
-            this.editor.codeMirror.setValue( this.parser.getCSSForEditor( css ).trim() );
+          //TODO: add back compress option to remove/merge duplicated CSS selectors.
+          this.editor.codeMirror.setValue( this.parser.stringify( this.parsed ) );
         },
 
         /**
@@ -902,27 +907,29 @@
         loadCSS: function (css, activeSelector) {
             this.css = css;
 
-            // Load the CSS and combine rules
-            this.parsed = this.parser.compressCSS( this.parser.parseCSS(css) );
+            // Load the CSS
+            this.parsed = this.parser.parse(css, {silent:true});
+            var rules = this.parsed.stylesheet.rules;
 
             // Add the dropdown menu items
             var dropdown = this.$('.toolbar select').empty();
-            for (var i = 0; i < this.parsed.length; i++) {
-                var rule = this.parsed[i];
+            for (var i = 0; i < rules.length; i++) {
+                var rule = rules[i];
                 
-                // Exclude @imports statements
-                if(rule.type === 'imports') {
+                // Exclude @import statements
+                if(rule.type === 'import' || rule.type === 'comment') {
                     continue;
                 }
                   
-                if( typeof rule.subStyles !== 'undefined' ) {
+                if( rule.type === 'media' ) {
 
-                    for (var j = 0; j < rule.subStyles.length; j++) {
-                        var subRule = rule.subStyles[j];
+                    for (var j = 0; j < rule.rules.length; j++) {
+                        var mediaRule = '@media ' + rule.media;
+                        var subRule = rule.rules[j];
                         dropdown.append(
                             $('<option>')
-                                .html( rule.selector + ': ' + subRule.selector )
-                                .attr( 'val', rule.selector + ': ' + subRule.selector )
+                                .html( mediaRule + ': ' + subRule.selectors.join(',') )
+                                .attr( 'val', mediaRule + ': ' + subRule.selectors.join(',') )
                                 .data( 'selector', subRule )
                         );
                     }
@@ -931,8 +938,8 @@
                 else {
                     dropdown.append(
                         $('<option>')
-                            .html( rule.selector )
-                            .attr( 'val', rule.selector )
+                            .html( rule.selectors.join(',') )
+                            .attr( 'val', rule.selectors.join(',') )
                             .data( 'selector', rule )
                     );
                 }
