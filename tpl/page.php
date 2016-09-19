@@ -2,7 +2,10 @@
 /**
  * @var $custom_css_revisions array Saved revisions for the current theme.
  */
-$snippets = SiteOrigin_CSS::single()->get_snippets(); ?>
+
+$snippets = SiteOrigin_CSS::single()->get_snippets();
+$user = wp_get_current_user();
+?>
 
 <div class="wrap" id="siteorigin-custom-css">
 	<h2>
@@ -21,14 +24,19 @@ $snippets = SiteOrigin_CSS::single()->get_snippets(); ?>
 		</div>
 	<?php endif; ?>
 
-
 	<div id="poststuff">
 		<div id="so-custom-css-info">
 
-			<?php
-			$user = wp_get_current_user();
-			if( !get_user_meta( $user->ID, 'socss_hide_gs' ) ) {
-				?>
+			<?php if( $this->display_teaser() ) : ?>
+				<div class="postbox">
+					<h3 class="hndle"><span><?php _e('Get The Full Experience', 'so-css') ?></span></h3>
+					<div class="inside">
+						<?php printf( __( '%sSiteOrigin Premium%s adds a <strong>Google Web Font</strong> selector to SiteOrigin CSS so you can easy change any font.', 'so-css' ) , '<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugins/web-font-selector" target="_blank">', '</a>' ); ?>
+					</div>
+				</div>
+			<?php endif; ?>
+
+			<?php if( !get_user_meta( $user->ID, 'socss_hide_gs' ) ) : ?>
 				<div class="postbox" id="so-custom-css-getting-started">
 					<h3 class="hndle">
 						<span><?php _e('Getting Started Video', 'so-css') ?></span>
@@ -38,9 +46,7 @@ $snippets = SiteOrigin_CSS::single()->get_snippets(); ?>
 						<a href="https://siteorigin.com/css/getting-started/" target="_blank"><img src="<?php echo plugin_dir_url(__FILE__).'../css/images/video.jpg' ?>" /></a>
 					</div>
 				</div>
-				<?php
-			}
-			?>
+			<?php endif; ?>
 
 			<div class="postbox" id="so-custom-css-revisions">
 				<h3 class="hndle"><span><?php _e('CSS Revisions', 'so-css') ?></span></h3>

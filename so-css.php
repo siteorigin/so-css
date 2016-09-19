@@ -249,6 +249,12 @@ class SiteOrigin_CSS {
 		include plugin_dir_path(__FILE__).'/tpl/page.php';
 	}
 
+
+	function display_teaser(){
+		return apply_filters( 'siteorigin_premium_upgrade_teaser', true ) &&
+		! defined( 'SITEORIGIN_PREMIUM_VERSION' );
+	}
+
 	/**
 	 *
 	 */
