@@ -754,8 +754,7 @@
         setRuleValue: function (rule, value) {
             if (
               typeof this.activeSelector === 'undefined' ||
-              typeof this.activeSelector.declarations === 'undefined' ||
-              value === ''
+              typeof this.activeSelector.declarations === 'undefined'
             ) {
                 return;
             }
@@ -766,9 +765,13 @@
             for (var i = 0; i < declarations.length; i++) {
                 if (declarations[i].property === rule) {
                     newRule = false;
-                    if ( declarations[i].value !== value ) {
-                        declarations[i].value = value;
+                    var declaration = declarations[i];
+                    if ( declaration.value !== value ) {
+                        declaration.value = value;
                         valueChanged = true;
+                    }
+                    if ( _.isEmpty( declaration.value ) ) {
+                        declarations.splice( declarations.indexOf( declaration ) );
                     }
                     break;
                 }
@@ -834,14 +837,24 @@
          * @param value
          */
         updateImport: function(identifier, value) {
-            var valueChanged = false;
             var importRule = this.findImport(identifier);
             if ( importRule.import !== value.import ) {
                 importRule.import = value.import;
-            }
-
-            if ( valueChanged ) {
                 this.updateMainEditor(false);
+            }
+        },
+
+        /**
+         * Find @import which completely or partially contains the identifier value and remove it.
+         *
+         * @param identifier
+         */
+        removeImport: function(identifier) {
+            var importIndex = _.findIndex( this.parsed.stylesheet.rules, function ( rule ) {
+                return rule.type === 'import' && rule.import.indexOf(identifier) > -1;
+            } );
+            if ( importIndex > -1 ) {
+                this.parsed.stylesheet.rules.splice(importIndex, 1);
             }
         },
 
