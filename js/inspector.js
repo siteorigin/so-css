@@ -182,9 +182,9 @@
 
             var container = this.$('.socss-selectors-window').empty();
 
-            _.each( selectors, function(selector){
+            _.each( selectors, function( selector ){
                 container.append(
-                    $( thisView.selectorTemplate(selector) )
+                    $( thisView.selectorTemplate( selector ) )
                         .data( selector )
                 );
             } );
@@ -379,9 +379,8 @@
             return e.split(':').map( trimFunc );
         };
 
-
         var parsedCss = socss.fn.getParsedCss();
-    
+
         var isAtRule = function (ruleType) {
             switch(ruleType) {
                 case 'charset':
@@ -420,15 +419,15 @@
                                 var declarations = rule.declarations;
                                 for (var l = 0; l < declarations.length; l++) {
                                     elProperties.push({
-                                        'name': declarations.property,
-                                        'value': declarations.value,
+                                        'name': declarations[l].property,
+                                        'value': declarations[l].value,
                                         'specificity': parseInt( ruleSpecificity[l].specificity.replace( /,/g, '' ) )
                                     });
                                 }
                             }
                         }
                         catch (e) {
-                            // For now, we're just going to ignore rules that trigger jQuery errors
+                            // For now, we're just going to ignore rules that trigger errors
                         }
                     }
                 }
