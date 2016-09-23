@@ -810,6 +810,8 @@
                         declaration.value = value;
                         valueChanged = true;
                     }
+                    
+                    // Remove empty declarations
                     if ( _.isEmpty( declaration.value ) ) {
                         declarations.splice( declarations.indexOf( declaration ) );
                     }
@@ -817,7 +819,7 @@
                 }
             }
 
-            if (newRule) {
+            if ( newRule && !_.isEmpty( value ) ) {
                 declarations.push({
                     property: rule,
                     value: value,
@@ -1161,7 +1163,7 @@
         },
 
         getValue: function () {
-            return this.field.minicolors('value');
+            return this.field.minicolors('value').trim();
         },
 
         setValue: function (val, options) {
