@@ -45,3 +45,10 @@
 
 	</div>
 </script>
+
+<script type="text/template" id="template-preview-window">
+	<div id="preview-navigator">
+		<input type="text" data-invalid-uri="<?php esc_attr_e( "Invalid URI. Please make sure you're using a URL from the same site.", 'so-css' ) ?>" />
+	</div>
+	<iframe id="preview-iframe" seamless="seamless"></iframe>
+</script>

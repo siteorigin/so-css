@@ -179,6 +179,9 @@ class SiteOrigin_CSS {
 		// We need Font Awesome
 		wp_enqueue_style( 'siteorigin-custom-css-font-awesome', plugin_dir_url(__FILE__) . 'lib/fontawesome/css/font-awesome.min.css', array( ), SOCSS_VERSION );
 
+		// URI parsing for preview navigation
+		wp_enqueue_script( 'siteorigin-uri', plugin_dir_url(__FILE__) . 'js/URI' . SOCSS_JS_SUFFIX . '.js', array( ), SOCSS_VERSION, true );
+
 		// All the custom SiteOrigin CSS stuff
 		wp_enqueue_script( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'js/editor' . SOCSS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'siteorigin-css-parser-lib', 'codemirror' ), SOCSS_VERSION, true );
 		wp_enqueue_style( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'css/admin.css', array( ), SOCSS_VERSION );

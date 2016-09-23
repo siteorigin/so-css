@@ -422,8 +422,10 @@
      */
     socss.view.preview = Backbone.View.extend({
 
-        template: _.template('<iframe class="preview-iframe" seamless="seamless"></iframe>'),
+        template: _.template( $('#template-preview-window').html() ),
         editor: null,
+        originalUri: null,
+        currentUri: null,
 
         initialize: function (attr) {
             this.editor = attr.editor;
@@ -437,12 +439,19 @@
         render: function () {
             var thisView = this;
 
-            this.$el.html(this.template());
+            this.$el.html( this.template() );
 
-            this.$('.preview-iframe')
-                .attr('src', socssOptions.homeURL)
+            this.$( '#preview-iframe' )
+                .attr( 'src', socssOptions.homeURL )
                 .load(function () {
                     var $$ = $(this);
+
+                    // Update the current URI with the iframe URI
+                    thisView.currentUri = new URI( $$.contents().get(0).location.href );
+                    thisView.currentUri.removeQuery( 'so_css_preview' );
+                    thisView.$( '#preview-navigator input' ).val( thisView.currentUri.toString() );
+                    thisView.currentUri.addQuery( 'so_css_preview', 1 );
+
                     $$.contents().find('a').each(function () {
                         var href = $(this).attr('href');
                         if (href === undefined) {
@@ -458,13 +467,44 @@
                 .mouseleave(function () {
                     thisView.clearHighlight();
                 });
+
+            this.$( '#preview-navigator input' ).keydown( function( e ){
+                var $$ = $(this);
+
+                if( e.keyCode == 13 ) {
+                    e.preventDefault();
+
+                    var newUri = new URI( $$.val() );
+
+                    // Validate the URI
+                    if(
+                        thisView.originalUri.host() !== newUri.host() ||
+                        thisView.originalUri.protocol() !== newUri.protocol()
+                    ) {
+                        $$.blur();
+                        alert( $$.data( 'invalid-uri' ) );
+                        $$.focus();
+                    }
+                    else {
+                        newUri.addQuery( 'so_css_preview', 1 );
+                        thisView.$( '#preview-iframe' ).attr( 'src', newUri.toString() );
+                    }
+                }
+            } );
+
+            this.originalUri = new URI( socssOptions.homeURL );
+            this.currentUri = new URI( socssOptions.homeURL );
+
+            this.currentUri.removeQuery( 'so_css_preview' );
+            this.$('#preview-navigator input').val( this.currentUri.toString() );
+            this.currentUri.addQuery( 'so_css_preview', 1 );
         },
 
         /**
          * Update the preview CSS from the CodeMirror value in the editor
          */
         updatePreviewCss: function () {
-            var preview = this.$('.preview-iframe');
+            var preview = this.$('#preview-iframe');
             if (preview.length === 0) {
                 return;
             }

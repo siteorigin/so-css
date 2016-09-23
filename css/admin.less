@@ -90,7 +90,7 @@
 #so-custom-css-form {
 
 	.custom-css-preview {
-		iframe {
+		iframe, #preview-navigator {
 			display: none;
 		}
 	}
@@ -228,13 +228,33 @@
 		.custom-css-preview {
 			position: fixed;
 			display: block;
-			top: 0;
+			top: 40px;
 			right: 0;
 			bottom: 0;
 			left: @expanded_form_width;
 			background: #ffffff;
 
-			iframe {
+			#preview-navigator {
+				display: block;
+				.box-sizing( border-box );
+				padding: 6px 10px;
+				position: absolute;
+				width: 100%;
+				height: 40px;
+				top: -40px;
+				.gradient( #bbb, #bbb, #eee );
+				border-bottom: 1px solid #888;
+
+				input {
+					width: 100%;
+					border: 1px solid #888;
+					border-radius: 2px;
+					color: #444;
+					.box-shadow( ~"inset 2px 2px 2px rgba( 0,0,0,0.1 )" );
+				}
+			}
+
+			#preview-iframe {
 				display: block;
 				width: 100%;
 				height: 100%;
