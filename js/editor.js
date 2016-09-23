@@ -115,7 +115,7 @@
             var initValue = $textArea.val();
             // Pad with empty lines so the editor takes up all the white space. To try make sure user gets copy/paste
             // options in context menu.
-            var newlineMatches = initValue.match(/\n/gm); 
+            var newlineMatches = initValue.match(/\n/gm);
             var lineCount = newlineMatches ? newlineMatches.length+1 : 1;
             var numPadLines = 15 - lineCount;
             var paddedValue = initValue;
@@ -669,7 +669,7 @@
          */
         render: function () {
             var thisView = this;
-            
+
             // Clean up for potential re-renders
             this.$('.section-tabs').empty();
             this.$('.sections').empty();
@@ -754,21 +754,24 @@
         setRuleValue: function (rule, value) {
             if (
               typeof this.activeSelector === 'undefined' ||
-              typeof this.activeSelector.declarations === 'undefined' ||
-              value === ''
+              typeof this.activeSelector.declarations === 'undefined'
             ) {
                 return;
             }
-    
+
             var declarations = this.activeSelector.declarations;
             var newRule = true;
             var valueChanged = false;
             for (var i = 0; i < declarations.length; i++) {
                 if (declarations[i].property === rule) {
                     newRule = false;
-                    if ( declarations[i].value !== value ) {
-                        declarations[i].value = value;
+                    var declaration = declarations[i];
+                    if ( declaration.value !== value ) {
+                        declaration.value = value;
                         valueChanged = true;
+                    }
+                    if ( _.isEmpty( declaration.value ) ) {
+                        declarations.splice( declarations.indexOf( declaration ) );
                     }
                     break;
                 }
@@ -780,8 +783,9 @@
                     value: value,
                     type: 'declaration',
                 });
+                valueChanged = true;
             }
-            
+
             if ( valueChanged ) {
                 this.updateMainEditor(false);
             }
@@ -789,32 +793,32 @@
 
         /**
          * Adds the @import rule value if it doesn't already exist.
-         * 
+         *
          * @param newRule
-         * 
+         *
          */
         addImport: function (newRule) {
-            
+
             // get @import rules
             // check if any have the same value
             // if not, then add the new @ rule
-          
+
             var importRules = _.filter( this.parsed.stylesheet.rules, function ( rule) {
                 return rule.type === 'import';
             } );
             var exists = _.any( importRules, function ( rule ) {
                 return rule.import === newRule.import;
               } );
-            
+
             if ( !exists ) {
                 // Add it to the top!
                 // @import statements must precede other rule types.
                 this.parsed.stylesheet.rules.unshift( newRule );
                 this.updateMainEditor( false );
             }
-            
+
         },
-    
+
         /**
          * Find @import which completely or partially contains the specified value.
          *
@@ -825,7 +829,7 @@
                 return rule.type === 'import' && rule.import.indexOf(value) > -1;
             } );
         },
-        
+
         /**
          * Find @import which completely or partially contains the identifier value and update it's import property.
          *
@@ -833,14 +837,24 @@
          * @param value
          */
         updateImport: function(identifier, value) {
-            var valueChanged = false;
             var importRule = this.findImport(identifier);
             if ( importRule.import !== value.import ) {
                 importRule.import = value.import;
-            }
-            
-            if ( valueChanged ) {
                 this.updateMainEditor(false);
+            }
+        },
+
+        /**
+         * Find @import which completely or partially contains the identifier value and remove it.
+         *
+         * @param identifier
+         */
+        removeImport: function(identifier) {
+            var importIndex = _.findIndex( this.parsed.stylesheet.rules, function ( rule ) {
+                return rule.type === 'import' && rule.import.indexOf(identifier) > -1;
+            } );
+            if ( importIndex > -1 ) {
+                this.parsed.stylesheet.rules.splice(importIndex, 1);
             }
         },
 
@@ -852,8 +866,8 @@
             if (typeof this.activeSelector === 'undefined' || typeof this.activeSelector.declarations === 'undefined') {
                 return '';
             }
-    
-            var declarations = this.activeSelector.declarations; 
+
+            var declarations = this.activeSelector.declarations;
             for (var i = 0; i < declarations.length; i++) {
                 if (declarations[i].property === rule) {
                     return declarations[i].value;
@@ -915,12 +929,12 @@
             var dropdown = this.$('.toolbar select').empty();
             for (var i = 0; i < rules.length; i++) {
                 var rule = rules[i];
-                
+
                 // Exclude @import statements
-                if(rule.type === 'import' || rule.type === 'comment') {
+                if ( ! _.contains( [ 'rule', 'media' ], rule.type) ) {
                     continue;
                 }
-                  
+
                 if( rule.type === 'media' ) {
 
                     for (var j = 0; j < rule.rules.length; j++) {
