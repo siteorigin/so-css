@@ -334,6 +334,9 @@
   font-size: 12px;
   padding: 5px 8px;
 }
+#so-custom-css-properties .sections .fields-table .minicolors input {
+  padding-left: 30px;
+}
 #so-custom-css-properties .sections .fields-table .select {
   display: block;
   position: absolute;
