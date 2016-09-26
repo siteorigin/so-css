@@ -1,0 +1,9 @@
+{
+  "name": "so-css",
+  "version": "0.0.1",
+  "repository": "https://github.com/siteorigin/so-css",
+  "license": "GPL-2.0+",
+  "dependencies": {
+    "css": "^2.2.1"
+  }
+}

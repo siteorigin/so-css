@@ -115,7 +115,7 @@
             var initValue = $textArea.val();
             // Pad with empty lines so the editor takes up all the white space. To try make sure user gets copy/paste
             // options in context menu.
-            var newlineMatches = initValue.match(/\n/gm); 
+            var newlineMatches = initValue.match(/\n/gm);
             var lineCount = newlineMatches ? newlineMatches.length+1 : 1;
             var numPadLines = 15 - lineCount;
             var paddedValue = initValue;
@@ -422,8 +422,10 @@
      */
     socss.view.preview = Backbone.View.extend({
 
-        template: _.template('<iframe class="preview-iframe" seamless="seamless"></iframe>'),
+        template: _.template( $('#template-preview-window').html() ),
         editor: null,
+        originalUri: null,
+        currentUri: null,
 
         initialize: function (attr) {
             this.editor = attr.editor;
@@ -437,12 +439,19 @@
         render: function () {
             var thisView = this;
 
-            this.$el.html(this.template());
+            this.$el.html( this.template() );
 
-            this.$('.preview-iframe')
-                .attr('src', socssOptions.homeURL)
+            this.$( '#preview-iframe' )
+                .attr( 'src', socssOptions.homeURL )
                 .load(function () {
                     var $$ = $(this);
+
+                    // Update the current URI with the iframe URI
+                    thisView.currentUri = new URI( $$.contents().get(0).location.href );
+                    thisView.currentUri.removeQuery( 'so_css_preview' );
+                    thisView.$( '#preview-navigator input' ).val( thisView.currentUri.toString() );
+                    thisView.currentUri.addQuery( 'so_css_preview', 1 );
+
                     $$.contents().find('a').each(function () {
                         var href = $(this).attr('href');
                         if (href === undefined) {
@@ -458,13 +467,44 @@
                 .mouseleave(function () {
                     thisView.clearHighlight();
                 });
+
+            this.$( '#preview-navigator input' ).keydown( function( e ){
+                var $$ = $(this);
+
+                if( e.keyCode == 13 ) {
+                    e.preventDefault();
+
+                    var newUri = new URI( $$.val() );
+
+                    // Validate the URI
+                    if(
+                        thisView.originalUri.host() !== newUri.host() ||
+                        thisView.originalUri.protocol() !== newUri.protocol()
+                    ) {
+                        $$.blur();
+                        alert( $$.data( 'invalid-uri' ) );
+                        $$.focus();
+                    }
+                    else {
+                        newUri.addQuery( 'so_css_preview', 1 );
+                        thisView.$( '#preview-iframe' ).attr( 'src', newUri.toString() );
+                    }
+                }
+            } );
+
+            this.originalUri = new URI( socssOptions.homeURL );
+            this.currentUri = new URI( socssOptions.homeURL );
+
+            this.currentUri.removeQuery( 'so_css_preview' );
+            this.$('#preview-navigator input').val( this.currentUri.toString() );
+            this.currentUri.addQuery( 'so_css_preview', 1 );
         },
 
         /**
          * Update the preview CSS from the CodeMirror value in the editor
          */
         updatePreviewCss: function () {
-            var preview = this.$('.preview-iframe');
+            var preview = this.$('#preview-iframe');
             if (preview.length === 0) {
                 return;
             }
@@ -660,7 +700,7 @@
          * Initialize the properties editor with a new model
          */
         initialize: function ( attr ) {
-            this.parser = new cssjs();
+            this.parser = window.css;
             this.editor = attr.editor;
         },
 
@@ -669,7 +709,7 @@
          */
         render: function () {
             var thisView = this;
-            
+
             // Clean up for potential re-renders
             this.$('.section-tabs').empty();
             this.$('.sections').empty();
@@ -752,71 +792,112 @@
          * @param value
          */
         setRuleValue: function (rule, value) {
-            if (typeof this.activeSelector === 'undefined' || typeof this.activeSelector.rules === 'undefined') {
+            if (
+              typeof this.activeSelector === 'undefined' ||
+              typeof this.activeSelector.declarations === 'undefined'
+            ) {
                 return;
             }
 
+            var declarations = this.activeSelector.declarations;
             var newRule = true;
-            for (var i = 0; i < this.activeSelector.rules.length; i++) {
-                if (this.activeSelector.rules[i].directive === rule) {
-                    this.activeSelector.rules[i].value = value;
+            var valueChanged = false;
+            for (var i = 0; i < declarations.length; i++) {
+                if (declarations[i].property === rule) {
                     newRule = false;
+                    var declaration = declarations[i];
+                    if ( declaration.value !== value ) {
+                        declaration.value = value;
+                        valueChanged = true;
+                    }
+                    
+                    // Remove empty declarations
+                    if ( _.isEmpty( declaration.value ) ) {
+                        declarations.splice( declarations.indexOf( declaration ) );
+                    }
                     break;
                 }
             }
 
-            if (newRule) {
-                this.activeSelector.rules.push({
-                    directive: rule,
-                    value: value
+            if ( newRule && !_.isEmpty( value ) ) {
+                declarations.push({
+                    property: rule,
+                    value: value,
+                    type: 'declaration',
                 });
+                valueChanged = true;
             }
 
-            this.updateMainEditor( false );
+            if ( valueChanged ) {
+                this.updateMainEditor(false);
+            }
         },
 
         /**
          * Adds the @import rule value if it doesn't already exist.
-         * 
-         * @param atRule
-         * @param value
+         *
+         * @param newRule
+         *
          */
-        addImport: function (value) {
-            
+        addImport: function (newRule) {
+
             // get @import rules
             // check if any have the same value
             // if not, then add the new @ rule
-          
-            var importRules = _.filter( this.parsed, function ( selector ) {
-                return selector.selector.startsWith('@import');
+
+            var importRules = _.filter( this.parsed.stylesheet.rules, function ( rule) {
+                return rule.type === 'import';
             } );
             var exists = _.any( importRules, function ( rule ) {
-                return rule.styles === value;
+                return rule.import === newRule.import;
               } );
-            
+
             if ( !exists ) {
-                var newRule = {
-                    selector: '@imports',
-                    styles: value,
-                    type: 'imports'
-                };
-                // Add it to the top! @import statements must precede other rule types.
-                this.parsed.unshift( newRule );
+                // Add it to the top!
+                // @import statements must precede other rule types.
+                this.parsed.stylesheet.rules.unshift( newRule );
+                this.updateMainEditor( false );
             }
-            
-            this.updateMainEditor( false );
+
         },
-    
+
         /**
          * Find @import which completely or partially contains the specified value.
          *
          * @param value
          */
         findImport: function(value) {
-            
-            return _.find( this.parsed, function ( selector ) {
-                return selector.selector.startsWith('@import') && selector.styles.indexOf(value) > -1;
+            return _.find( this.parsed.stylesheet.rules, function ( rule ) {
+                return rule.type === 'import' && rule.import.indexOf(value) > -1;
             } );
+        },
+
+        /**
+         * Find @import which completely or partially contains the identifier value and update it's import property.
+         *
+         * @param identifier
+         * @param value
+         */
+        updateImport: function(identifier, value) {
+            var importRule = this.findImport(identifier);
+            if ( importRule.import !== value.import ) {
+                importRule.import = value.import;
+                this.updateMainEditor(false);
+            }
+        },
+
+        /**
+         * Find @import which completely or partially contains the identifier value and remove it.
+         *
+         * @param identifier
+         */
+        removeImport: function(identifier) {
+            var importIndex = _.findIndex( this.parsed.stylesheet.rules, function ( rule ) {
+                return rule.type === 'import' && rule.import.indexOf(identifier) > -1;
+            } );
+            if ( importIndex > -1 ) {
+                this.parsed.stylesheet.rules.splice(importIndex, 1);
+            }
         },
 
         /**
@@ -824,13 +905,14 @@
          * @param rule
          */
         getRuleValue: function (rule) {
-            if (typeof this.activeSelector === 'undefined' || typeof this.activeSelector.rules === 'undefined') {
+            if (typeof this.activeSelector === 'undefined' || typeof this.activeSelector.declarations === 'undefined') {
                 return '';
             }
 
-            for (var i = 0; i < this.activeSelector.rules.length; i++) {
-                if (this.activeSelector.rules[i].directive === rule) {
-                    return this.activeSelector.rules[i].value;
+            var declarations = this.activeSelector.declarations;
+            for (var i = 0; i < declarations.length; i++) {
+                if (declarations[i].property === rule) {
+                    return declarations[i].value;
                 }
             }
             return '';
@@ -840,22 +922,8 @@
          * Update the main editor with the value of the parsed CSS
          */
         updateMainEditor: function ( compress ) {
-            var css;
-            if( typeof compress === 'undefined' || compress === true  ) {
-                css = this.parser.compressCSS( this.parsed );
-                // Also remove any empty selectors
-                css = css.filter( function(v){
-                    return (
-                        typeof v.type !== 'undefined' ||
-                        v.rules.length > 0
-                    );
-                } );
-            }
-            else {
-                css = this.parsed;
-            }
-
-            this.editor.codeMirror.setValue( this.parser.getCSSForEditor( css ).trim() );
+          //TODO: add back compress option to remove/merge duplicated CSS selectors.
+          this.editor.codeMirror.setValue( this.parser.stringify( this.parsed ) );
         },
 
         /**
@@ -895,27 +963,29 @@
         loadCSS: function (css, activeSelector) {
             this.css = css;
 
-            // Load the CSS and combine rules
-            this.parsed = this.parser.compressCSS( this.parser.parseCSS(css) );
+            // Load the CSS
+            this.parsed = this.parser.parse(css, {silent:true});
+            var rules = this.parsed.stylesheet.rules;
 
             // Add the dropdown menu items
             var dropdown = this.$('.toolbar select').empty();
-            for (var i = 0; i < this.parsed.length; i++) {
-                var rule = this.parsed[i];
-                
-                // Exclude @imports statements
-                if(rule.type === 'imports') {
+            for (var i = 0; i < rules.length; i++) {
+                var rule = rules[i];
+
+                // Exclude @import statements
+                if ( ! _.contains( [ 'rule', 'media' ], rule.type) ) {
                     continue;
                 }
-                  
-                if( typeof rule.subStyles !== 'undefined' ) {
 
-                    for (var j = 0; j < rule.subStyles.length; j++) {
-                        var subRule = rule.subStyles[j];
+                if( rule.type === 'media' ) {
+
+                    for (var j = 0; j < rule.rules.length; j++) {
+                        var mediaRule = '@media ' + rule.media;
+                        var subRule = rule.rules[j];
                         dropdown.append(
                             $('<option>')
-                                .html( rule.selector + ': ' + subRule.selector )
-                                .attr( 'val', rule.selector + ': ' + subRule.selector )
+                                .html( mediaRule + ': ' + subRule.selectors.join(',') )
+                                .attr( 'val', mediaRule + ': ' + subRule.selectors.join(',') )
                                 .data( 'selector', subRule )
                         );
                     }
@@ -924,8 +994,8 @@
                 else {
                     dropdown.append(
                         $('<option>')
-                            .html( rule.selector )
-                            .attr( 'val', rule.selector )
+                            .html( rule.selectors.join(',') )
+                            .attr( 'val', rule.selectors.join(',') )
                             .data( 'selector', rule )
                     );
                 }
@@ -1093,7 +1163,7 @@
         },
 
         getValue: function () {
-            return this.field.minicolors('value');
+            return this.field.minicolors('value').trim();
         },
 
         setValue: function (val, options) {

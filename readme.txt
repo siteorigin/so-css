@@ -62,6 +62,12 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.1 - 26 September 2016 =
+* Changed CSS parsing library. Fixed several issues with the visual editor mode.
+* Added address bar to preview window.
+* Small CSS fixes.
+* Small changes to allow adding more visual editor fields.
+
 = 1.0.8 - 15 August 2016 =
 * Fixed action link.
 * Support for GlotPress.
