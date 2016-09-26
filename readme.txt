@@ -62,7 +62,7 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
-= 1.1 - 15 August 2016 =
+= 1.1 - 26 September 2016 =
 * Changed CSS parsing library. Fixed several issues with the visual editor mode.
 * Added address bar to preview window.
 * Small CSS fixes.
