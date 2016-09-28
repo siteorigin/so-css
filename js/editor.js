@@ -964,7 +964,9 @@
             this.css = css;
 
             // Load the CSS
-            this.parsed = this.parser.parse(css, {silent:true});
+            this.parsed = this.parser.parse(css, {
+                silent:true
+            } );
             var rules = this.parsed.stylesheet.rules;
 
             // Add the dropdown menu items
