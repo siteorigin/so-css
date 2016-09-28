@@ -62,6 +62,10 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.1.1 - 28 September 2016 =
+* Properly handle errors in frontend CSS.
+* Added notice about SiteOrigin Premium.
+
 = 1.1 - 26 September 2016 =
 * Changed CSS parsing library. Fixed several issues with the visual editor mode.
 * Added address bar to preview window.
