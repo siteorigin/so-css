@@ -36,6 +36,7 @@ module.exports = {
         src: [
             '**/!(*.js|*.less)',                // Everything except .js and .less files
             'lib/**/*.*',                       // libraries used at runtime
+            '!{node_modules,node_modules/**}',  // Ignore build/ and contents
             '!{build,build/**}',                // Ignore build/ and contents
             '!{tests,tests/**}',                // Ignore tests/ and contents
             '!{tmp,tmp/**}',                    // Ignore tmp/ and contents
