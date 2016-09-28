@@ -310,7 +310,9 @@
             var parser = window.css;
             $('.socss-theme-styles').each(function(){
                 var $$ = $(this);
-                var p = parser.parse( $$.html() );
+                var p = parser.parse( $$.html(), {
+                    silent: true
+                } );
                 socss.parsedCss[ $$.attr('id') ] = p;
             });
         }
