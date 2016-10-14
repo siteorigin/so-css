@@ -984,6 +984,9 @@
                     for (var j = 0; j < rule.rules.length; j++) {
                         var mediaRule = '@media ' + rule.media;
                         var subRule = rule.rules[j];
+                        if(subRule.type != 'rule') {
+                            continue;
+                        }
                         dropdown.append(
                             $('<option>')
                                 .html( mediaRule + ': ' + subRule.selectors.join(',') )
