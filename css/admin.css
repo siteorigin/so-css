@@ -335,7 +335,7 @@
   padding: 5px 8px;
 }
 #so-custom-css-properties .sections .fields-table .minicolors input {
-  padding-left: 30px;
+  padding: 14px 0 14px 30px;
 }
 #so-custom-css-properties .sections .fields-table .select {
   display: block;
