@@ -62,6 +62,12 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.1.2 - 11 November 2016 =
+* Ignore anything other than actual rules in media query subrules.
+* Removed depreciated jQuery function.
+* Updated CSSLint library.
+* Updated minicolors.
+
 = 1.1.1 - 28 September 2016 =
 * Properly handle errors in frontend CSS.
 * Added notice about SiteOrigin Premium.
