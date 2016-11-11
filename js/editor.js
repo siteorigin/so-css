@@ -443,7 +443,7 @@
 
             this.$( '#preview-iframe' )
                 .attr( 'src', socssOptions.homeURL )
-                .load(function () {
+                .on( 'load', function () {
                     var $$ = $(this);
 
                     // Update the current URI with the iframe URI
