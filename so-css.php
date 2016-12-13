@@ -12,7 +12,7 @@ Text Domain: so-css
 */
 
 // Handle the legacy CSS editor that came with SiteOrigin themes
-include plugin_dir_path(__FILE__) . '/inc/legacy.php';
+include plugin_dir_path( __FILE__ ) . 'inc/legacy.php';
 
 define('SOCSS_VERSION', 'dev');
 define('SOCSS_JS_SUFFIX', '');
@@ -86,7 +86,7 @@ class SiteOrigin_CSS {
 	}
 
 	function set_plugin_textdomain(){
-		load_plugin_textdomain('so-css', false, plugin_dir_path( __FILE__ ). '/languages/');
+		load_plugin_textdomain( 'so-css', false, plugin_dir_path( __FILE__ ) . 'languages/' );
 	}
 
 	/**
@@ -219,7 +219,7 @@ class SiteOrigin_CSS {
 	 * Get all the available property controllers
 	 */
 	function get_property_controllers() {
-		return include plugin_dir_path(__FILE__) . 'inc/controller-config.php';
+		return include plugin_dir_path( __FILE__ ) . 'inc/controller-config.php';
 	}
 
 	/**
@@ -247,7 +247,7 @@ class SiteOrigin_CSS {
 			$revision = true;
 		}
 
-		include plugin_dir_path(__FILE__).'/tpl/page.php';
+		include plugin_dir_path( __FILE__ ) . 'tpl/page.php';
 	}
 
 
