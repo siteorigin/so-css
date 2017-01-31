@@ -1,7 +1,7 @@
 === SiteOrigin CSS ===
 Tags: css, design, edit, customize
 Requires at least: 3.9
-Tested up to: 4.6
+Tested up to: 4.7.2
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv2 or later
@@ -62,6 +62,11 @@ We're actively developing SiteOrigin CSS. Keep track of what's happening over on
 We offer free support on the [SiteOrigin support forums](https://siteorigin.com/thread/).
 
 == Changelog ==
+
+= 1.1.3 - 31 January 2017 =
+* Removed leading slash in paths after plugin_dir_url().
+* Updated to latest CodeMirror.
+* Fixed padding issue that was causing problems with Firefox and the color picker.
 
 = 1.1.2 - 11 November 2016 =
 * Ignore anything other than actual rules in media query subrules.
