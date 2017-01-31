@@ -6,6 +6,7 @@ Stable tag: trunk
 Build time: unbuilt
 License: GPLv2 or later
 Contributors: gpriday
+Donate link: https://siteorigin.com/downloads/contribution/
 
 == Description ==
 
