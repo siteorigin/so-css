@@ -117,11 +117,7 @@
             // options in context menu.
             var newlineMatches = initValue.match(/\n/gm);
             var lineCount = newlineMatches ? newlineMatches.length+1 : 1;
-            var numPadLines = 15 - lineCount;
             var paddedValue = initValue;
-            for(var i = 0; i < numPadLines; i++) {
-                paddedValue += '\n';
-            }
             $textArea.val(paddedValue);
             this.codeMirror = CodeMirror.fromTextArea($textArea.get(0), {
                 tabSize: 2,
