@@ -65,6 +65,11 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.1.4 - 31 January 2017 =
+* Updated CodeMirror to 2.25.2.
+* Removed extra line padding.
+* Better integration with WordPress.org translation.
+
 = 1.1.3 - 31 January 2017 =
 * Removed leading slash in paths after plugin_dir_url().
 * Updated to latest CodeMirror.
