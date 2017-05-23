@@ -186,7 +186,9 @@ class SiteOrigin_CSS {
 
 		wp_localize_script( 'siteorigin-custom-css', 'socssOptions', array(
 			'themeCSS' => SiteOrigin_CSS::single()->get_theme_css(),
-			'homeURL' => add_query_arg( 'so_css_preview', '1', site_url() ),
+            // Pretty confusing, but it seems we should be using `home_url` and NOT `site_url`
+            // as described here => https://wordpress.stackexchange.com/a/50605
+			'homeURL' => add_query_arg( 'so_css_preview', '1', home_url() ),
 			'snippets' => $this->get_snippets(),
 
 			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() ),
