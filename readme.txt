@@ -8,13 +8,15 @@ License: GPLv2 or later
 Contributors: gpriday
 Donate link: https://siteorigin.com/downloads/contribution/
 
-== Description ==
+SiteOrigin CSS is the simple, yet powerful CSS editor for WordPress. It gives you visual controls that let you edit the look and feel of your site in real-time.
 
-[vimeo https://vimeo.com/129660380]
+== Description ==
 
 SiteOrigin CSS is the simple, yet powerful CSS editor for WordPress. It gives you visual controls that let you edit the look and feel of your site in real-time.
 
 We've created a site editing experience that will suit both beginners and advanced users alike. Beginners will love the simple visual controls and real-time preview. Advanced users will love the code autocompletion that makes writing CSS faster than ever.
+
+[vimeo https://vimeo.com/129660380]
 
 = Inspector =
 
@@ -62,6 +64,11 @@ We're actively developing SiteOrigin CSS. Keep track of what's happening over on
 We offer free support on the [SiteOrigin support forums](https://siteorigin.com/thread/).
 
 == Changelog ==
+
+= 1.1.4 - 31 January 2017 =
+* Updated CodeMirror to 2.25.2.
+* Removed extra line padding.
+* Better integration with WordPress.org translation.
 
 = 1.1.3 - 31 January 2017 =
 * Removed leading slash in paths after plugin_dir_url().
