@@ -86,7 +86,7 @@ class SiteOrigin_CSS {
 	}
 
 	function set_plugin_textdomain(){
-		load_plugin_textdomain( 'so-css', false, plugin_dir_path( __FILE__ ) . 'languages/' );
+		load_plugin_textdomain( 'so-css', false, plugin_dir_path( __FILE__ ) . 'lang/' );
 	}
 
 	/**
