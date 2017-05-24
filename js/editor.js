@@ -290,12 +290,23 @@
          * Scale the size of the editor depending on whether it's expanded or not
          */
         scaleEditor: function () {
+            var windowHeight = $( window ).outerHeight();
             if (this.$el.hasClass('expanded')) {
                 // If we're in the expanded view, then resize the editor
-                this.codeMirror.setSize('100%', $(window).outerHeight() - this.$('.custom-css-toolbar').outerHeight());
+                this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', '' );
+                this.codeMirror.setSize('100%', windowHeight - this.$('.custom-css-toolbar').outerHeight());
             }
             else {
-                this.codeMirror.setSize('100%', 'auto');
+                // Attempt to calculate approximate space available for editor when not expanded.
+                var $form = $( '#so-custom-css-form' );
+                var otherEltsHeight = $('#wpadminbar').outerHeight( true ) +
+                    $( '#siteorigin-custom-css' ).find( '> h2' ).outerHeight( true ) +
+                    $form.find( '> .custom-css-toolbar' ).outerHeight( true ) +
+                    $form.find( '> p.description' ).outerHeight( true ) +
+                    $form.find( '> p.submit' ).outerHeight( true ) +
+                    parseFloat( $( '#wpbody-content' ).css( 'padding-bottom' ) );
+                this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', windowHeight - otherEltsHeight );
+                this.codeMirror.setSize( '100%', 'auto' );
             }
         },
 
