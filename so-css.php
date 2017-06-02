@@ -44,6 +44,9 @@ class SiteOrigin_CSS {
 
 		// The request to hide the getting started video
 		add_action( 'wp_ajax_socss_hide_getting_started', array( $this, 'admin_action_hide_getting_started' ) );
+		
+		add_filter( 'page_row_actions', array( $this, 'admin_posts_list_actions' ), 10, 2 );
+		add_filter( 'post_row_actions', array( $this, 'admin_posts_list_actions' ), 10, 2 );
 
 		if( isset($_GET['so_css_preview']) && !is_admin() ) {
 
@@ -183,12 +186,22 @@ class SiteOrigin_CSS {
 		// All the custom SiteOrigin CSS stuff
 		wp_enqueue_script( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'js/editor' . SOCSS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'siteorigin-css-parser-lib', 'codemirror' ), SOCSS_VERSION, true );
 		wp_enqueue_style( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'css/admin.css', array( ), SOCSS_VERSION );
-
+		
+		// Pretty confusing, but it seems we should be using `home_url` and NOT `site_url`
+		// as described here => https://wordpress.stackexchange.com/a/50605
+		$init_url = home_url();
+        $edit_url = ! empty( $_REQUEST['edit_url'] ) ? $_REQUEST['edit_url'] : '';
+		$parsed = wp_parse_url( $edit_url );
+        if ( ! empty( $edit_url ) && $parsed['host'] == $_SERVER['HTTP_HOST'] ) {
+	        $init_url = $edit_url;
+        }
+        
+        $home_url = add_query_arg( 'so_css_preview', '1', $init_url );
+        
 		wp_localize_script( 'siteorigin-custom-css', 'socssOptions', array(
 			'themeCSS' => SiteOrigin_CSS::single()->get_theme_css(),
-            // Pretty confusing, but it seems we should be using `home_url` and NOT `site_url`
-            // as described here => https://wordpress.stackexchange.com/a/50605
-			'homeURL' => add_query_arg( 'so_css_preview', '1', home_url() ),
+			'homeURL' => $home_url,
+			'openVisualEditor' => $init_url == $edit_url,
 			'snippets' => $this->get_snippets(),
 
 			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() ),
@@ -256,6 +269,43 @@ class SiteOrigin_CSS {
 	function display_teaser(){
 		return apply_filters( 'siteorigin_premium_upgrade_teaser', true ) &&
 		! defined( 'SITEORIGIN_PREMIUM_VERSION' );
+	}
+
+	/**
+	 *  Adds 'Edit Custom CSS' row action link to page and post rows
+	 */
+	function admin_posts_list_actions( $actions, $post ){
+		$post_type_object = get_post_type_object( $post->post_type );
+		$can_edit_post = current_user_can( 'edit_post', $post->ID );
+		
+		if ( $can_edit_post && is_post_type_viewable( $post_type_object ) ) {
+			$edit_css_link = $this->get_edit_css_link( $post );
+			
+			$actions_keys = array_keys( $actions );
+			array_splice( $actions_keys, 1, 0, 'so_edit_custom_css' );
+			
+			$actions_values = array_values( $actions );
+			array_splice( $actions_values, 1, 0, sprintf(
+				'<a href="%s" aria-label="%s">%s</a>',
+				esc_url( $edit_css_link ),
+				esc_attr( __( 'Edit Custom CSS', 'so-widgets-bundle' ) ),
+				__( 'Edit Custom CSS', 'so-widgets-bundle' )
+			) );
+			
+			$actions = array_combine( $actions_keys, $actions_values );
+		}
+		
+		return $actions;
+	}
+	
+	
+	/**
+	 *  Generates the url to edit the custom CSS for a post.
+	 */
+	function get_edit_css_link( $post ) {
+		$url = admin_url( 'themes.php?page=so_custom_css' );
+		$post = get_post( $post );
+		return add_query_arg( 'edit_url', urlencode( set_url_scheme( get_permalink( $post ) ) ), $url );
 	}
 
 	/**

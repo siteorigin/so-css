@@ -101,6 +101,10 @@
                 el: this.$('.custom-css-preview')
             });
             this.preview.render();
+
+            if ( socssOptions.openVisualEditor ) {
+                this.$( '.editor-visual' ).click();
+            }
         },
 
         /**
