@@ -45,7 +45,7 @@ class SiteOrigin_CSS {
 		// The request to hide the getting started video
 		add_action( 'wp_ajax_socss_hide_getting_started', array( $this, 'admin_action_hide_getting_started' ) );
 
-		if( isset($_GET['so_css_preview']) && !is_admin() ) {
+		if( isset( $_GET['so_css_preview'] ) && !is_admin() ) {
 
 			add_action( 'plugins_loaded', array($this, 'disable_ngg_resource_manager') );
 			add_filter( 'show_admin_bar', '__return_false' );
@@ -82,12 +82,12 @@ class SiteOrigin_CSS {
 		$css_file_name = 'so-css-' . $this->theme;
 		$css_file_path = $upload_dir_path . $css_file_name . '.css';
 		
-		if ( file_exists( $css_file_path ) ) {
+		if ( empty( $_GET['so_css_preview'] ) && ! is_admin() && file_exists( $css_file_path ) ) {
 			wp_enqueue_style(
 				'so-css-' . $this->theme,
 				set_url_scheme( $upload_dir['baseurl'] . '/so-css/' . $css_file_name . '.css' ),
 				array(),
-				SOCSS_VERSION
+				$this->get_latest_revision_timestamp()
 			);
 		} else {
 			$custom_css = get_option( 'siteorigin_custom_css[' . $this->theme . ']', '' );
@@ -476,6 +476,14 @@ class SiteOrigin_CSS {
 
 		//The NextGen Gallery plugin does some weird interfering with the output buffer.
 		define('NGG_DISABLE_RESOURCE_MANAGER', true);
+	}
+	
+	private function get_latest_revision_timestamp() {
+		$revisions = get_option( 'siteorigin_custom_css_revisions[' . $this->theme . ']' );
+		krsort( $revisions );
+		$revision_times = array_keys( $revisions );
+		
+		return $revision_times[0];
 	}
 }
 
