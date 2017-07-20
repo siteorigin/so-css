@@ -84,14 +84,29 @@ class SiteOrigin_CSS {
 	/**
 	 * Display the custom CSS in the header.
 	 */
-	function action_wp_head(){
-		$custom_css = get_option( 'siteorigin_custom_css[' . $this->theme . ']', '' );
-		if ( empty( $custom_css ) ) return;
-
-		// We just need to enqueue a dummy style
-		echo "<style id='" . sanitize_html_class($this->theme) . "-custom-css' class='siteorigin-custom-css' type='text/css'>\n";
-		echo self::sanitize_css( $custom_css ) . "\n";
-		echo "</style>\n";
+	function action_wp_head() {
+		$upload_dir = wp_upload_dir();
+		$upload_dir_path = $upload_dir['basedir'] . '/so-css/';
+		
+		$css_file_name = 'so-css-' . $this->theme;
+		$css_file_path = $upload_dir_path . $css_file_name . '.css';
+		
+		if ( empty( $_GET['so_css_preview'] ) && ! is_admin() && file_exists( $css_file_path ) ) {
+			wp_enqueue_style(
+				'so-css-' . $this->theme,
+				set_url_scheme( $upload_dir['baseurl'] . '/so-css/' . $css_file_name . '.css' ),
+				array(),
+				$this->get_latest_revision_timestamp()
+			);
+		} else {
+			$custom_css = get_option( 'siteorigin_custom_css[' . $this->theme . ']', '' );
+			// We just need to enqueue a dummy style
+			if ( ! empty( $custom_css ) ) {
+				echo "<style id='" . sanitize_html_class($this->theme) . "-custom-css' class='siteorigin-custom-css' type='text/css'>\n";
+				echo self::sanitize_css( $custom_css ) . "\n";
+				echo "</style>\n";
+			}
+		}
 	}
 
 	function set_plugin_textdomain(){
@@ -106,24 +121,23 @@ class SiteOrigin_CSS {
 
 		if ( current_user_can('edit_theme_options') && isset( $_POST['siteorigin_custom_css_save'] ) ) {
 			check_admin_referer( 'custom_css', '_sononce' );
-			$theme = basename( get_template_directory() );
 
 			// Sanitize CSS input. Should keep most tags, apart from script and style tags.
 			$custom_css = self::sanitize_css( filter_input(INPUT_POST, 'custom_css' ) );
 
-			$current = get_option('siteorigin_custom_css[' . $theme . ']');
+			$current = get_option('siteorigin_custom_css[' . $this->theme . ']');
 			if( $current === false ) {
-				add_option( 'siteorigin_custom_css[' . $theme . ']', $custom_css , '', 'no' );
+				add_option( 'siteorigin_custom_css[' . $this->theme . ']', $custom_css , '', 'no' );
 			}
 			else {
-				update_option( 'siteorigin_custom_css[' . $theme . ']', $custom_css );
+				update_option( 'siteorigin_custom_css[' . $this->theme . ']', $custom_css );
 			}
 
 			// If this has changed, then add a revision.
 			if ( $current != $custom_css ) {
-				$revisions = get_option( 'siteorigin_custom_css_revisions[' . $theme . ']' );
+				$revisions = get_option( 'siteorigin_custom_css_revisions[' . $this->theme . ']' );
 				if ( empty( $revisions ) ) {
-					add_option( 'siteorigin_custom_css_revisions[' . $theme . ']', array(), '', 'no' );
+					add_option( 'siteorigin_custom_css_revisions[' . $this->theme . ']', array(), '', 'no' );
 					$revisions = array();
 				}
 				$revisions[ time() ] = $custom_css;
@@ -131,8 +145,31 @@ class SiteOrigin_CSS {
 				// Sort the revisions and cut off any old ones.
 				krsort($revisions);
 				$revisions = array_slice($revisions, 0, 15, true);
-
-				update_option( 'siteorigin_custom_css_revisions[' . $theme . ']', $revisions );
+				
+				update_option( 'siteorigin_custom_css_revisions[' . $this->theme . ']', $revisions );
+				
+				if( WP_Filesystem() ) {
+					global $wp_filesystem;
+					$upload_dir = wp_upload_dir();
+					$upload_dir_path = $upload_dir['basedir'] . '/so-css/';
+					
+					if ( ! $wp_filesystem->is_dir( $upload_dir_path ) ) {
+						$wp_filesystem->mkdir( $upload_dir_path );
+					}
+					
+					$css_file_name = 'so-css-' . $this->theme;
+					$css_file_path = $upload_dir_path . $css_file_name . '.css';
+					
+					if ( file_exists( $css_file_path ) ) {
+						$wp_filesystem->delete( $css_file_path );
+					}
+					
+					$wp_filesystem->put_contents(
+						$css_file_path,
+						$custom_css
+					);
+					
+				}
 			}
 		}
 	}
@@ -181,9 +218,9 @@ class SiteOrigin_CSS {
 			'id' => 'custom-css',
 			'title' => __( 'Custom CSS', 'so-css' ),
 			'content' => '<p>'
-	             . sprintf( __( "SiteOrigin CSS adds any custom CSS you enter here into your site's header. ", 'so-css' ) )
-	             . __( "These changes will persist across updates so it's best to make all your changes here. ", 'so-css' )
-	             . '</p>'
+				. sprintf( __( "SiteOrigin CSS adds any custom CSS you enter here into your site's header. ", 'so-css' ) )
+				. __( "These changes will persist across updates so it's best to make all your changes here. ", 'so-css' )
+				. '</p>'
 		) );
 	}
 
@@ -227,10 +264,11 @@ class SiteOrigin_CSS {
 		// All the custom SiteOrigin CSS stuff
 		wp_enqueue_script( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'js/editor' . SOCSS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'siteorigin-css-parser-lib', 'codemirror' ), SOCSS_VERSION, true );
 		wp_enqueue_style( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'css/admin.css', array( ), SOCSS_VERSION );
+
 		
-		// Pretty confusing, but it seems we should be using `home_url` and NOT `site_url`
-		// as described here => https://wordpress.stackexchange.com/a/50605
-		$init_url = home_url();
+            // Pretty confusing, but it seems we should be using `home_url` and NOT `site_url`
+            // as described here => https://wordpress.stackexchange.com/a/50605
+			$init_url = home_url();
         $edit_url = ! empty( $_REQUEST['edit_url'] ) ? $_REQUEST['edit_url'] : '';
 		$parsed = wp_parse_url( $edit_url );
         if ( ! empty( $edit_url ) && $parsed['host'] == $_SERVER['HTTP_HOST'] ) {
@@ -530,6 +568,14 @@ class SiteOrigin_CSS {
 
 		//The NextGen Gallery plugin does some weird interfering with the output buffer.
 		define('NGG_DISABLE_RESOURCE_MANAGER', true);
+	}
+	
+	private function get_latest_revision_timestamp() {
+		$revisions = get_option( 'siteorigin_custom_css_revisions[' . $this->theme . ']' );
+		krsort( $revisions );
+		$revision_times = array_keys( $revisions );
+		
+		return $revision_times[0];
 	}
 }
 
