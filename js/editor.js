@@ -290,12 +290,23 @@
          * Scale the size of the editor depending on whether it's expanded or not
          */
         scaleEditor: function () {
+            var windowHeight = $( window ).outerHeight();
             if (this.$el.hasClass('expanded')) {
                 // If we're in the expanded view, then resize the editor
-                this.codeMirror.setSize('100%', $(window).outerHeight() - this.$('.custom-css-toolbar').outerHeight());
+                this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', '' );
+                this.codeMirror.setSize('100%', windowHeight - this.$('.custom-css-toolbar').outerHeight());
             }
             else {
-                this.codeMirror.setSize('100%', 'auto');
+                // Attempt to calculate approximate space available for editor when not expanded.
+                var $form = $( '#so-custom-css-form' );
+                var otherEltsHeight = $('#wpadminbar').outerHeight( true ) +
+                    $( '#siteorigin-custom-css' ).find( '> h2' ).outerHeight( true ) +
+                    $form.find( '> .custom-css-toolbar' ).outerHeight( true ) +
+                    $form.find( '> p.description' ).outerHeight( true ) +
+                    $form.find( '> p.submit' ).outerHeight( true ) +
+                    parseFloat( $( '#wpbody-content' ).css( 'padding-bottom' ) );
+                this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', windowHeight - otherEltsHeight );
+                this.codeMirror.setSize( '100%', 'auto' );
             }
         },
 
@@ -1481,32 +1492,46 @@
             var $dec = $('<div class="dec-button socss-button"><span class="fa fa-minus"></span></div>').appendTo($diw);
             var $inc = $('<div class="inc-button socss-button"><span class="fa fa-plus"></span></div>').appendTo($diw);
 
-            // Increment is clicked
-            $inc.click( function(){
-                var value = thisView.parseUnits( $el.val() );
-                if( value.value === '' ) {
-                    return true;
+            var stepValue = function( direction ) {
+                var value = Number.parseInt( thisView.parseUnits( $el.val() ).value );
+
+                if( Number.isNaN( value ) ) {
+                    value = 0;
                 }
 
-                var newVal = Math.ceil( value.value * 1.05 );
+                var newVal = value + direction;
 
                 $fi.val( newVal );
                 updateValue();
                 $el.trigger('change').trigger('measurement_refresh');
-            } );
+            };
 
-            $dec.click( function(){
-                var value = thisView.parseUnits( $el.val() );
-                if( value.value === '' ) {
-                    return true;
-                }
+            var setupStepButton = function ( $button ) {
+                var direction = $button.is( '.dec-button' ) ? -1 : 1;
+                var intervalId;
+                var timeoutId;
+                $button.mousedown( function(){
+                    stepValue( direction );
+                    timeoutId = setTimeout( function () {
+                        intervalId = setInterval( function () {
+                            stepValue( direction );
+                        }, 50 );
+                    }, 500 );
+                } ).on( 'mouseup mouseout', function(){
+                    if ( timeoutId ) {
+                        clearTimeout( timeoutId );
+                        timeoutId = null;
+                    }
+                    if ( intervalId ) {
+                        clearInterval( intervalId );
+                        intervalId = null;
+                    }
+                } );
+            };
 
-                var newVal = Math.floor( value.value / 1.05 );
+            setupStepButton( $dec );
+            setupStepButton( $inc );
 
-                $fi.val( newVal );
-                updateValue();
-                $el.trigger('change').trigger('measurement_refresh');
-            } );
         }
 
     } );
