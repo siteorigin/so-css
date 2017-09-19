@@ -65,6 +65,13 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.1.5 - 14 September 2017 =
+* Use `home_url` instead of `site_url` to determine where to open CSS preview.
+* Increment and decrement buttons work when value empty or zero. Also added repeating action while button held down.
+* Scroll editor instead of the whole page so 'Save' button is always visible.
+* Set color CSS on visual editor and inspector.
+* Saving generated CSS to stylesheet file in uploads directory.
+
 = 1.1.4 - 31 January 2017 =
 * Updated CodeMirror to 2.25.2.
 * Removed extra line padding.
