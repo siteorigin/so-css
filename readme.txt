@@ -65,7 +65,7 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
-= 1.1.5 - 14 September 2017 =
+= 1.1.5 - 19 September 2017 =
 * Use `home_url` instead of `site_url` to determine where to open CSS preview.
 * Increment and decrement buttons work when value empty or zero. Also added repeating action while button held down.
 * Scroll editor instead of the whole page so 'Save' button is always visible.
