@@ -480,6 +480,9 @@ class SiteOrigin_CSS {
 	
 	private function get_latest_revision_timestamp() {
 		$revisions = get_option( 'siteorigin_custom_css_revisions[' . $this->theme . ']' );
+		if( empty( $revisions) ) {
+			return false;
+		}
 		krsort( $revisions );
 		$revision_times = array_keys( $revisions );
 		
