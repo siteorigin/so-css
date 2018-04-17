@@ -98,7 +98,7 @@ $user = wp_get_current_user();
 			<p class="description"><?php SiteOrigin_CSS::editor_description() ?></p>
 
 			<p class="submit">
-				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( 'Save CSS', 'so-css' ); ?>" />
+				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( ( ! empty ( $revision ) ?  __( 'Revert to this revision', 'so-css' ) : __( 'Save CSS', 'so-css' ) ) ); ?>" />
 			</p>
 
 			<div class="custom-css-preview">
