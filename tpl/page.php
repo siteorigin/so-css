@@ -19,7 +19,7 @@ $user = wp_get_current_user();
 	<?php endif; ?>
 
 	<?php if(!empty($revision)) : ?>
-		<div class="updated settings-error">
+		<div class="notice notice-info settings-error">
 			<p><?php _e('Viewing a revision. Save CSS to keep using this revision.', 'so-css') ?></p>
 		</div>
 	<?php endif; ?>
