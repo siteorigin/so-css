@@ -129,6 +129,9 @@
                     "CodeMirror-lint-markers"
                 ],
                 lint: true,
+                search: true,
+                dialog: true,
+                annotateScrollbar: true,
             });
 
             // Make sure the user doesn't leave without saving
