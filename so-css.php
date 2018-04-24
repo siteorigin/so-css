@@ -270,7 +270,7 @@ class SiteOrigin_CSS {
 
 	function plugin_action_links( $links ){
 		if( isset($links['edit']) ) unset( $links['edit'] );
-		$links['css_editor'] = '<a href="' . admin_url('themes.php?page=so_custom_css') . '">'.__('CSS Editor', 'so-css').'</a>';
+		$links['css_editor'] = '<a href="' . admin_url( 'themes.php?page=so_custom_css' ) . '">'.__('CSS Editor', 'so-css').'</a>';
 		$links['support'] = '<a href="https://siteorigin.com/thread/" target="_blank">'.__('Support', 'so-css').'</a>';
 		return $links;
 	}
@@ -282,9 +282,11 @@ class SiteOrigin_CSS {
 		$custom_css_revisions = get_option('siteorigin_custom_css_revisions[' . $theme . ']');
 
 		if( !empty( $_GET['theme'] ) && $_GET['theme'] == $theme && !empty( $_GET['time'] ) && !empty( $custom_css_revisions[$_GET['time']] ) ) {
-			$custom_css = $custom_css_revisions[$_GET['time']];
-			$revision = true;
+			$revision = $_GET['time'];
+			$custom_css = $custom_css_revisions[ $revision ];
 		}
+		
+		krsort( $custom_css_revisions );
 
 		include plugin_dir_path( __FILE__ ) . 'tpl/page.php';
 	}

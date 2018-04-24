@@ -1,10 +1,15 @@
 <?php
 /**
+ * @var $custom_css string The custom CSS string to be edited.
+ * @var $revision int If the CSS to be edited is a revision, this will contain the timestamp of the revision.
  * @var $custom_css_revisions array Saved revisions for the current theme.
  */
 
 $snippets = SiteOrigin_CSS::single()->get_snippets();
 $user = wp_get_current_user();
+if ( ! empty( $revision ) ) {
+	$revision_date = date( 'j F Y @ H:i:s', $revision + get_option( 'gmt_offset' ) * 60 * 60 );
+}
 ?>
 
 <div class="wrap" id="siteorigin-custom-css">
@@ -15,12 +20,12 @@ $user = wp_get_current_user();
 
 
 	<?php if( isset($_POST['siteorigin_custom_css_save']) ) : ?>
-		<div class="updated settings-error"><p><?php _e('Site design updated.', 'so-css') ?></p></div>
+		<div class="notice notice-success"><p><?php _e('Site design updated.', 'so-css') ?></p></div>
 	<?php endif; ?>
 
-	<?php if(!empty($revision)) : ?>
-		<div class="notice notice-info settings-error">
-			<p><?php _e('Viewing a revision. Save CSS to keep using this revision.', 'so-css') ?></p>
+	<?php if ( ! empty( $revision ) ) : ?>
+		<div class="notice notice-warning">
+			<p><?php printf( __( 'Editing revision dated %s. Click %sRevert to this revision%s to keep using it.', 'so-css'), $revision_date, '<em>', '</em>' ) ?></p>
 		</div>
 	<?php endif; ?>
 
@@ -45,19 +50,25 @@ $user = wp_get_current_user();
 					<ol data-confirm="<?php esc_attr_e('Are you sure you want to load this revision?', 'so-css') ?>">
 						<?php
 						if ( is_array( $custom_css_revisions ) ) {
-							$is_current = true;
+							$i = 0;
 							foreach ( $custom_css_revisions as $time => $css ) {
+								$is_current = ( empty( $revision ) && $i == 0 ) || ( ! empty( $revision ) && $time == $revision );
+								$link_url = $i == 0 ?
+									admin_url( 'themes.php?page=so_custom_css' ) :
+									add_query_arg( array( 'theme' => $theme, 'time' => $time ) );
 								?>
 								<li>
-									<?php if ( $is_current ) : ?>
-										<?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?> (Current)
-										<?php $is_current = false; ?>
-									<?php else : ?>
-										<a href="<?php echo esc_url( add_query_arg( array( 'theme' => $theme, 'time' => $time ) ) ) ?>" class="load-css-revision"><?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?></a>
-										(<?php printf(__('%d chars', 'so-css'), strlen($css)) ?>)
+									<?php if ( ! $is_current ) : ?>
+									<a href="<?php echo esc_url( $link_url ) ?>" class="load-css-revision">
 									<?php endif; ?>
+										<?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?>
+									<?php if ( ! $is_current ) : ?>
+									</a>
+									<?php endif; ?>
+									(<?php printf( __('%d chars', 'so-css'), strlen( $css ) ) ?>)<?php if ( $i == 0 ) : ?> (<?php _e( 'Latest', 'so-css' ) ?>)<?php endif; ?>
 								</li>
 								<?php
+								$i++;
 							}
 						}
 						?>
