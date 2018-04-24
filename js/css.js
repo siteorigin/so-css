@@ -722,7 +722,7 @@ function amdefine(module, requireFn) {
 
 module.exports = amdefine;
 
-}).call(this,require('_process'),"/node_modules/amdefine/amdefine.js")
+}).call(this,require('_process'),"/node_modules\\amdefine\\amdefine.js")
 },{"_process":3,"path":2}],6:[function(require,module,exports){
 exports.parse = require('./lib/parse');
 exports.stringify = require('./lib/stringify');
