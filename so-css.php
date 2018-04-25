@@ -362,7 +362,9 @@ class SiteOrigin_CSS {
 			$custom_css = $custom_css_revisions[ $revision ];
 		}
 		
-		krsort( $custom_css_revisions );
+		if ( ! empty( $custom_css_revisions ) ) {
+			krsort( $custom_css_revisions );
+		}
 		
 		include plugin_dir_path( __FILE__ ) . 'tpl/page.php';
 	}
@@ -390,7 +392,7 @@ class SiteOrigin_CSS {
 			array_splice( $actions_values, 1, 0, sprintf(
 				'<a href="%s" aria-label="%s">%s</a>',
 				esc_url( $edit_css_link ),
-				esc_attr( __( 'Edit Custom CSS', 'so-widgets-bundle' ) ),
+				esc_attr__( 'Edit Custom CSS', 'so-widgets-bundle' ),
 				__( 'Edit Custom CSS', 'so-widgets-bundle' )
 			) );
 			
