@@ -344,7 +344,7 @@ class SiteOrigin_CSS {
 		if ( ! empty( $custom_css_revisions ) ) {
 			krsort( $custom_css_revisions );
 		}
-		
+
 		include plugin_dir_path( __FILE__ ) . 'tpl/page.php';
 	}
 

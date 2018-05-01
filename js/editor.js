@@ -16,36 +16,23 @@
 	 */
 	socss.view.toolbar = Backbone.View.extend( {
 		
-		button: _.template( '<li><a href="#" class="toolbar-button socss-button"><%= text %></a></li>' ),
+		button: _.template( '<li><a href="#<%= action %>" class="toolbar-button socss-button"><%= text %></a></li>' ),
 		
-		editor: null,
+		events: {
+			'click .socss-button': 'triggerEvent',
+		},
 		
-		initialize: function ( attr ) {
-			this.editor = attr.editor;
-			
-			var thisView = this;
-			this.$( '.editor-expand' ).click( function ( e ) {
-				e.preventDefault();
-				$( this ).blur();
-				thisView.trigger( 'click_expand' );
-			} );
-			
-			this.$( '.editor-visual' ).click( function ( e ) {
-				e.preventDefault();
-				$( this ).blur();
-				thisView.trigger( 'click_visual' );
-			} );
+		triggerEvent: function ( event ) {
+			event.preventDefault();
+			var $target = $( event.currentTarget );
+			$target.blur();
+			var value = $target.attr( 'href' ).replace( '#', '' );
+			this.$el.trigger( 'click_' + value );
 		},
 		
 		addButton: function ( text, action ) {
-			var thisView = this;
-			var button = $( this.button( { text: text } ) )
-			.appendTo( this.$( '.toolbar-function-buttons .toolbar-buttons' ) )
-			.click( function ( e ) {
-				e.preventDefault();
-				$( this ).blur();
-				thisView.trigger( 'click_' + action );
-			} );
+			var button = $( this.button( { text: text, action: action } ) )
+			.appendTo( this.$( '.toolbar-function-buttons .toolbar-buttons' ) );
 			
 			return button;
 		}
@@ -65,19 +52,23 @@
 		
 		cssSelectors: [],
 		
-		initialize: function ( args ) {
+		initValue: null,
+		
+		events: {
+			'click_expand .custom-css-toolbar': 'toggleExpand',
+			'click_visual .custom-css-toolbar': 'showVisualEditor',
+			'submit': 'onSubmit',
+		},
+		
+		initialize: function () {
 			this.setupEditor();
 		},
 		
 		render: function () {
-			var thisView = this;
-			
 			// Setup the toolbar
 			this.toolbar = new socss.view.toolbar( {
-				editor: this,
 				el: this.$( '.custom-css-toolbar' )
 			} );
-			this.toolbar.editor = this;
 			this.toolbar.render();
 			
 			// Create the visual properties view
@@ -87,15 +78,6 @@
 			} );
 			this.visualProperties.render();
 			
-			this.toolbar.on( 'click_expand', function () {
-				thisView.toggleExpand();
-			} );
-			
-			this.toolbar.on( 'click_visual', function () {
-				thisView.visualProperties.loadCSS( thisView.codeMirror.getValue().trim() );
-				thisView.visualProperties.show();
-			} );
-			
 			this.preview = new socss.view.preview( {
 				editor: this,
 				el: this.$( '.custom-css-preview' )
@@ -103,25 +85,25 @@
 			this.preview.render();
 			
 			if ( socssOptions.openVisualEditor ) {
-				this.$( '.editor-visual' ).click();
+				this.showVisualEditor();
 			}
+			return this;
 		},
 		
 		/**
 		 * Do the initial setup of the CodeMirror editor
 		 */
 		setupEditor: function () {
-			var thisView = this;
 			this.registerCodeMirrorAutocomplete();
 			
 			// Setup the Codemirror instance
 			var $textArea = this.$( 'textarea.css-editor' );
-			var initValue = $textArea.val();
+			this.initValue = $textArea.val();
 			// Pad with empty lines so the editor takes up all the white space. To try make sure user gets copy/paste
 			// options in context menu.
-			var newlineMatches = initValue.match( /\n/gm );
+			var newlineMatches = this.initValue.match( /\n/gm );
 			var lineCount = newlineMatches ? newlineMatches.length + 1 : 1;
-			var paddedValue = initValue;
+			var paddedValue = this.initValue;
 			$textArea.val( paddedValue );
 			this.codeMirror = CodeMirror.fromTextArea( $textArea.get( 0 ), {
 				tabSize: 2,
@@ -136,15 +118,12 @@
 			} );
 			
 			// Make sure the user doesn't leave without saving
-			this.$el.on( 'submit', function () {
-				initValue = thisView.codeMirror.getValue().trim();
-			} );
-			$( window ).bind( 'beforeunload', function () {
-				var editorValue = thisView.codeMirror.getValue().trim();
-				if ( editorValue !== initValue ) {
+			$( window ).on( 'beforeunload', function () {
+				var editorValue = this.codeMirror.getValue().trim();
+				if ( editorValue !== this.initValue ) {
 					return socssOptions.loc.leave;
 				}
-			} );
+			}.bind( this ) );
 			
 			
 			// Set the container to visible overflow once the editor is setup
@@ -152,20 +131,22 @@
 			this.scaleEditor();
 			
 			// Scale the editor whenever the window is resized
-			$( window ).resize( function () {
-				thisView.scaleEditor();
-			} );
+			$( window ).on( 'resize', function () {
+				this.scaleEditor();
+			}.bind( this ) );
 			
 			// Setup the extensions
 			this.setupCodeMirrorExtensions();
+		},
+		
+		onSubmit: function () {
+			this.initValue = this.codeMirror.getValue().trim();
 		},
 		
 		/**
 		 * Register the autocomplete helper. Based on css-hint.js in the codemirror addon folder.
 		 */
 		registerCodeMirrorAutocomplete: function () {
-			var thisView = this;
-			
 			var pseudoClasses = {
 				link: 1, visited: 1, active: 1, hover: 1, focus: 1,
 				"first-letter": 1, "first-line": 1, "first-child": 1,
@@ -210,7 +191,7 @@
 					// We're going to autocomplete the selector using our own set of rules
 					var line = cm.getLine( cur.line ).trim();
 					
-					var selectors = thisView.cssSelectors;
+					var selectors = this.cssSelectors;
 					for ( var i = 0; i < selectors.length; i++ ) {
 						if ( selectors[ i ].selector.indexOf( line ) !== -1 ) {
 							result.push( selectors[ i ].selector );
@@ -252,11 +233,10 @@
 					
 				}
 				
-			} );
+			}.bind( this ) );
 		},
 		
 		setupCodeMirrorExtensions: function () {
-			var thisView = this;
 			
 			this.codeMirror.on( 'cursorActivity', function ( cm ) {
 				var cur = cm.getCursor(), token = cm.getTokenAt( cur );
@@ -267,12 +247,12 @@
 					var line = cm.getLine( cur.line );
 					var selector = line.substring( 0, token.end );
 					
-					thisView.preview.highlight( selector );
+					this.preview.highlight( selector );
 				}
 				else {
-					thisView.preview.clearHighlight();
+					this.preview.clearHighlight();
 				}
-			} );
+			}.bind( this ) );
 			
 			// This sets up automatic autocompletion at all times
 			this.codeMirror.on( 'keyup', function ( cm, e ) {
@@ -345,11 +325,18 @@
 		},
 		
 		/**
+		 * Show the visual editor view.
+		 */
+		showVisualEditor: function () {
+			this.visualProperties.loadCSS( this.codeMirror.getValue().trim() );
+			this.visualProperties.show();
+		},
+		
+		/**
 		 * Set the snippets available to this editor
 		 */
 		setSnippets: function ( snippets ) {
 			if ( !_.isEmpty( snippets ) ) {
-				var thisView = this;
 				
 				this.snippets = new socss.view.snippets( {
 					snippets: snippets
@@ -359,8 +346,8 @@
 				this.snippets.render();
 				this.toolbar.addButton( 'Snippets', 'snippets' );
 				this.toolbar.on( 'click_snippets', function () {
-					thisView.snippets.show();
-				} );
+					this.snippets.show();
+				}.bind( this ) );
 			}
 		},
 		
@@ -398,32 +385,31 @@
 		 * Sets the inspector view that's being used by the editor
 		 */
 		setInspector: function ( inspector ) {
-			var thisView = this;
 			this.inspector = inspector;
 			this.cssSelectors = inspector.pageSelectors;
 			
 			// A selector is clicked in the inspector
 			inspector.on( 'click_selector', function ( selector ) {
-				if ( thisView.visualProperties.isVisible() ) {
-					thisView.visualProperties.addSelector( selector );
+				if ( this.visualProperties.isVisible() ) {
+					this.visualProperties.addSelector( selector );
 				}
 				else {
-					thisView.addEmptySelector( selector );
+					this.addEmptySelector( selector );
 				}
-			} );
+			}.bind( this ) );
 			
 			// A property is clicked in the inspector
 			inspector.on( 'click_property', function ( property ) {
-				if ( !thisView.visualProperties.isVisible() ) {
-					thisView.codeMirror.replaceSelection( property + ";\n  " );
+				if ( !this.visualProperties.isVisible() ) {
+					this.codeMirror.replaceSelection( property + ";\n  " );
 				}
-			} );
+			}.bind( this ) );
 			
 			inspector.on( 'set_active_element', function ( el, selectors ) {
-				if ( thisView.visualProperties.isVisible() && selectors.length ) {
-					thisView.visualProperties.addSelector( selectors[ 0 ].selector );
+				if ( this.visualProperties.isVisible() && selectors.length ) {
+					this.visualProperties.addSelector( selectors[ 0 ].selector );
 				}
-			} );
+			}.bind( this ) );
 		}
 		
 	} );
@@ -438,70 +424,25 @@
 		originalUri: null,
 		currentUri: null,
 		
+		events: {
+			'load #preview-iframe': 'initPreview',
+			'mouseleave #preview-iframe': 'clearHighlight',
+			'keydown #preview-navigator input[type="text"]': 'reloadPreview',
+		},
+		
 		initialize: function ( attr ) {
 			this.editor = attr.editor;
 			
-			var thisView = this;
 			this.editor.codeMirror.on( 'change', function ( cm, c ) {
-				thisView.updatePreviewCss();
-			} );
+				this.updatePreviewCss();
+			}.bind( this ) );
 		},
 		
 		render: function () {
-			var thisView = this;
 			
 			this.$el.html( this.template() );
 			
-			this.$( '#preview-iframe' )
-			.attr( 'src', socssOptions.homeURL )
-			.on( 'load', function () {
-				var $$ = $( this );
-				
-				// Update the current URI with the iframe URI
-				thisView.currentUri = new URI( $$.contents().get( 0 ).location.href );
-				thisView.currentUri.removeQuery( 'so_css_preview' );
-				thisView.$( '#preview-navigator input' ).val( thisView.currentUri.toString() );
-				thisView.currentUri.addQuery( 'so_css_preview', 1 );
-				
-				$$.contents().find( 'a' ).each( function () {
-					var href = $( this ).attr( 'href' );
-					if ( href === undefined ) {
-						return true;
-					}
-					
-					var firstSeperator = ( href.indexOf( '?' ) === -1 ? '?' : '&' );
-					$( this ).attr( 'href', href + firstSeperator + 'so_css_preview=1' );
-				} );
-				
-				thisView.updatePreviewCss();
-			} )
-			.mouseleave( function () {
-				thisView.clearHighlight();
-			} );
-			
-			this.$( '#preview-navigator input' ).keydown( function ( e ) {
-				var $$ = $( this );
-				
-				if ( e.keyCode == 13 ) {
-					e.preventDefault();
-					
-					var newUri = new URI( $$.val() );
-					
-					// Validate the URI
-					if (
-						thisView.originalUri.host() !== newUri.host() ||
-						thisView.originalUri.protocol() !== newUri.protocol()
-					) {
-						$$.blur();
-						alert( $$.data( 'invalid-uri' ) );
-						$$.focus();
-					}
-					else {
-						newUri.addQuery( 'so_css_preview', 1 );
-						thisView.$( '#preview-iframe' ).attr( 'src', newUri.toString() );
-					}
-				}
-			} );
+			this.$( '#preview-iframe' ).attr( 'src', socssOptions.homeURL );
 			
 			this.originalUri = new URI( socssOptions.homeURL );
 			this.currentUri = new URI( socssOptions.homeURL );
@@ -509,6 +450,52 @@
 			this.currentUri.removeQuery( 'so_css_preview' );
 			this.$( '#preview-navigator input' ).val( this.currentUri.toString() );
 			this.currentUri.addQuery( 'so_css_preview', 1 );
+		},
+		
+		initPreview: function () {
+			var $$ = this.$( '#preview-iframe' );
+			
+			// Update the current URI with the iframe URI
+			this.currentUri = new URI( $$.contents().get( 0 ).location.href );
+			this.currentUri.removeQuery( 'so_css_preview' );
+			this.$( '#preview-navigator input' ).val( this.currentUri.toString() );
+			this.currentUri.addQuery( 'so_css_preview', 1 );
+			
+			$$.contents().find( 'a' ).each( function () {
+				var href = $( this ).attr( 'href' );
+				if ( href === undefined ) {
+					return true;
+				}
+				
+				var firstSeperator = ( href.indexOf( '?' ) === -1 ? '?' : '&' );
+				$( this ).attr( 'href', href + firstSeperator + 'so_css_preview=1' );
+			} );
+			
+			this.updatePreviewCss();
+		},
+		
+		reloadPreview: function ( e ) {
+			var $$ = this.$( '#preview-navigator input[type="text"]' );
+			
+			if ( e.keyCode === 13 ) {
+				e.preventDefault();
+				
+				var newUri = new URI( $$.val() );
+				
+				// Validate the URI
+				if (
+					this.originalUri.host() !== newUri.host() ||
+					this.originalUri.protocol() !== newUri.protocol()
+				) {
+					$$.blur();
+					alert( $$.data( 'invalid-uri' ) );
+					$$.focus();
+				}
+				else {
+					newUri.addQuery( 'so_css_preview', 1 );
+					this.$( '#preview-iframe' ).attr( 'src', newUri.toString() );
+				}
+			}
 		},
 		
 		/**
@@ -569,7 +556,8 @@
 		
 		events: {
 			'click .close': 'hide',
-			'click .buttons .insert-snippet': 'insertSnippet'
+			'click .buttons .insert-snippet': 'insertSnippet',
+			'click .snippet': 'clickSnippet',
 		},
 		
 		currentSnippet: null,
@@ -579,22 +567,6 @@
 		},
 		
 		render: function () {
-			var thisView = this;
-			
-			
-			var clickSnippet = function ( e ) {
-				e.preventDefault();
-				var $$ = $( this );
-				
-				thisView.$( '.snippets li.snippet' ).removeClass( 'active' );
-				$( this ).addClass( 'active' );
-				thisView.viewSnippet( {
-					name: $$.html(),
-					description: $$.data( 'description' ),
-					css: $$.data( 'css' )
-				} );
-			};
-			
 			this.$el.html( this.template() );
 			for ( var i = 0; i < this.snippets.length; i++ ) {
 				$( this.snippet( { name: this.snippets[ i ].Name } ) )
@@ -602,15 +574,27 @@
 					'description': this.snippets[ i ].Description,
 					'css': this.snippets[ i ].css
 				} )
-				.appendTo( this.$( 'ul.snippets' ) )
-				.click( clickSnippet );
+				.appendTo( this.$( 'ul.snippets' ) );
 			}
 			
 			// Click on the first one
-			thisView.$( '.snippets li.snippet' ).eq( 0 ).click();
+			this.$( '.snippets li.snippet' ).eq( 0 ).click();
 			
 			this.attach();
 			return this;
+		},
+		
+		clickSnippet: function ( event ) {
+			event.preventDefault();
+			var $$ = $( event.currentTarget );
+			
+			this.$( '.snippets li.snippet' ).removeClass( 'active' );
+			$( this ).addClass( 'active' );
+			this.viewSnippet( {
+				name: $$.html(),
+				description: $$.data( 'description' ),
+				css: $$.data( 'css' )
+			} );
 		},
 		
 		viewSnippet: function ( args ) {
@@ -667,8 +651,6 @@
 	 */
 	socss.view.properties = Backbone.View.extend( {
 		
-		model: socss.model.cssRules,
-		
 		tabTemplate: _.template( '<li data-section="<%- id %>"><span class="fa fa-<%- icon %>"></span> <%- title %></li>' ),
 		sectionTemplate: _.template( '<div class="section" data-section="<%- id %>"><table class="fields-table"><tbody></tbody></table></div>' ),
 		controllerTemplate: _.template( '<tr><th scope="row"><%- title %></th><td></td></tr>' ),
@@ -704,28 +686,28 @@
 		editorExpandedBefore: false,
 		
 		events: {
-			'click .close': 'hide'
+			'click .close': 'hide',
+			'click .section-tabs li': 'onTabClick',
+			'change .toolbar select': 'onToolbarSelectChange',
 		},
 		
 		/**
 		 * Initialize the properties editor with a new model
 		 */
-		initialize: function ( attr ) {
+		initialize: function ( options ) {
 			this.parser = window.css;
-			this.editor = attr.editor;
+			this.editor = options.editor;
 		},
 		
 		/**
 		 * Render the property editor
 		 */
 		render: function () {
-			var thisView = this;
-			
 			// Clean up for potential re-renders
 			this.$( '.section-tabs' ).empty();
 			this.$( '.sections' ).empty();
 			this.$( '.toolbar select' ).off();
-			thisView.propertyControllers = [];
+			this.propertyControllers = [];
 			
 			var controllers = socssOptions.propertyControllers;
 			
@@ -747,7 +729,7 @@
 					
 					for ( var i = 0; i < controllers[ id ].controllers.length; i++ ) {
 						
-						var $c = $( thisView.controllerTemplate( {
+						var $c = $( this.controllerTemplate( {
 							title: controllers[ id ].controllers[ i ].title
 						} ) ).appendTo( $s.find( 'tbody' ) );
 						
@@ -758,7 +740,7 @@
 							// Setup a default controller
 							controller = new socss.view.propertyController( {
 								el: $c.find( 'td' ),
-								propertiesView: thisView,
+								propertiesView: this,
 								args: ( typeof controllerAtts.args === 'undefined' ? {} : controllerAtts.args )
 							} );
 						}
@@ -766,35 +748,36 @@
 							// Setup a specific controller
 							controller = new socss.view.properties.controllers[ controllerAtts.type ]( {
 								el: $c.find( 'td' ),
-								propertiesView: thisView,
+								propertiesView: this,
 								args: ( typeof controllerAtts.args === 'undefined' ? {} : controllerAtts.args )
 							} );
 						}
 						
-						thisView.propertyControllers.push( controller );
+						this.propertyControllers.push( controller );
 						
 						// Setup and render the controller
 						controller.render();
-						controller.initChangeEvents();
 					}
 				}
 			}
 			
-			// Setup the tab switching for the property sections
-			this.$( '.section-tabs li' ).click( function () {
-				var $$ = $( this );
-				var show = thisView.$( '.sections .section[data-section="' + $$.data( 'section' ) + '"]' );
-				
-				thisView.$( '.sections .section' ).not( show ).hide().removeClass( 'active' );
-				show.show().addClass( 'active' );
-				
-				thisView.$( '.section-tabs li' ).not( $$ ).removeClass( 'active' );
-				$$.addClass( 'active' );
-			} ).eq( 0 ).click();
+			// Switch to the first tab.
+			this.$( '.section-tabs li' ).eq( 0 ).click();
+		},
+		
+		onTabClick: function ( event ) {
+			var $$ = $( event.currentTarget );
+			var show = this.$( '.sections .section[data-section="' + $$.data( 'section' ) + '"]' );
 			
-			this.$( '.toolbar select' ).change( function () {
-				thisView.setActivateSelector( $( this ).find( ':selected' ).data( 'selector' ) );
-			} );
+			this.$( '.sections .section' ).not( show ).hide().removeClass( 'active' );
+			show.show().addClass( 'active' );
+			
+			this.$( '.section-tabs li' ).not( $$ ).removeClass( 'active' );
+			$$.addClass( 'active' );
+		},
+		
+		onToolbarSelectChange: function ( event ) {
+			this.setActiveSelector( $( event.currentTarget ).find( ':selected' ).data( 'selector' ) );
 		},
 		
 		/**
@@ -1029,7 +1012,7 @@
 		 * Set the selector that we're currently dealing with
 		 * @param selector
 		 */
-		setActivateSelector: function ( selector ) {
+		setActiveSelector: function ( selector ) {
 			this.activeSelector = selector;
 			for ( var i = 0; i < this.propertyControllers.length; i++ ) {
 				this.propertyControllers[ i ].refreshFromRule();
@@ -1067,15 +1050,25 @@
 	// The basic property controller
 	socss.view.propertyController = Backbone.View.extend( {
 		
-		template: _.template( '<input type="text" value="" />' ),
+		template: _.template( '<input type="text" value="" class="socss-property-controller-input"/>' ),
 		activeRule: null,
 		args: null,
 		propertiesView: null,
+		
+		events: {
+			'change .socss-property-controller-input': 'onChange',
+			'keyup input.socss-property-controller-input': 'onChange',
+		},
 		
 		initialize: function ( args ) {
 			
 			this.args = args.args;
 			this.propertiesView = args.propertiesView;
+			
+			// If sub-views items define their own events hash with the same keys as above they will override those on
+			// the above events hash.
+			this.events = _.extend( socss.view.propertyController.prototype.events, this.events );
+			this.delegateEvents( this.events );
 			
 			// By default, update the active rule whenever things change
 			this.on( 'set_value', this.updateRule, this );
@@ -1087,19 +1080,12 @@
 		 */
 		render: function () {
 			this.$el.append( $( this.template( {} ) ) );
-			this.field = this.$( 'input' );
+			this.field = this.$( 'input.socss-property-controller-input' );
 		},
 		
-		/**
-		 * Initialize the events that constitute a change
-		 */
-		initChangeEvents: function () {
-			var thisView = this;
-			this.field.on( 'change keyup', function () {
-				thisView.trigger( 'change', $( this ).val() );
-			} );
+		onChange: function () {
+			this.trigger( 'change', this.field.val() );
 		},
-		
 		
 		/**
 		 * Update the value of an active rule
@@ -1158,24 +1144,15 @@
 	// The color controller
 	socss.view.properties.controllers.color = socss.view.propertyController.extend( {
 		
-		template: _.template( '<input type="text" value="" />' ),
-		
 		render: function () {
-			var thisView = this;
-			
-			this.$el.append( $( this.template( {} ) ) );
-			
+			socss.view.propertyController.prototype.render.apply( this, arguments );
 			// Set this up as a color picker
-			this.field = this.$el.find( 'input' );
 			this.field.minicolors( {} );
 			
 		},
 		
-		initChangeEvents: function () {
-			var thisView = this;
-			this.field.on( 'change keyup', function () {
-				thisView.trigger( 'change', thisView.field.minicolors( 'value' ) );
-			} );
+		onChange: function () {
+			this.trigger( 'change', this.field.minicolors( 'value' ) );
 		},
 		
 		getValue: function () {
@@ -1196,13 +1173,15 @@
 	
 	// The dropdown select box controller
 	socss.view.properties.controllers.select = socss.view.propertyController.extend( {
-		template: _.template( '<select></select>' ),
+		template: _.template( '<select class="socss-property-controller-input"></select>' ),
+		
+		events: {
+			'click .select-tab': 'onSelect',
+		},
 		
 		render: function () {
-			var thisView = this;
-			
 			this.$el.append( $( this.template( {} ) ) );
-			this.field = this.$el.find( 'select' );
+			this.field = this.$( 'select' );
 			
 			// Add the unchanged option
 			this.field.append( $( '<option value=""></option>' ).html( '' ) );
@@ -1218,7 +1197,6 @@
 		},
 		
 		setupVisualSelect: function () {
-			var thisView = this;
 			this.field.hide();
 			
 			var $tc = $( '<div class="select-tabs"></div>' ).appendTo( this.$el );
@@ -1238,14 +1216,14 @@
 				;
 			}
 			
-			$tc.find( '.select-tab' )
-			.css( 'width', 100 / ( $tc.find( '>div' ).length ) + "%" )
-			.click( function () {
-				var $t = $( this );
-				$tc.find( '.select-tab' ).removeClass( 'active' );
-				$t.addClass( 'active' );
-				thisView.field.val( $t.data( 'value' ) ).change();
-			} );
+			$tc.find( '.select-tab' ).css( 'width', 100 / ( $tc.find( '>div' ).length ) + "%" );
+		},
+		
+		onSelect: function ( event ) {
+			this.$( '.select-tab' ).removeClass( 'active' );
+			var $t = $( event.currentTarget );
+			$t.addClass( 'active' );
+			this.field.val( $t.data( 'value' ) ).trigger( 'change' );
 		},
 		
 		/**
@@ -1270,9 +1248,11 @@
 	socss.view.properties.controllers.image = socss.view.propertyController.extend( {
 		template: _.template( '<input type="text" value="" /> <span class="select socss-button"><span class="fa fa-upload"></span></span>' ),
 		
+		events: {
+			'click .select': 'openMedia',
+		},
+		
 		render: function () {
-			var thisView = this;
-			
 			this.media = wp.media( {
 				// Set the title of the modal.
 				title: socssOptions.loc.select_image,
@@ -1298,23 +1278,23 @@
 			
 			this.field = this.$el.find( 'input' );
 			
-			this.$( '.select' ).click( function () {
-				thisView.media.open();
-			} );
-			
 			this.media.on( 'select', function () {
 				// Grab the selected attachment.
-				var attachment = this.state().get( 'selection' ).first().attributes;
-				var val = thisView.args.value.replace( '{{url}}', attachment.url );
+				var attachment = this.media.state().get( 'selection' ).first().attributes;
+				var val = this.args.value.replace( '{{url}}', attachment.url );
 				
 				// Change the field value and trigger a change event
-				thisView.field.val( val ).change();
+				this.field.val( val ).change();
 				
 				// Close the image selector
-				thisView.media.close();
+				this.media.close();
 				
-			}, this.media );
-		}
+			}.bind( this ) );
+		},
+		
+		openMedia: function () {
+			this.media.open();
+		},
 		
 	} );
 	
@@ -1323,10 +1303,17 @@
 		
 		wrapperClass: 'socss-field-measurement',
 		
+		events: {
+			'click .toggle-dropdown': 'toggleUnitDropdown',
+			'click .dropdown li': 'onSelectUnit',
+			'keydown .socss-field-input': 'onInputKeyPress',
+			'keyup .socss-field-input': 'onInputKeyUp',
+		},
+		
 		render: function () {
-			this.$el.append( $( this.template( {} ) ) );
-			this.field = this.$( 'input' );
-			this.setupMeasurementField( this.field, {} );
+			socss.view.propertyController.prototype.render.apply( this, arguments );
+			
+			this.setupMeasurementField();
 		},
 		
 		setValue: function ( val, options ) {
@@ -1378,104 +1365,32 @@
 			}
 		},
 		
-		setupMeasurementField: function ( $el, options ) {
-			var thisView = this;
-			var $p = $el.parent();
+		setupMeasurementField: function () {
+			var defaultUnit = 'px';
 			
-			options = _.extend( {
-				defaultUnit: 'px'
-			}, options );
-			
-			$el.hide();
-			$p.addClass( this.wrapperClass ).data( 'unit', options.defaultUnit );
+			this.field.hide();
+			this.$el.addClass( this.wrapperClass ).data( 'unit', defaultUnit );
 			
 			// Create the fake input field
-			var $fi = $( '<input type="text" class="socss-field-input"/>' ).appendTo( $p );
-			var $da = $( '<span class="dashicons dashicons-arrow-down"></span>' ).appendTo( $p );
-			var $dd = $( '<ul class="dropdown"></ul>' ).appendTo( $p );
-			var $u = $( '<span class="units"></span>' ).html( options.defaultUnit ).appendTo( $p );
+			var $fi = $( '<input type="text" class="socss-field-input"/>' ).appendTo( this.$el );
+			$( '<span class="toggle-dropdown dashicons dashicons-arrow-down"></span>' ).appendTo( this.$el );
+			var $dd = $( '<ul class="dropdown"></ul>' ).appendTo( this.$el );
+			var $u = $( '<span class="units"></span>' ).html( defaultUnit ).appendTo( this.$el );
 			
-			for ( var i = 0; i < thisView.units.length; i++ ) {
-				var $o = $( '<li></li>' ).html( thisView.units[ i ] ).data( 'unit', thisView.units[ i ] );
-				if ( thisView.units[ i ] === options.defaultUnit ) {
+			for ( var i = 0; i < this.units.length; i++ ) {
+				var $o = $( '<li></li>' ).html( this.units[ i ] ).data( 'unit', this.units[ i ] );
+				if ( this.units[ i ] === defaultUnit ) {
 					$o.addClass( 'active' );
 				}
 				$dd.append( $o );
 			}
 			
-			var updateValue = function () {
-				var value = thisView.parseUnits( $fi.val() );
-				
-				if ( value.unit !== '' && value.unit !== $p.data( 'unit' ) ) {
-					$fi.val( value.value );
-					setUnit( value.unit );
-				}
-				
-				if ( value.value === '' ) {
-					$el.val( '' );
-				}
-				else {
-					$el.val( value.value + $p.data( 'unit' ) );
-				}
-			};
-			
-			var setUnit = function ( unit ) {
-				$u.html( unit );
-				$p.data( 'unit', unit );
-				$fi.trigger( 'keydown' );
-			};
-			
-			$da.click( function () {
-				$dd.toggle();
-			} );
-			
-			$dd.find( 'li' ).click( function () {
-				$dd.toggle();
-				setUnit( $( this ).data( 'unit' ) );
-				updateValue();
-				$el.trigger( 'change' );
-			} );
-			
-			$fi.on( 'keyup keydown', function ( e ) {
-				var $$ = $( this );
-				
-				var char = '';
-				if ( e.type === 'keydown' ) {
-					if ( e.keyCode >= 48 && e.keyCode <= 57 ) {
-						char = String.fromCharCode( e.keyCode );
-					}
-					else if ( e.keyCode === 189 ) {
-						char = '-';
-					}
-					else if ( e.keyCode === 190 ) {
-						char = '.';
-					}
-				}
-				
-				var $pl = $( '<span class="socss-hidden-placeholder"></span>' )
-				.css( {
-					'font-size': '14px'
-				} )
-				.html( $fi.val() + char )
-				.appendTo( 'body' );
-				var width = $pl.width();
-				width = Math.min( width, 63 );
-				$pl.remove();
-				
-				$u.css( 'left', width + 12 );
-			} );
-			
-			$fi.on( 'keyup', function ( e ) {
-				updateValue();
-				$el.trigger( 'change' );
-			} );
-			
-			$el.on( 'measurement_refresh', function () {
-				var value = thisView.parseUnits( $el.val() );
+			this.field.on( 'measurement_refresh', function () {
+				var value = this.parseUnits( this.field.val() );
 				$fi.val( value.value );
 				
-				var unit = value.unit === '' ? options.defaultUnit : value.unit;
-				$p.data( 'unit', unit );
+				var unit = value.unit === '' ? defaultUnit : value.unit;
+				this.$el.data( 'unit', unit );
 				$u.html( unit );
 				
 				var $pl = $( '<span class="socss-hidden-placeholder"></span>' )
@@ -1489,117 +1404,206 @@
 				$pl.remove();
 				
 				$u.css( 'left', width + 12 );
-			} );
+			}.bind( this ) );
 			
 			// Now add the increment/decrement buttons
-			var $diw = $( '<div class="socss-diw"></div>' ).appendTo( $p );
+			var $diw = $( '<div class="socss-diw"></div>' ).appendTo( this.$el );
 			var $dec = $( '<div class="dec-button socss-button"><span class="fa fa-minus"></span></div>' ).appendTo( $diw );
 			var $inc = $( '<div class="inc-button socss-button"><span class="fa fa-plus"></span></div>' ).appendTo( $diw );
 			
-			var stepValue = function ( direction ) {
-				var value = Number.parseInt( thisView.parseUnits( $el.val() ).value );
-				
-				if ( Number.isNaN( value ) ) {
-					value = 0;
-				}
-				
-				var newVal = value + direction;
-				
-				$fi.val( newVal );
-				updateValue();
-				$el.trigger( 'change' ).trigger( 'measurement_refresh' );
-			};
+			this.setupStepButton( $dec );
+			this.setupStepButton( $inc );
 			
-			var setupStepButton = function ( $button ) {
-				var direction = $button.is( '.dec-button' ) ? -1 : 1;
-				var intervalId;
-				var timeoutId;
-				$button.mousedown( function () {
-					stepValue( direction );
-					timeoutId = setTimeout( function () {
-						intervalId = setInterval( function () {
-							stepValue( direction );
-						}, 50 );
-					}, 500 );
-				} ).on( 'mouseup mouseout', function () {
-					if ( timeoutId ) {
-						clearTimeout( timeoutId );
-						timeoutId = null;
-					}
-					if ( intervalId ) {
-						clearInterval( intervalId );
-						intervalId = null;
-					}
-				} );
-			};
-			
-			setupStepButton( $dec );
-			setupStepButton( $inc );
-			
-		}
+		},
 		
+		updateValue: function () {
+			var $fi = this.$( '.socss-field-input' );
+			var value = this.parseUnits( $fi.val() );
+			
+			if ( value.unit !== '' && value.unit !== this.$el.data( 'unit' ) ) {
+				$fi.val( value.value );
+				this.setUnit( value.unit );
+			}
+			
+			if ( value.value === '' ) {
+				this.field.val( '' );
+			}
+			else {
+				this.field.val( value.value + this.$el.data( 'unit' ) );
+			}
+			this.field.trigger( 'change' );
+		},
+		
+		setUnit: function ( unit ) {
+			this.$( '.units' ).html( unit );
+			this.$el.data( 'unit', unit );
+			this.$( '.socss-field-input' ).trigger( 'keydown' );
+		},
+		
+		toggleUnitDropdown: function () {
+			this.$( '.dropdown' ).toggle();
+		},
+		
+		onSelectUnit: function ( event ) {
+			this.toggleUnitDropdown();
+			this.setUnit( $( event.currentTarget ).data( 'unit' ) );
+			this.updateValue();
+		},
+		
+		onInputKeyUp: function( event ) {
+			this.onInputKeyPress( event );
+			this.updateValue();
+		},
+		
+		onInputKeyPress: function ( event ) {
+			var $fi = this.$( '.socss-field-input' );
+			
+			var char = '';
+			if ( event.type === 'keydown' ) {
+				if ( event.keyCode >= 48 && event.keyCode <= 57 ) {
+					char = String.fromCharCode( event.keyCode );
+				}
+				else if ( event.keyCode === 189 ) {
+					char = '-';
+				}
+				else if ( event.keyCode === 190 ) {
+					char = '.';
+				}
+			}
+			
+			var $pl = $( '<span class="socss-hidden-placeholder"></span>' )
+			.css( {
+				'font-size': '14px'
+			} )
+			.html( $fi.val() + char )
+			.appendTo( 'body' );
+			var width = $pl.width();
+			width = Math.min( width, 63 );
+			$pl.remove();
+			
+			this.$( '.units' ).css( 'left', width + 12 );
+		},
+		
+		stepValue: function ( direction ) {
+			var value = Number.parseInt( this.parseUnits( this.field.val() ).value );
+			
+			if ( Number.isNaN( value ) ) {
+				value = 0;
+			}
+			
+			var newVal = value + direction;
+			
+			this.$( '.socss-field-input' ).val( newVal );
+			this.updateValue();
+			this.field.trigger( 'measurement_refresh' );
+		},
+		
+		setupStepButton: function ( $button ) {
+			var direction = $button.is( '.dec-button' ) ? -1 : 1;
+			var intervalId;
+			var timeoutId;
+			$button.mousedown( function () {
+				this.stepValue( direction );
+				timeoutId = setTimeout( function () {
+					intervalId = setInterval( function () {
+						this.stepValue( direction );
+					}.bind( this ), 50 );
+				}.bind( this ), 500 );
+			}.bind( this ) ).on( 'mouseup mouseout', function () {
+				if ( timeoutId ) {
+					clearTimeout( timeoutId );
+					timeoutId = null;
+				}
+				if ( intervalId ) {
+					clearInterval( intervalId );
+					intervalId = null;
+				}
+			} );
+		},
 	} );
 	
 	// A simple measurement field
 	socss.view.properties.controllers.number = socss.view.propertyController.extend( {
 		
-		render: function () {
-			this.$el.append( $( this.template( {} ) ) );
-			this.field = this.$( 'input' );
+		initialize: function ( args ) {
+			socss.view.propertyController.prototype.initialize.apply( this, arguments );
 			
-			// Setup the measurement field
-			this.setupNumberField( this.field, this.args );
-		},
-		
-		/**
-		 * Setup the number field
-		 * @param el
-		 * @param options
-		 */
-		setupNumberField: function ( $el, options ) {
-			options = _.extend( {
+			this.args = _.extend( {
 				change: null,
 				default: 0,
 				increment: 1,
 				decrement: -1,
 				max: null,
 				min: null
-			}, options );
+			}, args.args );
+		},
+		
+		render: function () {
+			socss.view.propertyController.prototype.render.apply( this, arguments );
 			
-			var $p = $el.parent();
-			$p.addClass( 'socss-field-number' );
+			this.setupNumberField();
+		},
+		
+		setupNumberField: function () {
+			
+			this.$el.addClass( 'socss-field-number' );
 			
 			// Now add the increment/decrement buttons
-			var $diw = $( '<div class="socss-diw"></div>' ).appendTo( $p );
-			var $dec = $( '<div class="dec-button socss-button">-</div>' ).appendTo( $diw );
-			var $inc = $( '<div class="inc-button socss-button">+</div>' ).appendTo( $diw );
+			var $diw = $( '<div class="socss-diw"></div>' ).appendTo( this.$el );
+			var $dec = $( '<div class="dec-button socss-button"><span class="fa fa-minus"></span></div>' ).appendTo( $diw );
+			var $inc = $( '<div class="inc-button socss-button"><span class="fa fa-plus"></span></div>' ).appendTo( $diw );
 			
-			// Increment is clicked
-			$diw.find( '> div' ).click( function ( e ) {
-				e.preventDefault();
-				
-				var val = options.default;
-				if ( $el.val() !== '' ) {
-					val = Number( $el.val() );
-				}
-				val = val + ( $( this ).is( $dec ) ? options.decrement : options.increment );
-				
-				val = Math.round( val * 100 ) / 100;
-				
-				if ( options.max !== null ) {
-					val = Math.min( options.max, val );
-				}
-				
-				if ( options.min !== null ) {
-					val = Math.max( options.min, val );
-				}
-				
-				$el.val( val );
-				$el.trigger( 'change' );
-			} );
+			this.setupStepButton( $dec );
+			this.setupStepButton( $inc );
 			
 			return this;
-		}
+		},
+		
+		stepValue: function ( direction ) {
+			var value = Number.parseFloat( this.field.val() );
+			
+			if ( Number.isNaN( value ) ) {
+				value = this.args.default;
+			}
+			
+			var newVal = value + direction;
+			
+			newVal = Math.round( newVal * 100 ) / 100;
+
+				if ( this.args.max !== null ) {
+					newVal = Math.min( this.args.max, newVal );
+				}
+
+				if ( this.args.min !== null ) {
+					newVal = Math.max( this.args.min, newVal );
+				}
+			
+			this.field.val( newVal );
+			this.field.trigger( 'change' );
+		},
+		
+		setupStepButton: function ( $button ) {
+			var direction = $button.is( '.dec-button' ) ? this.args.decrement : this.args.increment;
+			var intervalId;
+			var timeoutId;
+			$button.mousedown( function () {
+				this.stepValue( direction );
+				timeoutId = setTimeout( function () {
+					intervalId = setInterval( function () {
+						this.stepValue( direction );
+					}.bind( this ), 50 );
+				}.bind( this ), 500 );
+			}.bind( this ) ).on( 'mouseup mouseout', function () {
+				if ( timeoutId ) {
+					clearTimeout( timeoutId );
+					timeoutId = null;
+				}
+				if ( intervalId ) {
+					clearInterval( intervalId );
+					intervalId = null;
+				}
+			} );
+		},
 		
 	} );
 	
@@ -1610,27 +1614,29 @@
 		
 		controllers: [],
 		
+		events: {
+			'click .select-tab': 'onTabClick',
+		},
+		
 		render: function () {
-			var thisView = this;
 			
-			this.$el.append( $( this.template( {} ) ) );
-			this.field = this.$el.find( 'input' );
+			socss.view.propertyController.prototype.render.apply( this, arguments );
 			
-			if ( !thisView.args.hasAll ) {
+			if ( !this.args.hasAll ) {
 				this.$( '.select-tab' ).eq( 0 ).remove();
 				this.$( '.select-tab' ).css( 'width', '25%' );
 			}
 			
-			this.$( '.select-tab' ).each( function () {
-				var dir = $( this ).data( 'direction' );
+			this.$( '.select-tab' ).each( function ( index, element ) {
+				var dir = $( element ).data( 'direction' );
 				
 				var container = $( '<li class="side">' )
-				.appendTo( thisView.$( '.sides' ) )
+				.appendTo( this.$( '.sides' ) )
 				.hide();
 				
-				for ( var i = 0; i < thisView.args.controllers.length; i++ ) {
+				for ( var i = 0; i < this.args.controllers.length; i++ ) {
 					
-					var controllerArgs = thisView.args.controllers[ i ];
+					var controllerArgs = this.args.controllers[ i ];
 					
 					if ( typeof socss.view.properties.controllers[ controllerArgs.type ] ) {
 						
@@ -1647,33 +1653,34 @@
 						
 						var controller = new socss.view.properties.controllers[ controllerArgs.type ]( {
 							el: $( '<div>' ).appendTo( container ),
-							propertiesView: thisView.propertiesView,
+							propertiesView: this.propertiesView,
 							args: theseControllerArgs
 						} );
 						
 						// Setup and render the measurement controller and register it with the properties view
 						controller.render();
-						controller.initChangeEvents();
-						thisView.propertiesView.propertyControllers.push( controller );
-						
+						this.propertiesView.propertyControllers.push( controller );
 					}
-					
 				}
 				
-				$( this ).on( 'click', function () {
-					thisView.$( '.select-tab' ).removeClass( 'active' );
-					$( this ).addClass( 'active' );
-					
-					thisView.$( '.sides .side' ).hide();
-					container.show();
-				} );
-				
-			} );
+			}.bind( this ) );
 			
 			// Select the first tab by default
 			this.$( '.select-tab' ).eq( 0 ).click();
-		}
+		},
 		
+		onTabClick: function ( event ) {
+			var $tabs = this.$( '.select-tab' );
+			$tabs.removeClass( 'active' );
+			
+			var $tab = $( event.currentTarget );
+			$tab.addClass( 'active' );
+			
+			var $sides = this.$( '.sides .side' )
+			$sides.hide();
+			
+			$sides.eq( $tabs.index( $tab ) ).show();
+		},
 	} );
 	
 } )( jQuery, _, socssOptions );
