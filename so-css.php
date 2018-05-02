@@ -599,7 +599,7 @@ class SiteOrigin_CSS {
 			?>
 			<script type="text/css" class="socss-theme-styles"
 					id="socss-inlined-style-<?php echo sanitize_html_class( $handle ) ?>">
-			
+				<?php echo strip_tags( $css ); ?>
 			</script>
 			<?php
 		}
