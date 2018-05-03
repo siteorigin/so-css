@@ -85,6 +85,9 @@ if ( ! empty( $revision ) ) {
 					<div class="toolbar-functions-dropdown">
 						<span class="dashicons dashicons-menu"></span>
 					</div>
+					<div class="toolbar-select-css-target">
+						<select name="selected_post_id"></select>
+					</div>
 					<ul class="toolbar-buttons">
 					</ul>
 				</div>
@@ -106,7 +109,7 @@ if ( ! empty( $revision ) ) {
 				<textarea name="custom_css" id="custom-css-textarea" class="css-editor" rows="<?php echo max( 10, substr_count( $custom_css, "\n" )+1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
 				<?php wp_nonce_field( 'custom_css', '_sononce' ) ?>
 			</div>
-			<p class="description"><?php SiteOrigin_CSS::editor_description() ?></p>
+			<p class="description"><?php echo SiteOrigin_CSS::editor_description(); ?></p>
 
 			<p class="submit">
 				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( ( ! empty ( $revision ) ?  __( 'Revert to this revision', 'so-css' ) : __( 'Save CSS', 'so-css' ) ) ); ?>" />

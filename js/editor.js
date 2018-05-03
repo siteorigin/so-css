@@ -11,15 +11,63 @@
 	
 	window.socss = socss;
 	
+	socss.model.CustomCssModel = Backbone.Model.extend( {
+		// postId
+		// postTitle
+		// css
+	} );
+	
+	socss.model.CustomCssCollection = Backbone.Collection.extend( {
+		model: socss.model.CustomCssModel,
+		
+		modelId: function( attrs ) {
+			return attrs.postId;
+		},
+	} );
+	
+	socss.model.CSSEditorModel = Backbone.Model.extend( {
+		// selectedPost
+		// customCssPosts
+		initialize: function ( options ) {
+			if ( _.has( options, 'customCssPosts' ) && ! _.isEmpty( options.customCssPosts ) ) {
+				var customCssCollection = new socss.model.CustomCssCollection();
+				customCssCollection.reset( options.customCssPosts );
+				this.set( 'customCssPosts', customCssCollection );
+			}
+			
+			if ( _.has( options, 'selectedPost' ) && _.isNumber( options.selectedPost ) ) {
+				if ( this.has( 'customCssPosts' ) ) {
+					this.set( 'selectedPost', this.customCssPosts.get( options.selectedPost ) );
+				}
+			}
+		},
+	} );
+	
 	/**
 	 * The toolbar view
 	 */
 	socss.view.toolbar = Backbone.View.extend( {
 		
 		button: _.template( '<li><a href="#<%= action %>" class="toolbar-button socss-button"><%= text %></a></li>' ),
+		selectOption: _.template( '<option value="<%= postId %>"><%= postTitle %></option>' ),
 		
 		events: {
 			'click .socss-button': 'triggerEvent',
+			'change .toolbar-select-css-target > select': 'onSelectedPostChange'
+		},
+		
+		initialize: function () {
+			var selectedPost = this.model.get( 'selectedPost' );
+			if ( ! _.isEmpty( selectedPost ) ) {
+				var $postSelect = this.$( '.toolbar-select-css-target > select' );
+				$postSelect.val( selectedPost.get( 'postId' ) );
+			}
+		},
+		
+		render: function () {
+			this.collection.each( function ( customCss ) {
+				$( this.selectOption( customCss.toJSON() ) ).appendTo( this.$( '.toolbar-select-css-target > select' ) );
+			}.bind( this ) );
 		},
 		
 		triggerEvent: function ( event ) {
@@ -35,11 +83,18 @@
 			.appendTo( this.$( '.toolbar-function-buttons .toolbar-buttons' ) );
 			
 			return button;
-		}
+		},
+		
+		onSelectedPostChange: function ( event ) {
+			this.model.set( 'selectedPost', this.collection.get( $( event.currentTarget ).val() ) );
+		},
 	} );
 	
 	/**
 	 * The editor view, which handles codemirror stuff
+	 *
+	 * model: socss.model.CSSEditorModel
+	 *
 	 */
 	socss.view.editor = Backbone.View.extend( {
 		
@@ -61,13 +116,37 @@
 		},
 		
 		initialize: function () {
+			
 			this.setupEditor();
+			
+			this.listenTo( this.model, 'change:selectedPost', function () {
+				var selectedPost = this.model.get( 'selectedPost' );
+				if ( ! selectedPost.has( 'css' ) ) {
+					$.get(
+						socssOptions.getPostCSSAjaxUrl,
+						{ postId: selectedPost.get( 'postId' ) },
+						function ( result ) {
+							selectedPost.set( 'css', result.css );
+							this.codeMirror.setValue( selectedPost.get( 'css' ) );
+						}.bind( this )
+					);
+				} else {
+					this.codeMirror.setValue( selectedPost.get( 'css' ) );
+				}
+			}.bind( this ) );
 		},
 		
 		render: function () {
+			
+			if ( this.model.has( 'css' ) ) {
+				this.$( 'textarea.css-editor' ).val( this.model.get( 'css' ) );
+			}
+			
 			// Setup the toolbar
 			this.toolbar = new socss.view.toolbar( {
-				el: this.$( '.custom-css-toolbar' )
+				el: this.$( '.custom-css-toolbar' ),
+				model: this.model,
+				collection: this.model.get( 'customCssPosts' ),
 			} );
 			this.toolbar.render();
 			
@@ -80,6 +159,7 @@
 			
 			this.preview = new socss.view.preview( {
 				editor: this,
+				postId: this.model.get( 'selectedPostId' ),
 				el: this.$( '.custom-css-preview' )
 			} );
 			this.preview.render();
@@ -432,6 +512,7 @@
 		
 		initialize: function ( attr ) {
 			this.editor = attr.editor;
+			this.postId = attr.postId;
 			
 			this.editor.codeMirror.on( 'change', function ( cm, c ) {
 				this.updatePreviewCss();
@@ -1691,7 +1772,11 @@ jQuery( function ( $ ) {
 	
 	// Setup the editor
 	var editor = new socss.view.editor( {
-		el: $( '#so-custom-css-form' ).get( 0 )
+		el: $( '#so-custom-css-form' ).get( 0 ),
+		model: new socss.model.CSSEditorModel( {
+			selectedPost: _.has( socssOptions, 'postId' ) ? socssOptions.postId : '',
+			customCssPosts: socssOptions.customCssPosts ,
+		} )
 	} );
 	editor.render();
 	editor.setSnippets( socssOptions.snippets );
