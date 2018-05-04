@@ -549,7 +549,10 @@ class SiteOrigin_CSS {
 		
 		$current = $this->get_custom_css( $this->theme, $post_id );
 		
-		wp_send_json( array( 'css' => empty( $current ) ? '' : $current ) );
+		
+		$url = empty( $post_id ) ? home_url() : set_url_scheme( get_permalink( $post_id ) );
+		
+		wp_send_json( array( 'css' => empty( $current ) ? '' : $current, 'url' => $url ) );
 	}
 	
 	/**
