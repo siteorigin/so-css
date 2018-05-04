@@ -99,7 +99,15 @@
 		},
 		
 		onSelectedPostChange: function ( event ) {
-			this.model.set( 'selectedPost', this.collection.get( $( event.currentTarget ).val() ) );
+			var selectedPost = this.collection.get( $( event.currentTarget ).val() );
+			this.model.set( 'selectedPost', selectedPost );
+			var description = _.template( selectedPost.get( 'postId' ) === '' ?
+				socssOptions.editorDescriptions.global :
+				socssOptions.editorDescriptions.post
+			);
+			
+			$( '#so-custom-css-form > p.description' )
+			.text( description( { postTitle: selectedPost.get( 'postTitle' ), themeName: socssOptions.themeName } ) );
 		},
 	} );
 	
@@ -159,7 +167,7 @@
 				this.setupEditor();
 			}
 			
-			if ( !this.toolbar ) {
+			if ( ! this.toolbar ) {
 				this.toolbar = new socss.view.toolbar( {
 					el: this.$( '.custom-css-toolbar' ),
 					model: this.model,

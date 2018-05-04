@@ -381,8 +381,15 @@ class SiteOrigin_CSS {
 		
 		$custom_css_posts = $this->get_custom_css_posts();
 		
+		$theme = wp_get_theme();
+		
 		wp_localize_script( 'siteorigin-custom-css', 'socssOptions', array(
-			'themeCSS'=> SiteOrigin_CSS::single()->get_theme_css(),
+			'themeCSS' => SiteOrigin_CSS::single()->get_theme_css(),
+			'themeName' => $theme->get( 'Name' ),
+			'editorDescriptions' => array(
+				'global' => __( 'Changes apply to <%= themeName %> and its child themes', 'so-css' ),
+				'post' => __( 'Changes apply to the post <%= postTitle %> when the current theme is <%= themeName %> or its child themes', 'so-css' ),
+			),
 			'homeURL' => $home_url,
 			'postId' => $edit_post_id,
 			'customCssPosts' => $custom_css_posts,
