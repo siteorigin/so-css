@@ -274,13 +274,16 @@ class SiteOrigin_CSS {
 	 * @return WP_Admin_Bar
 	 */
 	function admin_bar_menu( $admin_bar ) {
-     
-	    if ( ! is_admin() && current_user_can( 'edit_theme_options', get_the_ID() ) ) {
-            $admin_bar->add_node( array(
-                'id'    => 'so_custom_css',
-                'title' => __( 'Edit CSS', 'so-css' ),
-                'href'  => $this->get_edit_css_link( get_the_ID() ),
-            ) );
+		
+		if ( ! is_admin() && current_user_can( 'edit_theme_options', get_the_ID() ) ) {
+			
+			$id = is_singular() ? get_the_ID() : get_queried_object_id();
+			
+			$admin_bar->add_node( array(
+				'id'    => 'so_custom_css',
+				'title' => __( 'Edit CSS', 'so-css' ),
+				'href'  => $this->get_edit_css_link( $id ),
+			) );
 	    }
 		
 		return $admin_bar;
@@ -509,9 +512,12 @@ class SiteOrigin_CSS {
 	 */
 	function get_edit_css_link( $post ) {
 		$url = admin_url( 'themes.php?page=so_custom_css' );
-		$post = get_post( $post );
+		if ( ! is_int( $post ) ) {
+			$post = get_post( $post );
+			$post = $post->ID;
+		}
 		
-		return add_query_arg( 'edit_post_id', urlencode( $post->ID ), $url );
+		return empty( $post ) ? $url : add_query_arg( 'edit_post_id', urlencode( $post ), $url );
 	}
 	/**
 	 *

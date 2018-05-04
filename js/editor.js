@@ -35,9 +35,9 @@
 				this.set( 'customCssPosts', customCssCollection );
 			}
 			
-			if ( _.has( options, 'selectedPost' ) && _.isNumber( options.selectedPost ) ) {
+			if ( _.has( options, 'selectedPost' ) && _.isNumber( parseInt( options.selectedPost ) ) ) {
 				if ( this.has( 'customCssPosts' ) ) {
-					this.set( 'selectedPost', this.customCssPosts.get( options.selectedPost ) );
+					this.set( 'selectedPost', this.get( 'customCssPosts' ).get( options.selectedPost ) );
 				}
 			}
 		},
@@ -56,18 +56,16 @@
 			'change .toolbar-select-css-target > select': 'onSelectedPostChange'
 		},
 		
-		initialize: function () {
+		render: function () {
+			this.collection.each( function ( customCss ) {
+				$( this.selectOption( customCss.toJSON() ) ).appendTo( this.$( '.toolbar-select-css-target > select' ) );
+			}.bind( this ) );
+			
 			var selectedPost = this.model.get( 'selectedPost' );
 			if ( ! _.isEmpty( selectedPost ) ) {
 				var $postSelect = this.$( '.toolbar-select-css-target > select' );
 				$postSelect.val( selectedPost.get( 'postId' ) );
 			}
-		},
-		
-		render: function () {
-			this.collection.each( function ( customCss ) {
-				$( this.selectOption( customCss.toJSON() ) ).appendTo( this.$( '.toolbar-select-css-target > select' ) );
-			}.bind( this ) );
 		},
 		
 		triggerEvent: function ( event ) {
@@ -115,32 +113,38 @@
 			'submit': 'onSubmit',
 		},
 		
-		initialize: function () {
+		initialize: function ( options ) {
 			
 			this.setupEditor();
 			
-			this.listenTo( this.model, 'change:selectedPost', function () {
-				var selectedPost = this.model.get( 'selectedPost' );
-				if ( ! selectedPost.has( 'css' ) ) {
-					$.get(
-						socssOptions.getPostCSSAjaxUrl,
-						{ postId: selectedPost.get( 'postId' ) },
-						function ( result ) {
-							selectedPost.set( 'css', result.css );
-							this.codeMirror.setValue( selectedPost.get( 'css' ) );
-						}.bind( this )
-					);
-				} else {
-					this.codeMirror.setValue( selectedPost.get( 'css' ) );
+			this.listenTo( this.model, 'change:selectedPost', this.getSelectedPostCss );
+			
+			this.getSelectedPostCss().then( function () {
+				if ( options.openVisualEditor ) {
+					this.showVisualEditor();
 				}
 			}.bind( this ) );
 		},
 		
-		render: function () {
+		getSelectedPostCss: function () {
+			var selectedPost = this.model.get( 'selectedPost' );
 			
-			if ( this.model.has( 'css' ) ) {
-				this.$( 'textarea.css-editor' ).val( this.model.get( 'css' ) );
+			if ( ! selectedPost.has( 'css' ) ) {
+				return $.get(
+					socssOptions.getPostCSSAjaxUrl,
+					{ postId: selectedPost.get( 'postId' ) },
+					function ( result ) {
+						selectedPost.set( 'css', result.css );
+						this.codeMirror.setValue( selectedPost.get( 'css' ) );
+					}.bind( this )
+				);
+			} else {
+				this.codeMirror.setValue( selectedPost.get( 'css' ) );
+				return new $.Deferred().resolve();
 			}
+		},
+		
+		render: function () {
 			
 			// Setup the toolbar
 			this.toolbar = new socss.view.toolbar( {
@@ -159,14 +163,11 @@
 			
 			this.preview = new socss.view.preview( {
 				editor: this,
-				postId: this.model.get( 'selectedPostId' ),
+				postId: this.model.get( 'selectedPost' ).get( 'postId' ),
 				el: this.$( '.custom-css-preview' )
 			} );
 			this.preview.render();
 			
-			if ( socssOptions.openVisualEditor ) {
-				this.showVisualEditor();
-			}
 			return this;
 		},
 		
@@ -1776,7 +1777,8 @@ jQuery( function ( $ ) {
 		model: new socss.model.CSSEditorModel( {
 			selectedPost: _.has( socssOptions, 'postId' ) ? socssOptions.postId : '',
 			customCssPosts: socssOptions.customCssPosts ,
-		} )
+		} ),
+		openVisualEditor: socssOptions.openVisualEditor,
 	} );
 	editor.render();
 	editor.setSnippets( socssOptions.snippets );
