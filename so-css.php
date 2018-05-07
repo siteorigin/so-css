@@ -371,11 +371,13 @@ class SiteOrigin_CSS {
 		// Pretty confusing, but it seems we should be using `home_url` and NOT `site_url`
 		// as described here => https://wordpress.stackexchange.com/a/50605
 		$init_url = home_url();
-		$edit_post_id = ! empty( $_REQUEST['edit_post_id'] ) ? intval( $_REQUEST['edit_post_id'] ) : '';
+		$socss_post_id = ! empty( $_REQUEST['socss_post_id'] ) ? intval( $_REQUEST['socss_post_id'] ) : '';
 		
-		if ( ! empty( $edit_post_id ) && is_int( $edit_post_id ) ) {
-			$init_url = set_url_scheme( get_permalink( $edit_post_id ) );
+		if ( ! empty( $socss_post_id ) && is_int( $socss_post_id ) ) {
+			$init_url = set_url_scheme( get_permalink( $socss_post_id ) );
 		}
+		
+		$open_visual_editor = ! empty( $_REQUEST['open_visual_editor'] );
 		
 		$home_url = add_query_arg( 'so_css_preview', '1', $init_url );
 		
@@ -391,10 +393,10 @@ class SiteOrigin_CSS {
 				'post' => __( 'Changes apply to the post <%= postTitle %> when the current theme is <%= themeName %> or its child themes', 'so-css' ),
 			),
 			'homeURL' => $home_url,
-			'postId' => $edit_post_id,
+			'postId' => $socss_post_id,
 			'customCssPosts' => $custom_css_posts,
 			'getPostCSSAjaxUrl' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_post_css'), 'get_post_css' ),
-			'openVisualEditor' => ! empty( $edit_post_id ),
+			'openVisualEditor' => $open_visual_editor,
 			'snippets' => $this->get_snippets(),
 			
 			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() ),
@@ -464,19 +466,24 @@ class SiteOrigin_CSS {
 	}
 	
 	function display_admin_page() {
-		$theme = basename( get_template_directory() );
 		
-		$custom_css = $this->get_custom_css( $this->theme );
-		$custom_css_revisions = $this->get_custom_css_revisions( $this->theme );
+		$socss_post_id = filter_input( INPUT_GET, 'socss_post_id', FILTER_VALIDATE_INT );
+		$theme = filter_input( INPUT_GET, 'theme' );
+		$time = filter_input( INPUT_GET, 'time', FILTER_VALIDATE_INT );
 		
-		if ( ! empty( $_GET['theme'] ) && $_GET['theme'] == $theme && ! empty( $_GET['time'] ) && ! empty( $custom_css_revisions[ $_GET['time'] ] ) ) {
-			$revision = $_GET['time'];
-			$custom_css = $custom_css_revisions[ $revision ];
+		$custom_css = $this->get_custom_css( $this->theme, $socss_post_id );
+		$custom_css_revisions = $this->get_custom_css_revisions( $this->theme, $socss_post_id );
+		
+		if ( ! empty( $theme ) && $theme == $this->theme && ! empty( $time ) && ! empty( $custom_css_revisions[ $time ] ) ) {
+			$current_revision = $time;
+			$custom_css = $custom_css_revisions[ $time ];
 		}
 		
 		if ( ! empty( $custom_css_revisions ) ) {
 			krsort( $custom_css_revisions );
 		}
+		
+		$theme = basename( get_template_directory() );
 		
 		include plugin_dir_path( __FILE__ ) . 'tpl/page.php';
 	}
@@ -524,7 +531,10 @@ class SiteOrigin_CSS {
 			$post = $post->ID;
 		}
 		
-		return empty( $post ) ? $url : add_query_arg( 'edit_post_id', urlencode( $post ), $url );
+		return empty( $post ) ? $url : add_query_arg( array(
+			'socss_post_id' => urlencode( $post ),
+			'open_visual_editor' => 1,
+		), $url );
 	}
 	/**
 	 *

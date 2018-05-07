@@ -1,14 +1,14 @@
 <?php
 /**
  * @var $custom_css string The custom CSS string to be edited.
- * @var $revision int If the CSS to be edited is a revision, this will contain the timestamp of the revision.
+ * @var $current_revision int If the CSS to be edited is a revision, this will contain the timestamp of the revision.
  * @var $custom_css_revisions array Saved revisions for the current theme.
  */
 
 $snippets = SiteOrigin_CSS::single()->get_snippets();
 $user = wp_get_current_user();
-if ( ! empty( $revision ) ) {
-	$revision_date = date( 'j F Y @ H:i:s', $revision + get_option( 'gmt_offset' ) * 60 * 60 );
+if ( ! empty( $current_revision ) ) {
+	$revision_date = date( 'j F Y @ H:i:s', $current_revision + get_option( 'gmt_offset' ) * 60 * 60 );
 }
 ?>
 
@@ -23,7 +23,7 @@ if ( ! empty( $revision ) ) {
 		<div class="notice notice-success"><p><?php _e('Site design updated.', 'so-css') ?></p></div>
 	<?php endif; ?>
 
-	<?php if ( ! empty( $revision ) ) : ?>
+	<?php if ( ! empty( $current_revision ) ) : ?>
 		<div class="notice notice-warning">
 			<p><?php printf( __( 'Editing revision dated %s. Click %sRevert to this revision%s to keep using it.', 'so-css'), $revision_date, '<em>', '</em>' ) ?></p>
 		</div>
@@ -52,14 +52,15 @@ if ( ! empty( $revision ) ) {
 						if ( is_array( $custom_css_revisions ) ) {
 							$i = 0;
 							foreach ( $custom_css_revisions as $time => $css ) {
-								$is_current = ( empty( $revision ) && $i == 0 ) || ( ! empty( $revision ) && $time == $revision );
-								$link_url = $i == 0 ?
-									admin_url( 'themes.php?page=so_custom_css' ) :
-									add_query_arg( array( 'theme' => $theme, 'time' => $time ) );
+								$is_current = ( empty( $current_revision ) && $i == 0 ) || ( ! empty( $current_revision ) && $time == $current_revision );
+								$query_args = array( 'theme' => $theme, 'time' => $time, 'open_visual_editor' => false );
+								if ( ! empty( $socss_post_id ) ) {
+									$query_args['socss_post_id'] = $socss_post_id;
+								}
 								?>
 								<li>
 									<?php if ( ! $is_current ) : ?>
-									<a href="<?php echo esc_url( $link_url ) ?>" class="load-css-revision">
+									<a href="<?php echo esc_url( add_query_arg( $query_args ) ) ?>" class="load-css-revision">
 									<?php endif; ?>
 										<?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?>
 									<?php if ( ! $is_current ) : ?>
@@ -106,13 +107,13 @@ if ( ! empty( $revision ) ) {
 			</div>
 
 			<div class="custom-css-container">
-				<textarea name="custom_css" id="custom-css-textarea" class="css-editor" rows="<?php echo max( 10, substr_count( $custom_css, "\n" )+1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
+				<textarea name="custom_css" id="custom-css-textarea" class="css-editor" rows="<?php echo max( 10, substr_count( $custom_css, "\n" ) + 1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
 				<?php wp_nonce_field( 'custom_css', '_sononce' ) ?>
 			</div>
 			<p class="description"><?php echo SiteOrigin_CSS::editor_description(); ?></p>
 
 			<p class="submit">
-				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( ( ! empty ( $revision ) ?  __( 'Revert to this revision', 'so-css' ) : __( 'Save CSS', 'so-css' ) ) ); ?>" />
+				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( ( ! empty ( $current_revision ) ?  __( 'Revert to this revision', 'so-css' ) : __( 'Save CSS', 'so-css' ) ) ); ?>" />
 			</p>
 
 			<div class="custom-css-preview">

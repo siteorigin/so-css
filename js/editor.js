@@ -49,12 +49,6 @@
 				customCssCollection.reset( options.customCssPosts );
 				this.set( 'customCssPosts', customCssCollection );
 			}
-			
-			if ( _.has( options, 'selectedPost' ) && _.isNumber( parseInt( options.selectedPost ) ) ) {
-				if ( this.has( 'customCssPosts' ) ) {
-					this.set( 'selectedPost', this.get( 'customCssPosts' ).get( options.selectedPost ) );
-				}
-			}
 		},
 	} );
 	
@@ -564,6 +558,7 @@
 			
 			this.currentUri = new URI( selectedPost.get( 'url' ) );
 			
+			this.currentUri.removeQuery( 'so_css_preview', 1 );
 			this.$( '#preview-navigator input' ).val( this.currentUri.toString() );
 			this.currentUri.addQuery( 'so_css_preview', 1 );
 			
@@ -1807,13 +1802,27 @@
 jQuery( function ( $ ) {
 	var socss = window.socss;
 	
+	var editorModel = new socss.model.CSSEditorModel( {
+		customCssPosts: socssOptions.customCssPosts,
+	} );
+	
+	if ( _.has( socssOptions, 'postId' ) ) {
+		
+		var initPost = editorModel.get( 'customCssPosts' ).get( socssOptions.postId );
+		
+		var initCss = $( 'textarea.css-editor' ).val();
+		
+		if ( initCss ) {
+			initPost.set( { css: initCss, url: socssOptions.homeURL } );
+		}
+		
+		editorModel.set( 'selectedPost', initPost );
+	}
+	
 	// Setup the editor
 	var editor = new socss.view.editor( {
 		el: $( '#so-custom-css-form' ).get( 0 ),
-		model: new socss.model.CSSEditorModel( {
-			selectedPost: _.has( socssOptions, 'postId' ) ? socssOptions.postId : '',
-			customCssPosts: socssOptions.customCssPosts ,
-		} ),
+		model: editorModel,
 		openVisualEditor: socssOptions.openVisualEditor,
 	} );
 	// editor.render();
