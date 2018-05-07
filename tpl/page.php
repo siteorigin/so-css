@@ -47,31 +47,9 @@ if ( ! empty( $current_revision ) ) {
 			<div class="postbox" id="so-custom-css-revisions">
 				<h3 class="hndle"><span><?php _e('CSS Revisions', 'so-css') ?></span></h3>
 				<div class="inside">
-					<ol data-confirm="<?php esc_attr_e('Are you sure you want to load this revision?', 'so-css') ?>">
+					<ol class="custom-revisions-list" data-confirm="<?php esc_attr_e('Are you sure you want to load this revision?', 'so-css') ?>">
 						<?php
-						if ( is_array( $custom_css_revisions ) ) {
-							$i = 0;
-							foreach ( $custom_css_revisions as $time => $css ) {
-								$is_current = ( empty( $current_revision ) && $i == 0 ) || ( ! empty( $current_revision ) && $time == $current_revision );
-								$query_args = array( 'theme' => $theme, 'time' => $time, 'open_visual_editor' => false );
-								if ( ! empty( $socss_post_id ) ) {
-									$query_args['socss_post_id'] = $socss_post_id;
-								}
-								?>
-								<li>
-									<?php if ( ! $is_current ) : ?>
-									<a href="<?php echo esc_url( add_query_arg( $query_args ) ) ?>" class="load-css-revision">
-									<?php endif; ?>
-										<?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?>
-									<?php if ( ! $is_current ) : ?>
-									</a>
-									<?php endif; ?>
-									(<?php printf( __('%d chars', 'so-css'), strlen( $css ) ) ?>)<?php if ( $i == 0 ) : ?> (<?php _e( 'Latest', 'so-css' ) ?>)<?php endif; ?>
-								</li>
-								<?php
-								$i++;
-							}
-						}
+						$this->custom_css_revisions_list( $theme, $socss_post_id, $current_revision );
 						?>
 					</ol>
 				</div>

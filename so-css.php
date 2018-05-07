@@ -46,6 +46,7 @@ class SiteOrigin_CSS {
 		// The request to hide the getting started video
 		add_action( 'wp_ajax_socss_hide_getting_started', array( $this, 'admin_action_hide_getting_started' ) );
 		add_action( 'wp_ajax_socss_get_post_css', array( $this, 'admin_action_get_post_css' ) );
+		add_action( 'wp_ajax_socss_get_revisions_list', array( $this, 'admin_action_get_revisions_list' ) );
 		
 		add_filter( 'page_row_actions', array( $this, 'admin_posts_list_actions' ), 10, 2 );
 		add_filter( 'post_row_actions', array( $this, 'admin_posts_list_actions' ), 10, 2 );
@@ -396,6 +397,7 @@ class SiteOrigin_CSS {
 			'postId' => $socss_post_id,
 			'customCssPosts' => $custom_css_posts,
 			'getPostCSSAjaxUrl' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_post_css'), 'get_post_css' ),
+			'getRevisionsListAjaxUrl' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_revisions_list'), 'get_revisions_list' ),
 			'openVisualEditor' => $open_visual_editor,
 			'snippets' => $this->get_snippets(),
 			
@@ -473,6 +475,7 @@ class SiteOrigin_CSS {
 		
 		$custom_css = $this->get_custom_css( $this->theme, $socss_post_id );
 		$custom_css_revisions = $this->get_custom_css_revisions( $this->theme, $socss_post_id );
+		$current_revision = 0;
 		
 		if ( ! empty( $theme ) && $theme == $this->theme && ! empty( $time ) && ! empty( $custom_css_revisions[ $time ] ) ) {
 			$current_revision = $time;
@@ -570,6 +573,55 @@ class SiteOrigin_CSS {
 		$url = empty( $post_id ) ? home_url() : set_url_scheme( get_permalink( $post_id ) );
 		
 		wp_send_json( array( 'css' => empty( $current ) ? '' : $current, 'url' => $url ) );
+	}
+	
+	/**
+	 * Retrieves the past revisions of post specific CSS for the supplied postId.
+	 */
+	function admin_action_get_revisions_list() {
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'get_revisions_list' ) ) {
+			wp_die(
+				__( 'The supplied nonce is invalid.', 'siteorigin-panels' ),
+				__( 'Invalid nonce.', 'siteorigin-panels' ),
+				403
+			);
+		}
+		
+		$post_id = filter_input( INPUT_GET, 'postId', FILTER_VALIDATE_INT );
+		
+		$this->custom_css_revisions_list( $this->theme, $post_id );
+		
+		wp_die();
+	}
+	
+	function custom_css_revisions_list( $theme, $post_id = null, $current_revision = null ) {
+		
+		$revisions = $this->get_custom_css_revisions( $theme, $post_id );
+		
+		if ( is_array( $revisions ) ) {
+			$i = 0;
+			foreach ( $revisions as $time => $css ) {
+				$is_current = ( empty( $current_revision ) && $i == 0 ) || ( ! empty( $current_revision ) && $time == $current_revision );
+				$query_args = array( 'theme' => $theme, 'time' => $time, 'open_visual_editor' => false );
+				if ( ! empty( $post_id ) ) {
+					$query_args['socss_post_id'] = $post_id;
+				}
+				?>
+				<li>
+					<?php if ( ! $is_current ) : ?>
+					<a href="<?php echo esc_url( add_query_arg( $query_args, admin_url( 'themes.php?page=so_custom_css' ) ) ) ?>"
+					   class="load-css-revision">
+						<?php endif; ?>
+						<?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?>
+						<?php if ( ! $is_current ) : ?>
+					</a>
+				<?php endif; ?>
+					(<?php printf( __('%d chars', 'so-css'), strlen( $css ) ) ?>)<?php if ( $i == 0 ) : ?> (<?php _e( 'Latest', 'so-css' ) ?>)<?php endif; ?>
+				</li>
+				<?php
+				$i++;
+			}
+		}
 	}
 	
 	/**
