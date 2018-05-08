@@ -129,6 +129,13 @@
                     "CodeMirror-lint-markers"
                 ],
                 lint: true,
+                search: true,
+                dialog: true,
+                annotateScrollbar: true,
+                extraKeys: {
+                    'Ctrl-F': 'findPersistent',
+                    'Alt-G': 'jumpToLine',
+                }
             });
 
             // Make sure the user doesn't leave without saving
