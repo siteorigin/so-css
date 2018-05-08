@@ -208,6 +208,7 @@ class SiteOrigin_CSS {
 		wp_enqueue_script( 'codemirror-search-matchesonscrollbar', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/matchesonscrollbar' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror', 'codemirror-search' ), '5.37.0' );
 		wp_enqueue_style( 'codemirror-search-matchesonscrollbar', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/matchesonscrollbar' . SOCSS_JS_SUFFIX . '.css', array(), '5.37.0' );
 		wp_enqueue_script( 'codemirror-scroll-annotatescrollbar', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/scroll/annotatescrollbar' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror', 'codemirror-search', 'codemirror-search-matchesonscrollbar' ), '5.37.0' );
+		wp_enqueue_script( 'codemirror-jump-to-line', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/jump-to-line' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror', 'codemirror-search' ), '5.37.0' );
 
 		// All the CodeMirror styles
 		wp_enqueue_style( 'codemirror', plugin_dir_url(__FILE__) . 'lib/codemirror/lib/codemirror.css', array(), '5.2.0' );
