@@ -58,23 +58,9 @@
 	socss.view.toolbar = Backbone.View.extend( {
 		
 		button: _.template( '<li><a href="#<%= action %>" class="toolbar-button socss-button"><%= text %></a></li>' ),
-		selectOption: _.template( '<option value="<%= postId %>"><%= postTitle %></option>' ),
 		
 		events: {
 			'click .socss-button': 'triggerEvent',
-			'change .toolbar-select-css-target > select': 'onSelectedPostChange'
-		},
-		
-		render: function () {
-			this.collection.each( function ( customCss ) {
-				$( this.selectOption( customCss.toJSON() ) ).appendTo( this.$( '.toolbar-select-css-target > select' ) );
-			}.bind( this ) );
-			
-			var selectedPost = this.model.get( 'selectedPost' );
-			if ( ! _.isEmpty( selectedPost ) ) {
-				var $postSelect = this.$( '.toolbar-select-css-target > select' );
-				$postSelect.val( selectedPost.get( 'postId' ) );
-			}
 		},
 		
 		triggerEvent: function ( event ) {
@@ -90,18 +76,6 @@
 			.appendTo( this.$( '.toolbar-function-buttons .toolbar-buttons' ) );
 			
 			return button;
-		},
-		
-		onSelectedPostChange: function ( event ) {
-			var selectedPost = this.collection.get( $( event.currentTarget ).val() );
-			this.model.set( 'selectedPost', selectedPost );
-			var description = _.template( selectedPost.get( 'postId' ) === '' ?
-				socssOptions.editorDescriptions.global :
-				socssOptions.editorDescriptions.post
-			);
-			
-			$( '#so-custom-css-form > p.description' )
-			.text( description( { postTitle: selectedPost.get( 'postTitle' ), themeName: socssOptions.themeName } ) );
 		},
 	} );
 	
@@ -145,15 +119,21 @@
 		
 		getSelectedPostCss: function () {
 			var selectedPost = this.model.get( 'selectedPost' );
+			var promise;
+			if ( selectedPost ) {
+				promise = selectedPost.getCssData();
+			} else {
+				promise = new $.Deferred().resolve();
+			}
 			
-			return selectedPost.getCssData().then( this.render.bind( this ) );
+			return promise.then( this.render.bind( this ) );
 		},
 		
 		render: function () {
 			
 			var selectedPost = this.model.get( 'selectedPost' );
 			
-			if ( !selectedPost.has( 'css' ) ) {
+			if ( selectedPost && !selectedPost.has( 'css' ) ) {
 				return this;
 			}
 			
@@ -165,7 +145,6 @@
 				this.toolbar = new socss.view.toolbar( {
 					el: this.$( '.custom-css-toolbar' ),
 					model: this.model,
-					collection: this.model.get( 'customCssPosts' ),
 				} );
 				this.toolbar.render();
 			}
@@ -188,7 +167,9 @@
 				this.preview.render();
 			}
 			
-			this.codeMirror.setValue( selectedPost.get( 'css' ) );
+			if ( selectedPost ) {
+				this.codeMirror.setValue( selectedPost.get( 'css' ) );
+			}
 			
 			return this;
 		},
@@ -539,6 +520,7 @@
 			this.listenTo( this.model, 'change:selectedPost', this.render.bind( this ) );
 			
 			this.originalUri = new URI( attr.initURL );
+			this.currentUri = new URI( attr.initURL );
 			
 			this.editor.codeMirror.on( 'change', function ( cm, c ) {
 				this.updatePreviewCss();
@@ -549,14 +531,16 @@
 			
 			var selectedPost = this.model.get( 'selectedPost' );
 			
-			if ( !selectedPost.has( 'url' ) ) {
+			if ( selectedPost && !selectedPost.has( 'url' ) ) {
 				selectedPost.getCssData().then( this.render.bind( this ) );
 				return this;
 			}
 			
 			this.$el.html( this.template() );
 			
-			this.currentUri = new URI( selectedPost.get( 'url' ) );
+			if ( selectedPost ) {
+				this.currentUri = new URI( selectedPost.get( 'url' ) );
+			}
 			
 			this.currentUri.removeQuery( 'so_css_preview', 1 );
 			this.$( '#preview-navigator input' ).val( this.currentUri.toString() );
@@ -1825,19 +1809,6 @@ jQuery( function ( $ ) {
 		customCssPosts: socssOptions.customCssPosts,
 	} );
 	
-	if ( _.has( socssOptions, 'postId' ) ) {
-		
-		var initPost = editorModel.get( 'customCssPosts' ).get( socssOptions.postId );
-		
-		var initCss = $( 'textarea.css-editor' ).val();
-		
-		if ( initCss ) {
-			initPost.set( { css: initCss, url: socssOptions.homeURL } );
-		}
-		
-		editorModel.set( 'selectedPost', initPost );
-	}
-	
 	// Setup the editor
 	var editor = new socss.view.editor( {
 		el: $( '#so-custom-css-form' ).get( 0 ),
@@ -1847,7 +1818,6 @@ jQuery( function ( $ ) {
 	// editor.render();
 	editor.setSnippets( socssOptions.snippets );
 	
-	window.socss.mainEditor = editor;
 	
 	var revisionsList = new socss.view.RevisionsListView( {
 		el: $( '#so-custom-css-revisions' ),
@@ -1860,4 +1830,8 @@ jQuery( function ( $ ) {
 		$( '#so-custom-css-getting-started' ).slideUp();
 		$.get( $( this ).attr( 'href' ) );
 	} );
+	
+	window.socss.mainEditor = editor;
+	window.socss.revisionsList = revisionsList;
+	$( socss ).trigger( 'initialized' );
 } );

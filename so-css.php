@@ -34,22 +34,18 @@ class SiteOrigin_CSS {
 		
 		// All the admin actions
 		add_action( 'admin_menu', array( $this, 'action_admin_menu' ) );
-		add_action( 'admin_bar_menu', array( $this, 'admin_bar_menu' ), 100 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ), 20 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_admin_scripts' ), 19 );
 		add_action( 'load-appearance_page_so_custom_css', array( $this, 'add_help_tab' ) );
-		add_action( 'admin_footer', array( $this, 'action_admin_footer' ) );
 		
 		// Add the action links.
 		add_action( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
 		
 		// The request to hide the getting started video
 		add_action( 'wp_ajax_socss_hide_getting_started', array( $this, 'admin_action_hide_getting_started' ) );
+		
 		add_action( 'wp_ajax_socss_get_post_css', array( $this, 'admin_action_get_post_css' ) );
 		add_action( 'wp_ajax_socss_get_revisions_list', array( $this, 'admin_action_get_revisions_list' ) );
-		
-		add_filter( 'page_row_actions', array( $this, 'admin_posts_list_actions' ), 10, 2 );
-		add_filter( 'post_row_actions', array( $this, 'admin_posts_list_actions' ), 10, 2 );
   
 		if ( ! is_admin() ) {
 			if( isset( $_GET['so_css_preview'] )  ) {
@@ -267,29 +263,6 @@ class SiteOrigin_CSS {
 		}
 	}
 	
-/**
-	 * Add the Edit CSS item to the admin bar.
-	 *
-	 * @param WP_Admin_Bar $admin_bar
-	 *
-	 * @return WP_Admin_Bar
-	 */
-	function admin_bar_menu( $admin_bar ) {
-		
-		if ( ! is_admin() && current_user_can( 'edit_theme_options', get_the_ID() ) ) {
-			
-			$id = is_singular() ? get_the_ID() : get_queried_object_id();
-			
-			$admin_bar->add_node( array(
-				'id'    => 'so_custom_css',
-				'title' => __( 'Edit CSS', 'so-css' ),
-				'href'  => $this->get_edit_css_link( $id ),
-			) );
-	    }
-		
-		return $admin_bar;
-	}
-	
 	
 	/**
 	 * Enqueues the front end style used for the 'Edit CSS' admin bar menu item.
@@ -372,7 +345,6 @@ class SiteOrigin_CSS {
 		// Pretty confusing, but it seems we should be using `home_url` and NOT `site_url`
 		// as described here => https://wordpress.stackexchange.com/a/50605
 		$init_url = home_url();
-		$socss_post_id = ! empty( $_REQUEST['socss_post_id'] ) ? intval( $_REQUEST['socss_post_id'] ) : '';
 		
 		if ( ! empty( $socss_post_id ) && is_int( $socss_post_id ) ) {
 			$init_url = set_url_scheme( get_permalink( $socss_post_id ) );
@@ -381,8 +353,6 @@ class SiteOrigin_CSS {
 		$open_visual_editor = ! empty( $_REQUEST['open_visual_editor'] );
 		
 		$home_url = add_query_arg( 'so_css_preview', '1', $init_url );
-		
-		$custom_css_posts = $this->get_custom_css_posts();
 		
 		$theme = wp_get_theme();
 		
@@ -394,12 +364,9 @@ class SiteOrigin_CSS {
 				'post' => __( 'Changes apply to the post <%= postTitle %> when the current theme is <%= themeName %> or its child themes', 'so-css' ),
 			),
 			'homeURL' => $home_url,
-			'postId' => $socss_post_id,
-			'customCssPosts' => $custom_css_posts,
 			'getPostCSSAjaxUrl' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_post_css'), 'get_post_css' ),
 			'getRevisionsListAjaxUrl' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_revisions_list'), 'get_revisions_list' ),
 			'openVisualEditor' => $open_visual_editor,
-			'snippets' => $this->get_snippets(),
 			
 			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() ),
 			
@@ -411,22 +378,9 @@ class SiteOrigin_CSS {
 			)
 		) );
 		
-		// This is for the templates required by the CSS editor
-		add_action( 'admin_footer', array( $this, 'action_admin_footer' ) );
-	}
-	
-	function get_custom_css_posts() {
-		
-		$pages = get_pages();
-		$posts = get_posts( array( 'numberposts' => -1 ) );
-		
-		$custom_css_posts = array();
-		$custom_css_posts[] = array( 'postId' => '', 'postTitle' => __( 'Global CSS', 'so-css' ) );
-		foreach ( array_merge( $posts, $pages ) as $post ) {
-			$custom_css_posts[] = array( 'postId' => $post->ID, 'postTitle' => $post->post_title );
-		}
-		
-		return $custom_css_posts;
+		// This is for the templates required by the CSS editor. Ideally this would be out in the footer, but we need
+		// it earlier for dependent scripts.
+		include plugin_dir_path( __FILE__ ) . 'tpl/js-templates.php';
 	}
 	
 	/**
@@ -448,13 +402,6 @@ class SiteOrigin_CSS {
 	 */
 	function get_property_controllers() {
 		return include plugin_dir_path( __FILE__ ) . 'inc/controller-config.php';
-	}
-	
-	/**
-	 * Display the templates for the CSS Editor
-	 */
-	function action_admin_footer() {
-		include plugin_dir_path( __FILE__ ) . 'tpl/js-templates.php';
 	}
 	
 	function plugin_action_links( $links ) {
@@ -496,33 +443,6 @@ class SiteOrigin_CSS {
 		return apply_filters( 'siteorigin_premium_upgrade_teaser', true ) &&
 			   ! defined( 'SITEORIGIN_PREMIUM_VERSION' );
 	}
-/**
-	 *  Adds 'Edit Custom CSS' row action link to page and post rows
-	 */
-	function admin_posts_list_actions( $actions, $post ){
-		$post_type_object = get_post_type_object( $post->post_type );
-		$can_edit_post = current_user_can( 'edit_post', $post->ID );
-		
-		if ( $can_edit_post && is_post_type_viewable( $post_type_object ) ) {
-			$edit_css_link = $this->get_edit_css_link( $post );
-			
-			$actions_keys = array_keys( $actions );
-			array_splice( $actions_keys, 1, 0, 'so_edit_custom_css' );
-			
-			$actions_values = array_values( $actions );
-			array_splice( $actions_values, 1, 0, sprintf(
-				'<a href="%s" aria-label="%s">%s</a>',
-				esc_url( $edit_css_link ),
-				esc_attr__( 'Edit Custom CSS', 'so-widgets-bundle' ),
-				__( 'Edit Custom CSS', 'so-widgets-bundle' )
-			) );
-			
-			$actions = array_combine( $actions_keys, $actions_values );
-		}
-		
-		return $actions;
-	}
-	
 	
 	/**
 	 *  Generates the url to edit the custom CSS for a post.

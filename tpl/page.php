@@ -64,9 +64,7 @@ if ( ! empty( $current_revision ) ) {
 					<div class="toolbar-functions-dropdown">
 						<span class="dashicons dashicons-menu"></span>
 					</div>
-					<div class="toolbar-select-css-target">
-						<select name="selected_post_id"></select>
-					</div>
+					
 					<ul class="toolbar-buttons">
 					</ul>
 				</div>
