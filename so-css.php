@@ -88,8 +88,12 @@ class SiteOrigin_CSS {
 	 * @return string The custom CSS for the theme and post ID combination.
 	 */
 	function get_custom_css( $theme, $post_id = null ) {
-		$css_key = 'siteorigin_custom_css[' . $theme . ( ! empty( $post_id ) ? '_' . $post_id : '' ) . ']';
-		return get_option( $css_key, '' );
+		$css_key = 'siteorigin_custom_css[' . $theme . ']';
+		if ( empty( $post_id ) ) {
+			return get_option( $css_key, '' );
+		}
+		
+		return get_post_meta( $post_id, $css_key, true );
 	}
 	
 	/**
@@ -102,13 +106,21 @@ class SiteOrigin_CSS {
 	 * @return bool Whether or not saving the custom CSS was successful.
 	 */
 	function save_custom_css( $custom_css, $theme, $post_id = null ) {
-		$css_key = 'siteorigin_custom_css[' . $theme . ( ! empty( $post_id ) ?  '_' . $post_id : '' ) . ']';
-		$current = get_option( $css_key );
-		if ( $current === false ) {
-			return add_option( $css_key, $custom_css, '', 'no' );
-		} else {
-			return update_option( $css_key, $custom_css );
+		$css_key = 'siteorigin_custom_css[' . $theme . ']';
+		if ( empty( $post_id ) ) {
+			$current = get_option( $css_key );
+			if ( $current === false ) {
+				return add_option( $css_key, $custom_css, '', 'no' );
+			} else {
+				return update_option( $css_key, $custom_css );
+			}
 		}
+		
+		if ( metadata_exists( 'post', $post_id, $css_key ) ) {
+			return update_post_meta( $post_id, $css_key, $custom_css );
+		}
+		
+		return add_post_meta( $post_id, $css_key, $custom_css );
 	}
 	
 	/**
@@ -139,7 +151,6 @@ class SiteOrigin_CSS {
 				$css_file_path,
 				$custom_css
 			);
-			
 		}
 	}
 	
@@ -152,9 +163,12 @@ class SiteOrigin_CSS {
 	 * @return array The custom CSS revisions for the theme and post ID combination.
 	 */
 	function get_custom_css_revisions( $theme, $post_id = null ) {
-		$css_key = 'siteorigin_custom_css_revisions[' . $theme . ( ! empty( $post_id ) ?  '_' . $post_id : '' ) . ']';
+		$css_key = 'siteorigin_custom_css_revisions[' . $theme . ']';
+		if ( empty( $post_id ) ) {
+			return get_option( $css_key, '' );
+		}
 		
-		return get_option( $css_key, '' );
+		return get_post_meta( $post_id, $css_key, true );
 	}
 	
 	/**
@@ -167,13 +181,17 @@ class SiteOrigin_CSS {
 	 * @return bool Whether or not adding the custom CSS revision was successful.
 	 */
 	function add_custom_css_revision( $custom_css, $theme, $post_id = null ) {
-		$revisions = $this->get_custom_css_revisions( $this->theme );
+		$revisions = $this->get_custom_css_revisions( $this->theme, $post_id );
 		
-		$css_key = 'siteorigin_custom_css_revisions[' . $theme . ( ! empty( $post_id ) ?  '_' . $post_id : '' ) . ']';
+		$css_key = 'siteorigin_custom_css_revisions[' . $theme . ']';
 		
 		if ( empty( $revisions ) ) {
-			add_option( $css_key, array(), '', 'no' );
 			$revisions = array();
+			if ( empty( $post_id ) ) {
+				add_option( $css_key, $revisions, '', 'no' );
+			} else {
+				add_post_meta( $post_id, $css_key, $revisions );
+			}
 		}
 		$revisions[ time() ] = $custom_css;
 		
@@ -181,7 +199,11 @@ class SiteOrigin_CSS {
 		krsort( $revisions );
 		$revisions = array_slice( $revisions, 0, 15, true );
 		
-		return update_option( $css_key, $revisions );
+		if ( empty( $post_id ) ) {
+			return update_option( $css_key, $revisions );
+		}
+		
+		return update_post_meta( $post_id, $css_key, $revisions );
 	}
 	
 	/**
