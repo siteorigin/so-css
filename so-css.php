@@ -37,7 +37,6 @@ class SiteOrigin_CSS {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_scripts' ), 20 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'dequeue_admin_scripts' ), 19 );
 		add_action( 'load-appearance_page_so_custom_css', array( $this, 'add_help_tab' ) );
-		add_action( 'admin_footer', array( $this, 'action_admin_footer' ) );
 		
 		// Add the action links.
 		add_action( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
@@ -45,16 +44,24 @@ class SiteOrigin_CSS {
 		// The request to hide the getting started video
 		add_action( 'wp_ajax_socss_hide_getting_started', array( $this, 'admin_action_hide_getting_started' ) );
 		
-		if ( isset( $_GET['so_css_preview'] ) && ! is_admin() ) {
+		add_action( 'wp_ajax_socss_get_post_css', array( $this, 'admin_action_get_post_css' ) );
+		add_action( 'wp_ajax_socss_get_revisions_list', array( $this, 'admin_action_get_revisions_list' ) );
+  
+		if ( ! is_admin() ) {
+			if( isset( $_GET['so_css_preview'] )  ) {
+
+				add_action( 'plugins_loaded', array($this, 'disable_ngg_resource_manager') );
+				add_filter( 'show_admin_bar', '__return_false' );
+				add_filter( 'wp_enqueue_scripts', array($this, 'enqueue_inspector_scripts') );
+				add_filter( 'wp_footer', array($this, 'inspector_templates') );
+	
+				// We'll be grabbing all the enqueued scripts and outputting them
+				add_action( 'wp_enqueue_scripts', array($this, 'inline_inspector_scripts'), 100 );
+			}
 			
-			add_action( 'plugins_loaded', array( $this, 'disable_ngg_resource_manager' ) );
-			add_filter( 'show_admin_bar', '__return_false' );
-			add_filter( 'wp_enqueue_scripts', array( $this, 'enqueue_inspector_scripts' ) );
-			add_filter( 'wp_footer', array( $this, 'inspector_templates' ) );
-			
-			// We'll be grabbing all the enqueued scripts and outputting them
-			add_action( 'wp_enqueue_scripts', array( $this, 'inline_inspector_scripts' ), 100 );
+			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_front_scripts' ) );
 		}
+  
 	}
 	
 	/**
@@ -73,27 +80,173 @@ class SiteOrigin_CSS {
 	}
 	
 	/**
+	 * Retrieve the current custom CSS for a given theme and post id combination.
+	 *
+	 * @param $theme string The name of the theme for which to retrieve custom CSS.
+	 * @param $post_id int The ID of the specific post for which to retrieve custom CSS.
+	 *
+	 * @return string The custom CSS for the theme and post ID combination.
+	 */
+	function get_custom_css( $theme, $post_id = null ) {
+		$css_key = 'siteorigin_custom_css[' . $theme . ']';
+		if ( empty( $post_id ) ) {
+			return get_option( $css_key, '' );
+		}
+		
+		return get_post_meta( $post_id, $css_key, true );
+	}
+	
+	/**
+	 * Save custom CSS for a given theme and post id combination.
+	 *
+	 * @param $custom_css string The custom CSS to save.
+	 * @param $theme string The name of the theme for which to save custom CSS.
+	 * @param $post_id int The ID of the specific post for which to save custom CSS.
+	 *
+	 * @return bool Whether or not saving the custom CSS was successful.
+	 */
+	function save_custom_css( $custom_css, $theme, $post_id = null ) {
+		$css_key = 'siteorigin_custom_css[' . $theme . ']';
+		if ( empty( $post_id ) ) {
+			$current = get_option( $css_key );
+			if ( $current === false ) {
+				return add_option( $css_key, $custom_css, '', 'no' );
+			} else {
+				return update_option( $css_key, $custom_css );
+			}
+		}
+		
+		if ( metadata_exists( 'post', $post_id, $css_key ) ) {
+			return update_post_meta( $post_id, $css_key, $custom_css );
+		}
+		
+		return add_post_meta( $post_id, $css_key, $custom_css );
+	}
+	
+	/**
+	 * Save custom CSS for a given theme and post id combination to a file in the uploads directory to allow for caching.
+	 *
+	 * @param $custom_css
+	 * @param $theme
+	 * @param null $post_id
+	 */
+	function save_custom_css_file( $custom_css, $theme, $post_id = null ) {
+		if ( WP_Filesystem() ) {
+			global $wp_filesystem;
+			$upload_dir = wp_upload_dir();
+			$upload_dir_path = $upload_dir['basedir'] . '/so-css/';
+			
+			if ( ! $wp_filesystem->is_dir( $upload_dir_path ) ) {
+				$wp_filesystem->mkdir( $upload_dir_path );
+			}
+			
+			$css_file_name = 'so-css-' . $theme . ( ! empty( $post_id ) ? '_' . $post_id : '' );
+			$css_file_path = $upload_dir_path . $css_file_name . '.css';
+			
+			if ( file_exists( $css_file_path ) ) {
+				$wp_filesystem->delete( $css_file_path );
+			}
+			
+			$wp_filesystem->put_contents(
+				$css_file_path,
+				$custom_css
+			);
+		}
+	}
+	
+	/**
+	 * Retrieve the previous revisions of custom CSS for a given theme and post id combination.
+	 *
+	 * @param $theme string The name of the theme for which to retrieve custom CSS revisions.
+	 * @param $post_id int The ID of the specific post for which to retrieve custom CSS revisions.
+	 *
+	 * @return array The custom CSS revisions for the theme and post ID combination.
+	 */
+	function get_custom_css_revisions( $theme, $post_id = null ) {
+		$css_key = 'siteorigin_custom_css_revisions[' . $theme . ']';
+		if ( empty( $post_id ) ) {
+			return get_option( $css_key, '' );
+		}
+		
+		return get_post_meta( $post_id, $css_key, true );
+	}
+	
+	/**
+	 * Adds a custom CSS revision for a given theme and post id combination.
+	 *
+	 * @param $custom_css string The custom CSS to add as a revision.
+	 * @param $theme string The name of the theme for which to save custom CSS.
+	 * @param $post_id int The ID of the specific post for which to save custom CSS.
+	 *
+	 * @return bool Whether or not adding the custom CSS revision was successful.
+	 */
+	function add_custom_css_revision( $custom_css, $theme, $post_id = null ) {
+		$revisions = $this->get_custom_css_revisions( $this->theme, $post_id );
+		
+		$css_key = 'siteorigin_custom_css_revisions[' . $theme . ']';
+		
+		if ( empty( $revisions ) ) {
+			$revisions = array();
+			if ( empty( $post_id ) ) {
+				add_option( $css_key, $revisions, '', 'no' );
+			} else {
+				add_post_meta( $post_id, $css_key, $revisions );
+			}
+		}
+		$revisions[ time() ] = $custom_css;
+		
+		// Sort the revisions and cut off any old ones.
+		krsort( $revisions );
+		$revisions = array_slice( $revisions, 0, 15, true );
+		
+		if ( empty( $post_id ) ) {
+			return update_option( $css_key, $revisions );
+		}
+		
+		return update_post_meta( $post_id, $css_key, $revisions );
+	}
+	
+	/**
 	 * Display the custom CSS in the header.
 	 */
 	function action_wp_head() {
+		
+		$this->enqueue_custom_css( $this->theme );
+		
+		if ( is_singular() ) {
+			$this->enqueue_custom_css( $this->theme, get_the_ID() );
+		}
+		
+	}
+	
+	/**
+	 * Enqueue the custom CSS for the given theme and post id combination.
+	 *
+	 * @param $theme string The name of the theme for which to enqueue custom CSS.
+	 * @param $post_id int The ID of the specific post for which to enqueue custom CSS.
+	 *
+	 */
+	function enqueue_custom_css( $theme, $post_id = null ) {
+		
 		$upload_dir = wp_upload_dir();
 		$upload_dir_path = $upload_dir['basedir'] . '/so-css/';
 		
-		$css_file_name = 'so-css-' . $this->theme;
+		$css_id = $theme . ( ! empty( $post_id ) ? '_' . $post_id : '' );
+		$css_file_name = 'so-css-' . $css_id;
 		$css_file_path = $upload_dir_path . $css_file_name . '.css';
 		
 		if ( empty( $_GET['so_css_preview'] ) && ! is_admin() && file_exists( $css_file_path ) ) {
 			wp_enqueue_style(
-				'so-css-' . $this->theme,
+				'so-css-' . $css_id,
 				set_url_scheme( $upload_dir['baseurl'] . '/so-css/' . $css_file_name . '.css' ),
 				array(),
 				$this->get_latest_revision_timestamp()
 			);
 		} else {
-			$custom_css = get_option( 'siteorigin_custom_css[' . $this->theme . ']', '' );
+			$custom_css = $this->get_custom_css( $theme, $post_id );
 			// We just need to enqueue a dummy style
 			if ( ! empty( $custom_css ) ) {
-				echo "<style id='" . sanitize_html_class( $this->theme ) . "-custom-css' class='siteorigin-custom-css' type='text/css'>\n";
+				echo "<style id='" . sanitize_html_class( $css_id ) . "-custom-css' class='siteorigin-custom-css' type='text/css'>\n";
 				echo self::sanitize_css( $custom_css ) . "\n";
 				echo "</style>\n";
 			}
@@ -118,55 +271,34 @@ class SiteOrigin_CSS {
 			
 			// Sanitize CSS input. Should keep most tags, apart from script and style tags.
 			$custom_css = self::sanitize_css( filter_input( INPUT_POST, 'custom_css' ) );
+			$selected_post_id = filter_input( INPUT_POST, 'selected_post_id', FILTER_VALIDATE_INT );
 			
-			$current = get_option( 'siteorigin_custom_css[' . $this->theme . ']' );
-			if ( $current === false ) {
-				add_option( 'siteorigin_custom_css[' . $this->theme . ']', $custom_css, '', 'no' );
-			} else {
-				update_option( 'siteorigin_custom_css[' . $this->theme . ']', $custom_css );
-			}
+			$current = $this->get_custom_css( $this->theme, $selected_post_id );
+			$this->save_custom_css( $custom_css, $this->theme, $selected_post_id );
 			
 			// If this has changed, then add a revision.
 			if ( $current != $custom_css ) {
-				$revisions = get_option( 'siteorigin_custom_css_revisions[' . $this->theme . ']' );
-				if ( empty( $revisions ) ) {
-					add_option( 'siteorigin_custom_css_revisions[' . $this->theme . ']', array(), '', 'no' );
-					$revisions = array();
-				}
-				$revisions[ time() ] = $custom_css;
+				$this->add_custom_css_revision( $custom_css, $this->theme, $selected_post_id );
 				
-				// Sort the revisions and cut off any old ones.
-				krsort( $revisions );
-				$revisions = array_slice( $revisions, 0, 15, true );
-				
-				update_option( 'siteorigin_custom_css_revisions[' . $this->theme . ']', $revisions );
-				
-				if ( WP_Filesystem() ) {
-					global $wp_filesystem;
-					$upload_dir = wp_upload_dir();
-					$upload_dir_path = $upload_dir['basedir'] . '/so-css/';
-					
-					if ( ! $wp_filesystem->is_dir( $upload_dir_path ) ) {
-						$wp_filesystem->mkdir( $upload_dir_path );
-					}
-					
-					$css_file_name = 'so-css-' . $this->theme;
-					$css_file_path = $upload_dir_path . $css_file_name . '.css';
-					
-					if ( file_exists( $css_file_path ) ) {
-						$wp_filesystem->delete( $css_file_path );
-					}
-					
-					$wp_filesystem->put_contents(
-						$css_file_path,
-						$custom_css
-					);
-					
-				}
+				$this->save_custom_css_file( $custom_css, $this->theme, $selected_post_id );
 			}
 		}
 	}
 	
+	
+	/**
+	 * Enqueues the front end style used for the 'Edit CSS' admin bar menu item.
+	 */
+	function enqueue_front_scripts() {
+		if ( current_user_can( 'edit_theme_options', get_the_ID() ) ) {
+            wp_enqueue_style(
+                'so-css-front',
+                plugin_dir_url( __FILE__ ) . 'css/front.css',
+                array(),
+                SOCSS_VERSION
+            );
+        }
+	}
 	/**
 	 * Display the help tab
 	 */
@@ -240,21 +372,35 @@ class SiteOrigin_CSS {
 		wp_enqueue_script( 'siteorigin-uri', plugin_dir_url( __FILE__ ) . 'js/URI' . SOCSS_JS_SUFFIX . '.js', array(), SOCSS_VERSION, true );
 		
 		// All the custom SiteOrigin CSS stuff
-		wp_enqueue_script( 'siteorigin-custom-css', plugin_dir_url( __FILE__ ) . 'js/editor' . SOCSS_JS_SUFFIX . '.js', array(
-			'jquery',
-			'underscore',
-			'backbone',
-			'siteorigin-css-parser-lib',
-			'codemirror'
-		), SOCSS_VERSION, true );
-		wp_enqueue_style( 'siteorigin-custom-css', plugin_dir_url( __FILE__ ) . 'css/admin.css', array(), SOCSS_VERSION );
+		wp_enqueue_script( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'js/editor' . SOCSS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'siteorigin-css-parser-lib', 'codemirror' ), SOCSS_VERSION, true );
+		wp_enqueue_style( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'css/admin.css', array( ), SOCSS_VERSION );
+
+		
+		// Pretty confusing, but it seems we should be using `home_url` and NOT `site_url`
+		// as described here => https://wordpress.stackexchange.com/a/50605
+		$init_url = home_url();
+		
+		if ( ! empty( $socss_post_id ) && is_int( $socss_post_id ) ) {
+			$init_url = set_url_scheme( get_permalink( $socss_post_id ) );
+		}
+		
+		$open_visual_editor = ! empty( $_REQUEST['open_visual_editor'] );
+		
+		$home_url = add_query_arg( 'so_css_preview', '1', $init_url );
+		
+		$theme = wp_get_theme();
 		
 		wp_localize_script( 'siteorigin-custom-css', 'socssOptions', array(
 			'themeCSS' => SiteOrigin_CSS::single()->get_theme_css(),
-			// Pretty confusing, but it seems we should be using `home_url` and NOT `site_url`
-			// as described here => https://wordpress.stackexchange.com/a/50605
-			'homeURL'  => add_query_arg( 'so_css_preview', '1', home_url() ),
-			'snippets' => $this->get_snippets(),
+			'themeName' => $theme->get( 'Name' ),
+			'editorDescriptions' => array(
+				'global' => __( 'Changes apply to <%= themeName %> and its child themes', 'so-css' ),
+				'post' => __( 'Changes apply to the post <%= postTitle %> when the current theme is <%= themeName %> or its child themes', 'so-css' ),
+			),
+			'homeURL' => $home_url,
+			'getPostCSSAjaxUrl' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_post_css'), 'get_post_css' ),
+			'getRevisionsListAjaxUrl' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_revisions_list'), 'get_revisions_list' ),
+			'openVisualEditor' => $open_visual_editor,
 			
 			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() ),
 			
@@ -266,8 +412,9 @@ class SiteOrigin_CSS {
 			)
 		) );
 		
-		// This is for the templates required by the CSS editor
-		add_action( 'admin_footer', array( $this, 'action_admin_footer' ) );
+		// This is for the templates required by the CSS editor. Ideally this would be out in the footer, but we need
+		// it earlier for dependent scripts.
+		include plugin_dir_path( __FILE__ ) . 'tpl/js-templates.php';
 	}
 	
 	/**
@@ -291,13 +438,6 @@ class SiteOrigin_CSS {
 		return include plugin_dir_path( __FILE__ ) . 'inc/controller-config.php';
 	}
 	
-	/**
-	 * Display the templates for the CSS Editor
-	 */
-	function action_admin_footer() {
-		include plugin_dir_path( __FILE__ ) . 'tpl/js-templates.php';
-	}
-	
 	function plugin_action_links( $links ) {
 		if ( isset( $links['edit'] ) ) {
 			unset( $links['edit'] );
@@ -309,19 +449,25 @@ class SiteOrigin_CSS {
 	}
 	
 	function display_admin_page() {
-		$theme = basename( get_template_directory() );
 		
-		$custom_css = get_option( 'siteorigin_custom_css[' . $theme . ']', '' );
-		$custom_css_revisions = get_option( 'siteorigin_custom_css_revisions[' . $theme . ']' );
+		$socss_post_id = filter_input( INPUT_GET, 'socss_post_id', FILTER_VALIDATE_INT );
+		$theme = filter_input( INPUT_GET, 'theme' );
+		$time = filter_input( INPUT_GET, 'time', FILTER_VALIDATE_INT );
 		
-		if ( ! empty( $_GET['theme'] ) && $_GET['theme'] == $theme && ! empty( $_GET['time'] ) && ! empty( $custom_css_revisions[ $_GET['time'] ] ) ) {
-			$revision = $_GET['time'];
-			$custom_css = $custom_css_revisions[ $revision ];
+		$custom_css = $this->get_custom_css( $this->theme, $socss_post_id );
+		$custom_css_revisions = $this->get_custom_css_revisions( $this->theme, $socss_post_id );
+		$current_revision = 0;
+		
+		if ( ! empty( $theme ) && $theme == $this->theme && ! empty( $time ) && ! empty( $custom_css_revisions[ $time ] ) ) {
+			$current_revision = $time;
+			$custom_css = $custom_css_revisions[ $time ];
 		}
 		
 		if ( ! empty( $custom_css_revisions ) ) {
 			krsort( $custom_css_revisions );
 		}
+		
+		$theme = basename( get_template_directory() );
 		
 		include plugin_dir_path( __FILE__ ) . 'tpl/page.php';
 	}
@@ -333,6 +479,21 @@ class SiteOrigin_CSS {
 	}
 	
 	/**
+	 *  Generates the url to edit the custom CSS for a post.
+	 */
+	function get_edit_css_link( $post ) {
+		$url = admin_url( 'themes.php?page=so_custom_css' );
+		if ( ! is_int( $post ) ) {
+			$post = get_post( $post );
+			$post = $post->ID;
+		}
+		
+		return empty( $post ) ? $url : add_query_arg( array(
+			'socss_post_id' => urlencode( $post ),
+			'open_visual_editor' => 1,
+		), $url );
+	}
+	/**
 	 *
 	 */
 	function admin_action_hide_getting_started() {
@@ -343,6 +504,77 @@ class SiteOrigin_CSS {
 		$user = wp_get_current_user();
 		if ( ! empty( $user ) ) {
 			update_user_meta( $user->ID, 'socss_hide_gs', true );
+		}
+	}
+	
+	/**
+	 * Retrieves the post specific CSS for the supplied postId.
+	 */
+	function admin_action_get_post_css() {
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'get_post_css' ) ) {
+			wp_die(
+				__( 'The supplied nonce is invalid.', 'siteorigin-panels' ),
+				__( 'Invalid nonce.', 'siteorigin-panels' ),
+				403
+			);
+		}
+		
+		$post_id = filter_input( INPUT_GET, 'postId', FILTER_VALIDATE_INT );
+		
+		$current = $this->get_custom_css( $this->theme, $post_id );
+		
+		
+		$url = empty( $post_id ) ? home_url() : set_url_scheme( get_permalink( $post_id ) );
+		
+		wp_send_json( array( 'css' => empty( $current ) ? '' : $current, 'url' => $url ) );
+	}
+	
+	/**
+	 * Retrieves the past revisions of post specific CSS for the supplied postId.
+	 */
+	function admin_action_get_revisions_list() {
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'get_revisions_list' ) ) {
+			wp_die(
+				__( 'The supplied nonce is invalid.', 'siteorigin-panels' ),
+				__( 'Invalid nonce.', 'siteorigin-panels' ),
+				403
+			);
+		}
+		
+		$post_id = filter_input( INPUT_GET, 'postId', FILTER_VALIDATE_INT );
+		
+		$this->custom_css_revisions_list( $this->theme, $post_id );
+		
+		wp_die();
+	}
+	
+	function custom_css_revisions_list( $theme, $post_id = null, $current_revision = null ) {
+		
+		$revisions = $this->get_custom_css_revisions( $theme, $post_id );
+		
+		if ( is_array( $revisions ) ) {
+			$i = 0;
+			foreach ( $revisions as $time => $css ) {
+				$is_current = ( empty( $current_revision ) && $i == 0 ) || ( ! empty( $current_revision ) && $time == $current_revision );
+				$query_args = array( 'theme' => $theme, 'time' => $time, 'open_visual_editor' => false );
+				if ( ! empty( $post_id ) ) {
+					$query_args['socss_post_id'] = $post_id;
+				}
+				?>
+				<li>
+					<?php if ( ! $is_current ) : ?>
+					<a href="<?php echo esc_url( add_query_arg( $query_args, admin_url( 'themes.php?page=so_custom_css' ) ) ) ?>"
+					   class="load-css-revision">
+						<?php endif; ?>
+						<?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?>
+						<?php if ( ! $is_current ) : ?>
+					</a>
+				<?php endif; ?>
+					(<?php printf( __('%d chars', 'so-css'), strlen( $css ) ) ?>)<?php if ( $i == 0 ) : ?> (<?php _e( 'Latest', 'so-css' ) ?>)<?php endif; ?>
+				</li>
+				<?php
+				$i++;
+			}
 		}
 	}
 	
@@ -529,7 +761,7 @@ class SiteOrigin_CSS {
 			?>
 			<script type="text/css" class="socss-theme-styles"
 					id="socss-inlined-style-<?php echo sanitize_html_class( $handle ) ?>">
-			
+				<?php echo strip_tags( $css ); ?>
 			</script>
 			<?php
 		}
@@ -545,7 +777,7 @@ class SiteOrigin_CSS {
 	}
 	
 	private function get_latest_revision_timestamp() {
-		$revisions = get_option( 'siteorigin_custom_css_revisions[' . $this->theme . ']' );
+		$revisions = $this->get_custom_css_revisions( $this->theme );
 		if ( empty( $revisions ) ) {
 			return false;
 		}

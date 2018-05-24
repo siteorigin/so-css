@@ -11,6 +11,47 @@
 	
 	window.socss = socss;
 	
+	socss.model.CustomCssModel = Backbone.Model.extend( {
+		// postId
+		// postTitle
+		// css
+		
+		getCssData: function () {
+			if ( ! this.has( 'css' ) ) {
+				
+				return $.get(
+					socssOptions.getPostCSSAjaxUrl,
+					{ postId: this.get( 'postId' ) },
+					function ( result ) {
+						this.set( result );
+					}.bind( this )
+				);
+			} else {
+				return new $.Deferred().resolve();
+			}
+		},
+	} );
+	
+	socss.model.CustomCssCollection = Backbone.Collection.extend( {
+		model: socss.model.CustomCssModel,
+		
+		modelId: function( attrs ) {
+			return attrs.postId;
+		},
+	} );
+	
+	socss.model.CSSEditorModel = Backbone.Model.extend( {
+		// selectedPost
+		// customCssPosts
+		initialize: function ( options ) {
+			if ( _.has( options, 'customCssPosts' ) && ! _.isEmpty( options.customCssPosts ) ) {
+				var customCssCollection = new socss.model.CustomCssCollection();
+				customCssCollection.reset( options.customCssPosts );
+				this.set( 'customCssPosts', customCssCollection );
+			}
+		},
+	} );
+	
 	/**
 	 * The toolbar view
 	 */
@@ -35,11 +76,14 @@
 			.appendTo( this.$( '.toolbar-function-buttons .toolbar-buttons' ) );
 			
 			return button;
-		}
+		},
 	} );
 	
 	/**
 	 * The editor view, which handles codemirror stuff
+	 *
+	 * model: socss.model.CSSEditorModel
+	 *
 	 */
 	socss.view.editor = Backbone.View.extend( {
 		
@@ -60,33 +104,73 @@
 			'submit': 'onSubmit',
 		},
 		
-		initialize: function () {
-			this.setupEditor();
+		initialize: function ( options ) {
+			
+			this.listenTo( this.model, 'change:selectedPost', this.getSelectedPostCss );
+			
+			this.getSelectedPostCss().then( function () {
+				
+				if ( options.openVisualEditor ) {
+					this.showVisualEditor();
+				}
+			}.bind( this ) );
+			
+		},
+		
+		getSelectedPostCss: function () {
+			var selectedPost = this.model.get( 'selectedPost' );
+			var promise;
+			if ( selectedPost ) {
+				promise = selectedPost.getCssData();
+			} else {
+				promise = new $.Deferred().resolve();
+			}
+			
+			return promise.then( this.render.bind( this ) );
 		},
 		
 		render: function () {
-			// Setup the toolbar
-			this.toolbar = new socss.view.toolbar( {
-				el: this.$( '.custom-css-toolbar' )
-			} );
-			this.toolbar.render();
 			
-			// Create the visual properties view
-			this.visualProperties = new socss.view.properties( {
-				editor: this,
-				el: $( '#so-custom-css-properties' )
-			} );
-			this.visualProperties.render();
+			var selectedPost = this.model.get( 'selectedPost' );
 			
-			this.preview = new socss.view.preview( {
-				editor: this,
-				el: this.$( '.custom-css-preview' )
-			} );
-			this.preview.render();
-			
-			if ( socssOptions.openVisualEditor ) {
-				this.showVisualEditor();
+			if ( selectedPost && !selectedPost.has( 'css' ) ) {
+				return this;
 			}
+			
+			if ( !this.codeMirror ) {
+				this.setupEditor();
+			}
+			
+			if ( ! this.toolbar ) {
+				this.toolbar = new socss.view.toolbar( {
+					el: this.$( '.custom-css-toolbar' ),
+					model: this.model,
+				} );
+				this.toolbar.render();
+			}
+			
+			if ( !this.visualProperties ) {
+				this.visualProperties = new socss.view.properties( {
+					editor: this,
+					el: $( '#so-custom-css-properties' )
+				} );
+				this.visualProperties.render();
+			}
+			
+			if ( !this.preview ) {
+				this.preview = new socss.view.preview( {
+					editor: this,
+					model: this.model,
+					el: this.$( '.custom-css-preview' ),
+					initURL: socssOptions.homeURL,
+				} );
+				this.preview.render();
+			}
+			
+			if ( selectedPost ) {
+				this.codeMirror.setValue( selectedPost.get( 'css' ) );
+			}
+			
 			return this;
 		},
 		
@@ -440,6 +524,11 @@
 		initialize: function ( attr ) {
 			this.editor = attr.editor;
 			
+			this.listenTo( this.model, 'change:selectedPost', this.render.bind( this ) );
+			
+			this.originalUri = new URI( attr.initURL );
+			this.currentUri = new URI( attr.initURL );
+			
 			this.editor.codeMirror.on( 'change', function ( cm, c ) {
 				this.updatePreviewCss();
 			}.bind( this ) );
@@ -447,16 +536,24 @@
 		
 		render: function () {
 			
+			var selectedPost = this.model.get( 'selectedPost' );
+			
+			if ( selectedPost && !selectedPost.has( 'url' ) ) {
+				selectedPost.getCssData().then( this.render.bind( this ) );
+				return this;
+			}
+			
 			this.$el.html( this.template() );
 			
-			this.$( '#preview-iframe' ).attr( 'src', socssOptions.homeURL );
+			if ( selectedPost ) {
+				this.currentUri = new URI( selectedPost.get( 'url' ) );
+			}
 			
-			this.originalUri = new URI( socssOptions.homeURL );
-			this.currentUri = new URI( socssOptions.homeURL );
-			
-			this.currentUri.removeQuery( 'so_css_preview' );
+			this.currentUri.removeQuery( 'so_css_preview', 1 );
 			this.$( '#preview-navigator input' ).val( this.currentUri.toString() );
 			this.currentUri.addQuery( 'so_css_preview', 1 );
+			
+			this.$( '#preview-iframe' ).attr( 'src', this.currentUri.toString() );
 		},
 		
 		initPreview: function () {
@@ -1690,20 +1787,49 @@
 		},
 	} );
 	
+	socss.view.RevisionsListView = Backbone.View.extend( {
+		
+		initialize: function () {
+			this.listenTo( this.model, 'change:selectedPost', this.updateRevisionsList.bind( this ) )
+		},
+		
+		updateRevisionsList: function () {
+			$.get(
+				socssOptions.getRevisionsListAjaxUrl,
+				{ postId: this.model.get( 'selectedPost' ).get( 'postId' ) },
+				function ( result ) {
+					this.$( '.custom-revisions-list' ).html( result );
+				}.bind( this )
+			);
+		},
+		
+		// TODO: This is using the server rendered partial. Update to use models and render
+	} );
+	
 } )( jQuery, _, socssOptions );
 
 // Setup the main editor
 jQuery( function ( $ ) {
 	var socss = window.socss;
 	
+	var editorModel = new socss.model.CSSEditorModel( {
+		customCssPosts: socssOptions.customCssPosts,
+	} );
+	
 	// Setup the editor
 	var editor = new socss.view.editor( {
-		el: $( '#so-custom-css-form' ).get( 0 )
+		el: $( '#so-custom-css-form' ).get( 0 ),
+		model: editorModel,
+		openVisualEditor: socssOptions.openVisualEditor,
 	} );
-	editor.render();
+	// editor.render();
 	editor.setSnippets( socssOptions.snippets );
 	
-	window.socss.mainEditor = editor;
+	
+	var revisionsList = new socss.view.RevisionsListView( {
+		el: $( '#so-custom-css-revisions' ),
+		model: editorModel,
+	} );
 	
 	// This is for hiding the getting started video
 	$( '#so-custom-css-getting-started a.hide' ).click( function ( e ) {
@@ -1711,4 +1837,8 @@ jQuery( function ( $ ) {
 		$( '#so-custom-css-getting-started' ).slideUp();
 		$.get( $( this ).attr( 'href' ) );
 	} );
+	
+	window.socss.mainEditor = editor;
+	window.socss.revisionsList = revisionsList;
+	$( socss ).trigger( 'initialized' );
 } );
