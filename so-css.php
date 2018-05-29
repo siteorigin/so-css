@@ -30,7 +30,7 @@ class SiteOrigin_CSS {
 		
 		// Main header actions
 		add_action( 'plugins_loaded', array( $this, 'set_plugin_textdomain' ) );
-		add_action( 'wp_head', array( $this, 'action_wp_head' ), 20 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'action_wp_head' ), 20 );
 		
 		// All the admin actions
 		add_action( 'admin_menu', array( $this, 'action_admin_menu' ) );
