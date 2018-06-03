@@ -32,6 +32,15 @@ if ( ! empty( $current_revision ) ) {
 	<div id="poststuff">
 		<div id="so-custom-css-info">
 
+			<?php if( $this->display_teaser() ) : ?>
+				<div class="postbox">
+					<h3 class="hndle"><span><?php _e('Get The Full Experience', 'so-css') ?></span></h3>
+					<div class="inside">
+						<?php printf( __( '%sSiteOrigin Premium%s adds a <strong>Google Web Font</strong> selector to SiteOrigin CSS so you can easily change any font.', 'so-css' ) , '<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugins/web-font-selector" target="_blank">', '</a>' ); ?>
+					</div>
+				</div>
+			<?php endif; ?>
+
 			<?php if( !get_user_meta( $user->ID, 'socss_hide_gs' ) ) : ?>
 				<div class="postbox" id="so-custom-css-getting-started">
 					<h3 class="hndle">
