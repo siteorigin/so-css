@@ -12,24 +12,17 @@
 	window.socss = socss;
 	
 	socss.model.CustomCssModel = Backbone.Model.extend( {
-		// postId
-		// postTitle
-		// css
-		
-		getCssData: function () {
-			if ( ! this.has( 'css' ) ) {
-				
-				return $.get(
-					socssOptions.getPostCSSAjaxUrl,
-					{ postId: this.get( 'postId' ) },
-					function ( result ) {
-						this.set( result );
-					}.bind( this )
-				);
-			} else {
-				return new $.Deferred().resolve();
-			}
+		defaults: {
+			postId: null,
+			postTitle: null,
+			css: null,
 		},
+		
+		urlRoot: socssOptions.postCssUrlRoot,
+		
+		url: function () {
+			return this.urlRoot + '&postId=' + this.get( 'postId' );
+		}
 	} );
 	
 	socss.model.CustomCssCollection = Backbone.Collection.extend( {
@@ -41,15 +34,9 @@
 	} );
 	
 	socss.model.CSSEditorModel = Backbone.Model.extend( {
-		// selectedPost
-		// customCssPosts
-		initialize: function ( options ) {
-			if ( _.has( options, 'customCssPosts' ) && ! _.isEmpty( options.customCssPosts ) ) {
-				var customCssCollection = new socss.model.CustomCssCollection();
-				customCssCollection.reset( options.customCssPosts );
-				this.set( 'customCssPosts', customCssCollection );
-			}
-		},
+		defaults: {
+			customCssPosts: null,
+		}
 	} );
 	
 	/**
@@ -120,8 +107,8 @@
 		getSelectedPostCss: function () {
 			var selectedPost = this.model.get( 'selectedPost' );
 			var promise;
-			if ( selectedPost ) {
-				promise = selectedPost.getCssData();
+			if ( selectedPost && ! selectedPost.has( 'css' ) ) {
+				promise = selectedPost.fetch();
 			} else {
 				promise = new $.Deferred().resolve();
 			}
@@ -169,6 +156,7 @@
 			
 			if ( selectedPost ) {
 				this.codeMirror.setValue( selectedPost.get( 'css' ) );
+				this.codeMirror.clearHistory();
 			}
 			
 			return this;
@@ -207,6 +195,13 @@
 					'Alt-G': 'jumpToLine',
 				}
 			} );
+			
+			this.codeMirror.on( 'change', function ( cm, change ) {
+				var selectedPost = this.model.get( 'selectedPost' );
+				if ( selectedPost && selectedPost.get( 'css' ) !== cm.getValue().trim() ) {
+					selectedPost.set( 'css', cm.getValue().trim() );
+				}
+			}.bind( this ) );
 			
 			// Make sure the user doesn't leave without saving
 			$( window ).on( 'beforeunload', function () {
@@ -538,15 +533,15 @@
 			
 			var selectedPost = this.model.get( 'selectedPost' );
 			
-			if ( selectedPost && !selectedPost.has( 'url' ) ) {
-				selectedPost.getCssData().then( this.render.bind( this ) );
+			if ( selectedPost && !selectedPost.has( 'postUrl' ) ) {
+				selectedPost.fetch().then( this.render.bind( this ) );
 				return this;
 			}
 			
 			this.$el.html( this.template() );
 			
 			if ( selectedPost ) {
-				this.currentUri = new URI( selectedPost.get( 'url' ) );
+				this.currentUri = new URI( selectedPost.get( 'postUrl' ) );
 			}
 			
 			this.currentUri.removeQuery( 'so_css_preview', 1 );

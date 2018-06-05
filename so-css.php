@@ -58,10 +58,7 @@ class SiteOrigin_CSS {
 				// We'll be grabbing all the enqueued scripts and outputting them
 				add_action( 'wp_enqueue_scripts', array($this, 'inline_inspector_scripts'), 100 );
 			}
-			
-			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_front_scripts' ) );
 		}
-  
 	}
 	
 	/**
@@ -285,20 +282,6 @@ class SiteOrigin_CSS {
 		}
 	}
 	
-	
-	/**
-	 * Enqueues the front end style used for the 'Edit CSS' admin bar menu item.
-	 */
-	function enqueue_front_scripts() {
-		if ( current_user_can( 'edit_theme_options', get_the_ID() ) ) {
-            wp_enqueue_style(
-                'so-css-front',
-                plugin_dir_url( __FILE__ ) . 'css/front.css',
-                array(),
-                SOCSS_VERSION
-            );
-        }
-	}
 	/**
 	 * Display the help tab
 	 */
@@ -398,7 +381,7 @@ class SiteOrigin_CSS {
 				'post' => __( 'Changes apply to the post <%= postTitle %> when the current theme is <%= themeName %> or its child themes', 'so-css' ),
 			),
 			'homeURL' => $home_url,
-			'getPostCSSAjaxUrl' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_post_css'), 'get_post_css' ),
+			'postCssUrlRoot' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_post_css'), 'get_post_css' ),
 			'getRevisionsListAjaxUrl' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_revisions_list'), 'get_revisions_list' ),
 			'openVisualEditor' => $open_visual_editor,
 			
@@ -523,10 +506,9 @@ class SiteOrigin_CSS {
 		
 		$current = $this->get_custom_css( $this->theme, $post_id );
 		
-		
 		$url = empty( $post_id ) ? home_url() : set_url_scheme( get_permalink( $post_id ) );
 		
-		wp_send_json( array( 'css' => empty( $current ) ? '' : $current, 'url' => $url ) );
+		wp_send_json( array( 'css' => empty( $current ) ? '' : $current, 'postUrl' => $url ) );
 	}
 	
 	/**
