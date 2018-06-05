@@ -1781,6 +1781,11 @@
 			$sides.eq( $tabs.index( $tab ) ).show();
 		},
 	} );
+
+	// This is a placeholder for the full font_select in SiteOrigin Premium
+	socss.view.properties.controllers.font_select = socss.view.propertyController.extend( {
+		template: _.template( $('#template-webfont-teaser').html().trim() )
+	});
 	
 	socss.view.RevisionsListView = Backbone.View.extend( {
 		
