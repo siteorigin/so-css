@@ -52,3 +52,16 @@
 	</div>
 	<iframe id="preview-iframe" seamless="seamless"></iframe>
 </script>
+
+<script type="text/template" id="template-webfont-teaser">
+	<input type="text" value="" />
+	<small style="color: #888">
+		<?php
+		printf(
+			__( 'Get a %sGoogle Font%s selector.', 'so-css' ) ,
+			'<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugin/web-font-selector" target="_blank">',
+			'</a>'
+		);
+		?>
+	</small>
+</script>

@@ -1,10 +1,15 @@
 <?php
 /**
+ * @var $custom_css string The custom CSS string to be edited.
+ * @var $current_revision int If the CSS to be edited is a revision, this will contain the timestamp of the revision.
  * @var $custom_css_revisions array Saved revisions for the current theme.
  */
 
 $snippets = SiteOrigin_CSS::single()->get_snippets();
 $user = wp_get_current_user();
+if ( ! empty( $current_revision ) ) {
+	$revision_date = date( 'j F Y @ H:i:s', $current_revision + get_option( 'gmt_offset' ) * 60 * 60 );
+}
 ?>
 
 <div class="wrap" id="siteorigin-custom-css">
@@ -15,17 +20,26 @@ $user = wp_get_current_user();
 
 
 	<?php if( isset($_POST['siteorigin_custom_css_save']) ) : ?>
-		<div class="updated settings-error"><p><?php _e('Site design updated.', 'so-css') ?></p></div>
+		<div class="notice notice-success"><p><?php _e('Site design updated.', 'so-css') ?></p></div>
 	<?php endif; ?>
 
-	<?php if(!empty($revision)) : ?>
-		<div class="updated settings-error">
-			<p><?php _e('Viewing a revision. Save CSS to keep using this revision.', 'so-css') ?></p>
+	<?php if ( ! empty( $current_revision ) ) : ?>
+		<div class="notice notice-warning">
+			<p><?php printf( __( 'Editing revision dated %s. Click %sRevert to this revision%s to keep using it.', 'so-css'), $revision_date, '<em>', '</em>' ) ?></p>
 		</div>
 	<?php endif; ?>
 
 	<div id="poststuff">
 		<div id="so-custom-css-info">
+
+			<?php if( $this->display_teaser() ) : ?>
+				<div class="postbox">
+					<h3 class="hndle"><span><?php _e('Get The Full Experience', 'so-css') ?></span></h3>
+					<div class="inside">
+						<?php printf( __( '%sSiteOrigin Premium%s adds a <strong>Google Web Font</strong> selector to SiteOrigin CSS so you can easily change any font.', 'so-css' ) , '<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugins/web-font-selector" target="_blank">', '</a>' ); ?>
+					</div>
+				</div>
+			<?php endif; ?>
 
 			<?php if( !get_user_meta( $user->ID, 'socss_hide_gs' ) ) : ?>
 				<div class="postbox" id="so-custom-css-getting-started">
@@ -42,24 +56,9 @@ $user = wp_get_current_user();
 			<div class="postbox" id="so-custom-css-revisions">
 				<h3 class="hndle"><span><?php _e('CSS Revisions', 'so-css') ?></span></h3>
 				<div class="inside">
-					<ol data-confirm="<?php esc_attr_e('Are you sure you want to load this revision?', 'so-css') ?>">
+					<ol class="custom-revisions-list" data-confirm="<?php esc_attr_e('Are you sure you want to load this revision?', 'so-css') ?>">
 						<?php
-						if ( is_array( $custom_css_revisions ) ) {
-							$is_current = true;
-							foreach ( $custom_css_revisions as $time => $css ) {
-								?>
-								<li>
-									<?php if ( $is_current ) : ?>
-										<?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?> (Current)
-										<?php $is_current = false; ?>
-									<?php else : ?>
-										<a href="<?php echo esc_url( add_query_arg( array( 'theme' => $theme, 'time' => $time ) ) ) ?>" class="load-css-revision"><?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?></a>
-										(<?php printf(__('%d chars', 'so-css'), strlen($css)) ?>)
-									<?php endif; ?>
-								</li>
-								<?php
-							}
-						}
+						$this->custom_css_revisions_list( $theme, $socss_post_id, $current_revision );
 						?>
 					</ol>
 				</div>
@@ -74,6 +73,7 @@ $user = wp_get_current_user();
 					<div class="toolbar-functions-dropdown">
 						<span class="dashicons dashicons-menu"></span>
 					</div>
+					
 					<ul class="toolbar-buttons">
 					</ul>
 				</div>
@@ -92,13 +92,13 @@ $user = wp_get_current_user();
 			</div>
 
 			<div class="custom-css-container">
-				<textarea name="custom_css" id="custom-css-textarea" class="css-editor" rows="<?php echo max( 10, substr_count( $custom_css, "\n" )+1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
+				<textarea name="custom_css" id="custom-css-textarea" class="css-editor" rows="<?php echo max( 10, substr_count( $custom_css, "\n" ) + 1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
 				<?php wp_nonce_field( 'custom_css', '_sononce' ) ?>
 			</div>
-			<p class="description"><?php SiteOrigin_CSS::editor_description() ?></p>
+			<p class="description"><?php echo SiteOrigin_CSS::editor_description(); ?></p>
 
 			<p class="submit">
-				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( 'Save CSS', 'so-css' ); ?>" />
+				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( ( ! empty ( $current_revision ) ?  __( 'Revert to this revision', 'so-css' ) : __( 'Save CSS', 'so-css' ) ) ); ?>" />
 			</p>
 
 			<div class="custom-css-preview">

@@ -28,6 +28,9 @@ module.exports = {
         src: 'js/main.js',
         dest: 'js/',
         fileName: 'css.js',
+		watchFiles: [
+			'js/**',
+		]
     },
     bust: {
         src: []
