@@ -1,7 +1,7 @@
 === SiteOrigin CSS ===
 Tags: css, design, edit, customize
 Requires at least: 3.9
-Tested up to: 4.7.2
+Tested up to: 4.9
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv2 or later
@@ -64,6 +64,14 @@ We're actively developing SiteOrigin CSS. Keep track of what's happening over on
 We offer free support on the [SiteOrigin support forums](https://siteorigin.com/thread/).
 
 == Changelog ==
+
+= 1.2.0 - 6 June 2018 =
+* Updated CSS library.
+* UI changes to make it more obvious when viewing revision.
+* Ensure revisions are sorted in descending time order.
+* Don't link to revision currently being displayed.
+* Add search functionality to editor.
+* Enable persistent search and JumpToLine.
 
 = 1.1.5 - 19 September 2017 =
 * Use `home_url` instead of `site_url` to determine where to open CSS preview.
