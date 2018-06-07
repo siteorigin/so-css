@@ -159,6 +159,14 @@
 				this.codeMirror.clearHistory();
 			}
 			
+			var editorDescription = socssOptions.editorDescriptions.global;
+			
+			if ( selectedPost && ! _.isEmpty( selectedPost.get( 'postId' ) ) ) {
+				editorDescription = _.template( socssOptions.editorDescriptions.post )({ postTitle: selectedPost.get( 'postTitle' )});
+			}
+			
+			this.$( 'p.description' ).html( editorDescription );
+			
 			return this;
 		},
 		

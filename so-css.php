@@ -372,13 +372,12 @@ class SiteOrigin_CSS {
 		$home_url = add_query_arg( 'so_css_preview', '1', $init_url );
 		
 		$theme = wp_get_theme();
-		
+		$theme_name = $theme->get( 'Name' );
 		wp_localize_script( 'siteorigin-custom-css', 'socssOptions', array(
 			'themeCSS' => SiteOrigin_CSS::single()->get_theme_css(),
-			'themeName' => $theme->get( 'Name' ),
 			'editorDescriptions' => array(
-				'global' => __( 'Changes apply to <%= themeName %> and its child themes', 'so-css' ),
-				'post' => __( 'Changes apply to the post <%= postTitle %> when the current theme is <%= themeName %> or its child themes', 'so-css' ),
+				'global' => __( 'Changes apply to ' . $theme_name . ' and its child themes', 'so-css' ),
+				'post' => __( 'Changes apply to the post <%= postTitle %> when the current theme is ' . $theme_name . ' or its child themes', 'so-css' ),
 			),
 			'homeURL' => $home_url,
 			'postCssUrlRoot' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_post_css'), 'get_post_css' ),
