@@ -431,8 +431,8 @@ class SiteOrigin_CSS {
 		$time = filter_input( INPUT_GET, 'time', FILTER_VALIDATE_INT );
 		
 		$page_title = __( 'SiteOrigin CSS', 'so-css' );
-		$theme = wp_get_theme();
-		$theme_name = $theme->get( 'Name' );
+		$theme_obj = wp_get_theme();
+		$theme_name = $theme_obj->get( 'Name' );
 		$editor_description = sprintf( __( 'Changes apply to %s and its child themes', 'so-css' ), $theme_name );
 		$save_button_label = __( 'Save CSS', 'so-css' );
 		$form_save_url = admin_url( 'themes.php?page=so_custom_css' );
@@ -570,11 +570,11 @@ class SiteOrigin_CSS {
 					<?php if ( ! $is_current ) : ?>
 					<a href="<?php echo esc_url( add_query_arg( $query_args, admin_url( 'themes.php?page=so_custom_css' ) ) ) ?>"
 					   class="load-css-revision">
-						<?php endif; ?>
-						<?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?>
-						<?php if ( ! $is_current ) : ?>
+					<?php endif; ?>
+					<?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?>
+					<?php if ( ! $is_current ) : ?>
 					</a>
-				<?php endif; ?>
+					<?php endif; ?>
 					(<?php printf( __('%d chars', 'so-css'), strlen( $css ) ) ?>)<?php if ( $i == 0 ) : ?> (<?php _e( 'Latest', 'so-css' ) ?>)<?php endif; ?>
 				</li>
 				<?php
