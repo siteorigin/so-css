@@ -41,7 +41,7 @@ if ( ! empty( $current_revision ) ) {
 				<div class="postbox">
 					<h3 class="hndle"><span><?php _e('Get The Full Experience', 'so-css') ?></span></h3>
 					<div class="inside">
-						<?php printf( __( '%sSiteOrigin Premium%s adds a <strong>Google Web Font</strong> selector to SiteOrigin CSS so you can easily change any font.', 'so-css' ) , '<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugins/web-font-selector" target="_blank">', '</a>' ); ?>
+						<?php printf( __( '%sSiteOrigin Premium%s adds a <strong>Google Web Font</strong> selector to SiteOrigin CSS so you can easily change any font.', 'so-css' ) , '<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugin/web-font-selector" target="_blank">', '</a>' ); ?>
 					</div>
 				</div>
 			<?php endif; ?>
