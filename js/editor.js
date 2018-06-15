@@ -1814,6 +1814,5 @@ jQuery( function ( $ ) {
 	} );
 	
 	window.socss.mainEditor = editor;
-	window.socss.revisionsList = revisionsList;
 	$( socss ).trigger( 'initialized' );
 } );
