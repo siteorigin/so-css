@@ -1787,25 +1787,6 @@
 		template: _.template( $('#template-webfont-teaser').html().trim() )
 	});
 	
-	socss.view.RevisionsListView = Backbone.View.extend( {
-		
-		initialize: function () {
-			this.listenTo( this.model, 'change:selectedPost', this.updateRevisionsList.bind( this ) )
-		},
-		
-		updateRevisionsList: function () {
-			$.get(
-				socssOptions.getRevisionsListAjaxUrl,
-				{ postId: this.model.get( 'selectedPost' ).get( 'postId' ) },
-				function ( result ) {
-					this.$( '.custom-revisions-list' ).html( result );
-				}.bind( this )
-			);
-		},
-		
-		// TODO: This is using the server rendered partial. Update to use models and render
-	} );
-	
 } )( jQuery, _, socssOptions );
 
 // Setup the main editor
@@ -1824,12 +1805,6 @@ jQuery( function ( $ ) {
 	} );
 	// editor.render();
 	editor.setSnippets( socssOptions.snippets );
-	
-	
-	var revisionsList = new socss.view.RevisionsListView( {
-		el: $( '#so-custom-css-revisions' ),
-		model: editorModel,
-	} );
 	
 	// This is for hiding the getting started video
 	$( '#so-custom-css-getting-started a.hide' ).click( function ( e ) {

@@ -268,16 +268,16 @@ class SiteOrigin_CSS {
 			
 			// Sanitize CSS input. Should keep most tags, apart from script and style tags.
 			$custom_css = self::sanitize_css( filter_input( INPUT_POST, 'custom_css' ) );
-			$selected_post_id = filter_input( INPUT_POST, 'selected_post_id', FILTER_VALIDATE_INT );
+			$socss_post_id = filter_input( INPUT_GET, 'socss_post_id', FILTER_VALIDATE_INT );
 			
-			$current = $this->get_custom_css( $this->theme, $selected_post_id );
-			$this->save_custom_css( $custom_css, $this->theme, $selected_post_id );
+			$current = $this->get_custom_css( $this->theme, $socss_post_id );
+			$this->save_custom_css( $custom_css, $this->theme, $socss_post_id );
 			
 			// If this has changed, then add a revision.
 			if ( $current != $custom_css ) {
-				$this->add_custom_css_revision( $custom_css, $this->theme, $selected_post_id );
+				$this->add_custom_css_revision( $custom_css, $this->theme, $socss_post_id );
 				
-				$this->save_custom_css_file( $custom_css, $this->theme, $selected_post_id );
+				$this->save_custom_css_file( $custom_css, $this->theme, $socss_post_id );
 			}
 		}
 	}
@@ -325,13 +325,11 @@ class SiteOrigin_CSS {
 
 		// CodeMirror search and dialog addons
 		wp_enqueue_script( 'codemirror-dialog', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/dialog/dialog' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror' ), '5.2.0' );
-		wp_enqueue_style( 'codemirror-dialog', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/dialog/dialog' . SOCSS_JS_SUFFIX . '.css', '5.2.0' );
 
 		wp_enqueue_script( 'codemirror-search', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/search' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror' ), '5.37.0' );
 		wp_enqueue_script( 'codemirror-search-searchcursor', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/searchcursor' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror', 'codemirror-search' ), '5.37.0' );
 		wp_enqueue_script( 'codemirror-search-match-cursor', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/match-highlighter' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror', 'codemirror-search' ), '5.37.0' );
 		wp_enqueue_script( 'codemirror-search-matchesonscrollbar', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/matchesonscrollbar' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror', 'codemirror-search' ), '5.37.0' );
-		wp_enqueue_style( 'codemirror-search-matchesonscrollbar', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/matchesonscrollbar' . SOCSS_JS_SUFFIX . '.css', array(), '5.37.0' );
 		wp_enqueue_script( 'codemirror-scroll-annotatescrollbar', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/scroll/annotatescrollbar' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror', 'codemirror-search', 'codemirror-search-matchesonscrollbar' ), '5.37.0' );
 		wp_enqueue_script( 'codemirror-jump-to-line', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/jump-to-line' . SOCSS_JS_SUFFIX . '.js', array( 'codemirror', 'codemirror-search' ), '5.37.0' );
 
@@ -340,6 +338,8 @@ class SiteOrigin_CSS {
 		wp_enqueue_style( 'codemirror-theme-neat', plugin_dir_url( __FILE__ ) . 'lib/codemirror/theme/neat.css', array(), '5.2.0' );
 		wp_enqueue_style( 'codemirror-lint-css', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/lint/lint.css', array(), '5.2.0' );
 		wp_enqueue_style( 'codemirror-show-hint', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/hint/show-hint.css', array(), '5.2.0' );
+		wp_enqueue_style( 'codemirror-dialog', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/dialog/dialog.css', '5.2.0' );
+		wp_enqueue_style( 'codemirror-search-matchesonscrollbar', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/matchesonscrollbar.css', array(), '5.37.0' );
 		
 		// Enqueue the scripts for theme CSS processing
 		wp_enqueue_script( 'siteorigin-css-parser-lib', plugin_dir_url( __FILE__ ) . 'js/css' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
@@ -371,15 +371,8 @@ class SiteOrigin_CSS {
 		
 		$home_url = add_query_arg( 'so_css_preview', '1', $init_url );
 		
-		$theme = wp_get_theme();
-		
 		wp_localize_script( 'siteorigin-custom-css', 'socssOptions', array(
 			'themeCSS' => SiteOrigin_CSS::single()->get_theme_css(),
-			'themeName' => $theme->get( 'Name' ),
-			'editorDescriptions' => array(
-				'global' => __( 'Changes apply to <%= themeName %> and its child themes', 'so-css' ),
-				'post' => __( 'Changes apply to the post <%= postTitle %> when the current theme is <%= themeName %> or its child themes', 'so-css' ),
-			),
 			'homeURL' => $home_url,
 			'postCssUrlRoot' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_post_css'), 'get_post_css' ),
 			'getRevisionsListAjaxUrl' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_revisions_list'), 'get_revisions_list' ),
@@ -437,6 +430,32 @@ class SiteOrigin_CSS {
 		$theme = filter_input( INPUT_GET, 'theme' );
 		$time = filter_input( INPUT_GET, 'time', FILTER_VALIDATE_INT );
 		
+		$page_title = __( 'SiteOrigin CSS', 'so-css' );
+		$theme_obj = wp_get_theme();
+		$theme_name = $theme_obj->get( 'Name' );
+		$editor_description = sprintf( __( 'Changes apply to %s and its child themes', 'so-css' ), $theme_name );
+		$save_button_label = __( 'Save CSS', 'so-css' );
+		$form_save_url = admin_url( 'themes.php?page=so_custom_css' );
+		
+		if ( ! empty( $socss_post_id ) ) {
+			$selected_post = get_post( $socss_post_id );
+			
+			$page_title = sprintf(
+				__( 'Editing CSS for: %s', 'so-css' ),
+				$selected_post->post_title
+			);
+			
+			$editor_description = sprintf(
+				__( 'Changes apply to the %s %s when the current theme is %s or its child themes', 'so-css' ),
+				$selected_post->post_type,
+				$selected_post->post_title,
+				$theme_name
+				);
+			$post_type_obj = get_post_type_object( $selected_post->post_type );
+			$post_type_labels = $post_type_obj->labels;
+			$save_button_label = sprintf( __( 'Save %s CSS', 'so-css' ), $post_type_labels->singular_name );
+			$form_save_url = add_query_arg( 'socss_post_id', urlencode( $socss_post_id ), $form_save_url );
+		}
 		$custom_css = $this->get_custom_css( $this->theme, $socss_post_id );
 		$custom_css_revisions = $this->get_custom_css_revisions( $this->theme, $socss_post_id );
 		$current_revision = 0;
@@ -444,6 +463,10 @@ class SiteOrigin_CSS {
 		if ( ! empty( $theme ) && $theme == $this->theme && ! empty( $time ) && ! empty( $custom_css_revisions[ $time ] ) ) {
 			$current_revision = $time;
 			$custom_css = $custom_css_revisions[ $time ];
+		}
+		
+		if ( ! empty ( $current_revision ) ) {
+			$save_button_label = __( 'Revert to this revision', 'so-css' );
 		}
 		
 		if ( ! empty( $custom_css_revisions ) ) {
@@ -534,7 +557,7 @@ class SiteOrigin_CSS {
 		
 		$revisions = $this->get_custom_css_revisions( $theme, $post_id );
 		
-		if ( is_array( $revisions ) ) {
+		if ( is_array( $revisions ) && ! empty( $revisions ) ) {
 			$i = 0;
 			foreach ( $revisions as $time => $css ) {
 				$is_current = ( empty( $current_revision ) && $i == 0 ) || ( ! empty( $current_revision ) && $time == $current_revision );
@@ -547,16 +570,18 @@ class SiteOrigin_CSS {
 					<?php if ( ! $is_current ) : ?>
 					<a href="<?php echo esc_url( add_query_arg( $query_args, admin_url( 'themes.php?page=so_custom_css' ) ) ) ?>"
 					   class="load-css-revision">
-						<?php endif; ?>
-						<?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?>
-						<?php if ( ! $is_current ) : ?>
+					<?php endif; ?>
+					<?php echo date('j F Y @ H:i:s', $time + get_option('gmt_offset') * 60 * 60) ?>
+					<?php if ( ! $is_current ) : ?>
 					</a>
-				<?php endif; ?>
+					<?php endif; ?>
 					(<?php printf( __('%d chars', 'so-css'), strlen( $css ) ) ?>)<?php if ( $i == 0 ) : ?> (<?php _e( 'Latest', 'so-css' ) ?>)<?php endif; ?>
 				</li>
 				<?php
 				$i++;
 			}
+		} else {
+			printf( '<em>%s</em>', __( 'No revisions yet.', 'so-css' ) );
 		}
 	}
 	
@@ -660,17 +685,6 @@ class SiteOrigin_CSS {
 		$css = preg_replace( '/\s+/', ' ', $css );
 		
 		return $css;
-	}
-	
-	/**
-	 * Get the editor description
-	 *
-	 * @return string
-	 */
-	static function editor_description() {
-		$theme = wp_get_theme();
-		
-		return sprintf( __( 'Changes apply to %s and its child themes', 'so-css' ), $theme->get( 'Name' ) );
 	}
 	
 	function enqueue_inspector_scripts() {

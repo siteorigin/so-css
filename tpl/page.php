@@ -1,8 +1,13 @@
 <?php
 /**
+ * @var $page_title string The title of the page. Includes the post title if a post was selected.
  * @var $custom_css string The custom CSS string to be edited.
  * @var $current_revision int If the CSS to be edited is a revision, this will contain the timestamp of the revision.
  * @var $custom_css_revisions array Saved revisions for the current theme.
+ * @var $editor_description string Description to provide context for the CSS being edited.
+ * @var $socss_post_id int ID of the post for which we're editing CSS.
+ * @var $save_button_label string Label of the save button depending on whether a post or revision has been selected.
+ * @var $form_save_url string URL to use when saving the CSS.
  */
 
 $snippets = SiteOrigin_CSS::single()->get_snippets();
@@ -15,7 +20,7 @@ if ( ! empty( $current_revision ) ) {
 <div class="wrap" id="siteorigin-custom-css">
 	<h2>
 		<img src="<?php echo plugin_dir_url(__FILE__) . '../css/images/icon.png' ?>" class="icon" />
-		<?php _e( 'SiteOrigin CSS', 'so-css' ) ?>
+		<?php echo esc_html( $page_title ) ?>
 	</h2>
 
 
@@ -36,7 +41,7 @@ if ( ! empty( $current_revision ) ) {
 				<div class="postbox">
 					<h3 class="hndle"><span><?php _e('Get The Full Experience', 'so-css') ?></span></h3>
 					<div class="inside">
-						<?php printf( __( '%sSiteOrigin Premium%s adds a <strong>Google Web Font</strong> selector to SiteOrigin CSS so you can easily change any font.', 'so-css' ) , '<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugins/web-font-selector" target="_blank">', '</a>' ); ?>
+						<?php printf( __( '%sSiteOrigin Premium%s adds a <strong>Google Web Font</strong> selector to SiteOrigin CSS so you can easily change any font.', 'so-css' ) , '<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugin/web-font-selector" target="_blank">', '</a>' ); ?>
 					</div>
 				</div>
 			<?php endif; ?>
@@ -66,7 +71,7 @@ if ( ! empty( $current_revision ) ) {
 
 		</div>
 
-		<form action="<?php echo esc_url( admin_url('themes.php?page=so_custom_css') ) ?>" method="POST" id="so-custom-css-form">
+		<form action="<?php echo esc_url( $form_save_url ) ?>" method="POST" id="so-custom-css-form">
 
 			<div class="custom-css-toolbar">
 				<div class="toolbar-function-buttons">
@@ -95,10 +100,10 @@ if ( ! empty( $current_revision ) ) {
 				<textarea name="custom_css" id="custom-css-textarea" class="css-editor" rows="<?php echo max( 10, substr_count( $custom_css, "\n" ) + 1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
 				<?php wp_nonce_field( 'custom_css', '_sononce' ) ?>
 			</div>
-			<p class="description"><?php echo SiteOrigin_CSS::editor_description(); ?></p>
+			<p class="description"><?php esc_html_e( $editor_description ) ?></p>
 
 			<p class="submit">
-				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( ( ! empty ( $current_revision ) ?  __( 'Revert to this revision', 'so-css' ) : __( 'Save CSS', 'so-css' ) ) ); ?>" />
+				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( $save_button_label ); ?>" />
 			</p>
 
 			<div class="custom-css-preview">
