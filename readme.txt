@@ -65,6 +65,9 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.2.2 - 16 June 2018 =
+* Removed reference to non-existent view.
+
 = 1.2.1 - 15 June 2018 =
 * Removed `.min` suffix from new stylesheets for CodeMirror plugins.
 
