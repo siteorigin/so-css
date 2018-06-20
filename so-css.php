@@ -32,7 +32,7 @@ class SiteOrigin_CSS {
 		add_action( 'plugins_loaded', array( $this, 'set_plugin_textdomain' ) );
 		
 		// Priority 20 is necessary to ensure our CSS takes precedence.
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_css' ), 20 );
+		add_action( 'wp_head', array( $this, 'enqueue_css' ), 20 );
 		
 		// All the admin actions
 		add_action( 'admin_menu', array( $this, 'action_admin_menu' ) );
