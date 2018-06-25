@@ -65,6 +65,10 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.2.3 - 25 June 2018 =
+* Add preview iframe 'load' event listener in `render` function.
+* Reverted change to stylesheet hook.
+
 = 1.2.2 - 16 June 2018 =
 * Removed reference to non-existent view.
 

@@ -511,7 +511,6 @@
 		currentUri: null,
 		
 		events: {
-			'load #preview-iframe': 'initPreview',
 			'mouseleave #preview-iframe': 'clearHighlight',
 			'keydown #preview-navigator input[type="text"]': 'reloadPreview',
 		},
@@ -548,7 +547,10 @@
 			this.$( '#preview-navigator input' ).val( this.currentUri.toString() );
 			this.currentUri.addQuery( 'so_css_preview', 1 );
 			
-			this.$( '#preview-iframe' ).attr( 'src', this.currentUri.toString() );
+			this.$( '#preview-iframe' )
+				.attr( 'src', this.currentUri.toString() )
+				// 'load' event doesn't bubble so can't be used in the events hash
+				.on( 'load', this.initPreview.bind( this ) );
 		},
 		
 		initPreview: function () {
