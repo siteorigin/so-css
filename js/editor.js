@@ -1158,7 +1158,6 @@
 		
 		events: {
 			'change .socss-property-controller-input': 'onChange',
-			'change .socss-font-controller-select': 'onChange',
 			'keyup input.socss-property-controller-input': 'onChange',
 		},
 		
