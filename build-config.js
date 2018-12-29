@@ -51,5 +51,12 @@ module.exports = {
             '!package.json',                    // Not the package.json file.
             '!package-lock.json'                // Not the package-lock.json file.
         ]
-    }
+    },
+    i18n: {
+        src: [
+            '**/*.php',                         // All the PHP files.
+            '!tmp/**/*.php',                    // Ignore tmp/ and contents
+            '!dist/**/*.php'                    // Ignore dist/ and contents
+        ],
+    },
 };
