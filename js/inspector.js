@@ -141,6 +141,10 @@
 
             var $h = this.$('.socss-hierarchy');
             $h.empty();
+    
+            if ( !el ) {
+                return;
+            }
 
             if (el.prop('tagName').toLowerCase() !== 'body') {
                 var cel = $(el);
