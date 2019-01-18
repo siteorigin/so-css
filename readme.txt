@@ -65,6 +65,10 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.2.4 - 17 January 2019 =
+* Prefix so-css for all codemirror assets.
+* Prevent JS error when attempting to set active element to null.
+
 = 1.2.3 - 25 June 2018 =
 * Add preview iframe 'load' event listener in `render` function.
 * Reverted change to stylesheet hook.
