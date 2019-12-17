@@ -374,7 +374,6 @@ class SiteOrigin_CSS {
 		$home_url = add_query_arg( 'so_css_preview', '1', $init_url );
 		
 		wp_localize_script( 'siteorigin-custom-css', 'socssOptions', array(
-			'themeCSS' => SiteOrigin_CSS::single()->get_theme_css(),
 			'homeURL' => $home_url,
 			'postCssUrlRoot' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_post_css'), 'get_post_css' ),
 			'getRevisionsListAjaxUrl' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_revisions_list'), 'get_revisions_list' ),
@@ -660,33 +659,6 @@ class SiteOrigin_CSS {
 	 */
 	static function sanitize_css( $css ) {
 		return trim( strip_tags( $css ) );
-	}
-	
-	/**
-	 * Get all the available theme CSS
-	 */
-	function get_theme_css() {
-		$css = '';
-		if ( file_exists( get_template_directory() . '/style.css' ) ) {
-			$css .= file_get_contents( get_template_directory() . '/style.css' );
-		}
-		
-		if ( is_child_theme() ) {
-			$css .= file_get_contents( get_stylesheet_directory() . '/style.css' );
-		}
-		
-		// Remove all CSS comments
-		$regex = array(
-			"`^([\t\s]+)`ism"                       => '',
-			"`^\/\*(.+?)\*\/`ism"                   => "",
-			"`([\n\A;]+)\/\*(.+?)\*\/`ism"          => "$1",
-			"`([\n\A;\s]+)//(.+?)[\n\r]`ism"        => "$1\n",
-			"`(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+`ism" => "\n"
-		);
-		$css = preg_replace( array_keys( $regex ), $regex, $css );
-		$css = preg_replace( '/\s+/', ' ', $css );
-		
-		return $css;
 	}
 	
 	function enqueue_inspector_scripts() {
