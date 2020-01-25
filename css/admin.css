@@ -333,7 +333,6 @@
   box-sizing: border-box;
   border-radius: 0;
   font-size: 12px;
-  padding: 5px 8px;
 }
 #so-custom-css-properties .sections .fields-table .minicolors input {
   box-sizing: border-box;
@@ -344,8 +343,10 @@
   display: block;
   position: absolute;
   top: 0px;
-  right: 1px;
-  padding: 5px;
+  right: 0;
+  line-height: inherit;
+  margin: 0;
+  padding: 4px 5px 6px;
   cursor: pointer;
   font-size: 15px;
 }
@@ -545,7 +546,6 @@
   position: relative;
 }
 .socss-field-measurement input.socss-field-input {
-  min-height: 1.5em;
   padding-right: 50px;
   width: 120px !important;
   box-sizing: border-box;
@@ -598,12 +598,12 @@
   cursor: pointer;
   box-sizing: border-box;
   float: left;
-  padding: 8px;
+  padding: 9px;
   user-select: none;
   text-align: center;
   margin: 0;
-  width: 27px;
-  height: 27px;
+  width: 30px;
+  height: 30px;
   font-size: 10px;
 }
 .socss-diw .inc-button {
