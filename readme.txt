@@ -65,6 +65,10 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.2.5 - 31 January 2020 =
+* Removed `themeCSS` localized script to prevent `preg_replace()` warning.
+* Minor form styling fixes.
+
 = 1.2.4 - 17 January 2019 =
 * Prefix so-css for all codemirror assets.
 * Prevent JS error when attempting to set active element to null.
