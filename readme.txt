@@ -65,7 +65,7 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
-= 1.2.5 - 04 February 2020 =
+= 1.2.5 - 05 February 2020 =
 * Removed `themeCSS` localized script to prevent `preg_replace()` warning.
 * Minor form styling fixes.
 
