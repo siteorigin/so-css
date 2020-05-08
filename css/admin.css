@@ -334,6 +334,10 @@
   border-radius: 0;
   font-size: 12px;
 }
+#so-custom-css-properties .sections .fields-table .socss-field-number input {
+  margin: 0;
+  width: 120px;
+}
 #so-custom-css-properties .sections .fields-table .minicolors input {
   box-sizing: border-box;
   height: 30px;
@@ -541,10 +545,6 @@
   text-align: right;
   padding: 10px 20px;
   overflow: hidden;
-}
-.socss-field-number input {
-  margin: 0;
-  width: 120px;
 }
 .socss-field-measurement {
   position: relative;
