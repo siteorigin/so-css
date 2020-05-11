@@ -36,6 +36,9 @@ if ( ! empty( $current_revision ) ) {
 
 	<div id="poststuff">
 		<div id="so-custom-css-info">
+			<p class="submit">
+				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( $save_button_label ); ?>" />
+			</p>
 
 			<?php if( $this->display_teaser() ) : ?>
 				<div class="postbox">
@@ -101,10 +104,6 @@ if ( ! empty( $current_revision ) ) {
 				<?php wp_nonce_field( 'custom_css', '_sononce' ) ?>
 			</div>
 			<p class="description"><?php esc_html_e( $editor_description ) ?></p>
-
-			<p class="submit">
-				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( $save_button_label ); ?>" />
-			</p>
 
 			<div class="custom-css-preview">
 
