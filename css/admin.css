@@ -57,6 +57,14 @@
 #so-custom-css-info *:last-child {
   margin-bottom: 0;
 }
+#so-custom-css-info p.submit {
+  padding-top: 1px;
+}
+#so-custom-css-info p.submit .button-primary {
+  font-size: 14px;
+  min-height: 40px;
+  width: 100%;
+}
 #so-custom-css-revisions ol {
   list-style: none;
   margin: 0;
