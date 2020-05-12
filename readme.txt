@@ -1,7 +1,7 @@
 === SiteOrigin CSS ===
 Tags: css, design, edit, customize
 Requires at least: 3.9
-Tested up to: 5.3.2
+Tested up to: 5.5
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv2 or later
