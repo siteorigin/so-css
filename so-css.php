@@ -676,11 +676,10 @@ class SiteOrigin_CSS {
 		
 		// Remove all CSS comments
 		$regex = array(
-			"`^([\t\s]+)`ism"                       => '',
-			"`^\/\*(.+?)\*\/`ism"                   => "",
-			"`([\n\A;]+)\/\*(.+?)\*\/`ism"          => "$1",
-			"`([\n\A;\s]+)//(.+?)[\n\r]`ism"        => "$1\n",
-			"`(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+`ism" => "\n"
+			"`^([\t\s]+)`ism"                             => '',
+			"`^\/\*(.+?)\*\/`ism"                         => "",
+			"`(\A|[\n;]+)/\*[^*]*\*+(?:[^/*][^*]*\*+)*/`" => "$1",
+			"`(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+`ism"       => "\n"
 		);
 		$css = preg_replace( array_keys( $regex ), $regex, $css );
 		$css = preg_replace( '/\s+/', ' ', $css );
@@ -724,13 +723,12 @@ class SiteOrigin_CSS {
 		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			return;
 		}
-		
+
 		$regex = array(
-			"`^([\t\s]+)`ism"                       => '',
-			"`^\/\*(.+?)\*\/`ism"                   => "",
-			"`([\n\A;]+)\/\*(.+?)\*\/`ism"          => "$1",
-			"`([\n\A;\s]+)//(.+?)[\n\r]`ism"        => "$1\n",
-			"`(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+`ism" => "\n"
+			"`^([\t\s]+)`ism"                             => '',
+			"`^\/\*(.+?)\*\/`ism"                         => "",
+			"`(\A|[\n;]+)/\*[^*]*\*+(?:[^/*][^*]*\*+)*/`" => "$1",
+			"`(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+`ism"       => "\n"
 		);
 		
 		global $wp_styles;
