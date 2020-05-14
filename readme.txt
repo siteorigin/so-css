@@ -65,7 +65,7 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
-= 1.2.6 - 13 May 2020 =
+= 1.2.6 - 15 May 2020 =
 * Minor visual editor form styling fixes.
 * Resolved PHP 7.4 `preg_replace()` warning.
 * Moved the basic editor Save button to the sidebar.
