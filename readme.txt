@@ -1,7 +1,7 @@
 === SiteOrigin CSS ===
 Tags: css, design, edit, customize
 Requires at least: 3.9
-Tested up to: 5.3.2
+Tested up to: 5.5
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv2 or later
@@ -64,6 +64,11 @@ We're actively developing SiteOrigin CSS. Keep track of what's happening over on
 We offer free support on the [SiteOrigin support forums](https://siteorigin.com/thread/).
 
 == Changelog ==
+
+= 1.2.6 - 15 May 2020 =
+* Minor visual editor form styling fixes.
+* Resolved PHP 7.4 `preg_replace()` warning.
+* Moved the basic editor Save button to the sidebar.
 
 = 1.2.5 - 05 February 2020 =
 * Removed `themeCSS` localized script to prevent `preg_replace()` warning.
