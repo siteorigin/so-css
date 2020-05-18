@@ -1819,6 +1819,6 @@ jQuery( function ( $ ) {
 	$( socss ).trigger( 'initialized' );
 
 	$( '.button-primary[name="siteorigin_custom_css_save"]' ).click( function() {
-		$( '#so-custom-css-form' ).click();
+		$( '#so-custom-css-form' ).submit();
 	} );
 } );
