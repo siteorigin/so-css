@@ -264,8 +264,8 @@ class SiteOrigin_CSS {
 			$this,
 			'display_admin_page'
 		) );
-		
-		if ( current_user_can( 'edit_theme_options' ) && isset( $_POST['siteorigin_custom_css_save'] ) ) {
+
+		if ( current_user_can( 'edit_theme_options' ) && isset( $_POST['custom_css'] ) ) {
 			check_admin_referer( 'custom_css', '_sononce' );
 			
 			// Sanitize CSS input. Should keep most tags, apart from script and style tags.
