@@ -265,11 +265,11 @@ class SiteOrigin_CSS {
 			'display_admin_page'
 		) );
 
-		if ( current_user_can( 'edit_theme_options' ) && isset( $_POST['custom_css'] ) ) {
+		if ( current_user_can( 'edit_theme_options' ) && isset( $_POST['siteorigin_custom_css'] ) ) {
 			check_admin_referer( 'custom_css', '_sononce' );
 			
 			// Sanitize CSS input. Should keep most tags, apart from script and style tags.
-			$custom_css = self::sanitize_css( filter_input( INPUT_POST, 'custom_css' ) );
+			$custom_css = self::sanitize_css( filter_input( INPUT_POST, 'siteorigin_custom_css' ) );
 			$socss_post_id = filter_input( INPUT_GET, 'socss_post_id', FILTER_VALIDATE_INT );
 			
 			$current = $this->get_custom_css( $this->theme, $socss_post_id );
