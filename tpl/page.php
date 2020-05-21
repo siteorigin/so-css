@@ -24,7 +24,7 @@ if ( ! empty( $current_revision ) ) {
 	</h2>
 
 
-	<?php if( isset($_POST['custom_css']) ) : ?>
+	<?php if( isset($_POST['siteorigin_custom_css']) ) : ?>
 		<div class="notice notice-success"><p><?php _e('Site design updated.', 'so-css') ?></p></div>
 	<?php endif; ?>
 
@@ -100,7 +100,7 @@ if ( ! empty( $current_revision ) ) {
 			</div>
 
 			<div class="custom-css-container">
-				<textarea name="custom_css" id="custom-css-textarea" class="css-editor" rows="<?php echo max( 10, substr_count( $custom_css, "\n" ) + 1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
+				<textarea name="siteorigin_custom_css" id="custom-css-textarea" class="css-editor" rows="<?php echo max( 10, substr_count( $custom_css, "\n" ) + 1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
 				<?php wp_nonce_field( 'custom_css', '_sononce' ) ?>
 			</div>
 			<p class="description"><?php esc_html_e( $editor_description ) ?></p>
