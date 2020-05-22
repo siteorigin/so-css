@@ -65,6 +65,9 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.2.8 - 22 May 2020 =
+* Renamed `custom_css` textarea to prevent conflicts.
+
 = 1.2.7 - 19 May 2020 =
 * Restored `Save` button functionality.
 
