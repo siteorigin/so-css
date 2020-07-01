@@ -54,7 +54,7 @@
 </script>
 
 <script type="text/template" id="template-webfont-teaser">
-	<input type="text" value="" class="socss-property-controller-input">
+	<input type="text" value="" class="socss-property-controller-input"/>
 	<small style="color: #888">
 		<?php
 		printf(
