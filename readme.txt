@@ -65,6 +65,9 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.2.9 - 29 July 2020 =
+* Resolved Font Family field output.
+
 = 1.2.8 - 22 May 2020 =
 * Renamed `custom_css` textarea to prevent conflicts.
 
