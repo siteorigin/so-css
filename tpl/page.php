@@ -36,7 +36,7 @@ if ( ! empty( $current_revision ) ) {
 
 	<div id="poststuff">
 		<div id="so-custom-css-info">
-			<p class="submit">
+			<p class="so-custom-css-submit">
 				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( $save_button_label ); ?>" />
 			</p>
 
