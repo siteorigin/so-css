@@ -65,7 +65,7 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
-= 1.2.10 - 07 September 2020 =
+= 1.2.10 - 09 September 2020 =
 * Increased the specificity of the Save CSS button styling to prevent plugin conflicts.
 
 = 1.2.9 - 29 July 2020 =
