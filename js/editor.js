@@ -373,7 +373,7 @@
 					$( '#siteorigin-custom-css' ).find( '> h2' ).outerHeight( true ) +
 					$form.find( '> .custom-css-toolbar' ).outerHeight( true ) +
 					$form.find( '> p.description' ).outerHeight( true ) +
-					$form.find( '> p.submit' ).outerHeight( true ) +
+					$form.find( '> p.so-custom-css-submit' ).outerHeight( true ) +
 					parseFloat( $( '#wpbody-content' ).css( 'padding-bottom' ) );
 				this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', windowHeight - otherEltsHeight );
 				this.codeMirror.setSize( '100%', 'auto' );
