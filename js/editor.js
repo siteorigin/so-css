@@ -1386,6 +1386,7 @@
 				
 				// Change the field value and trigger a change event
 				this.field.val( val ).change();
+				this.trigger( 'set_value', val );
 				
 				// Close the image selector
 				this.media.close();
