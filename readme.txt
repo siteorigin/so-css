@@ -65,7 +65,7 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
-= 1.2.11 - 07 October 2020 =
+= 1.2.11 - 21 October 2020 =
 * Fixed Background image setting writing to CSS.
 
 = 1.2.10 - 09 September 2020 =
