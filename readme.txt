@@ -65,6 +65,9 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.2.11 - 21 October 2020 =
+* Fixed Background image setting writing to CSS.
+
 = 1.2.10 - 09 September 2020 =
 * Increased the specificity of the Save CSS button styling to prevent plugin conflicts.
 
