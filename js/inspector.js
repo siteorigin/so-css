@@ -65,6 +65,7 @@
             });
 
             // Setup the click event
+            var wcCheck = $( '.single-product' ).length;
             $('body *').click(function( e ){
                 if( !thisView.active || thisView.$el.is(':hover') ) {
                     return true;
@@ -74,7 +75,7 @@
                 if ( ! wcCheck || ! $$.parents( '.wc-tabs' ).length ) {
                     e.preventDefault();
 
-                    $$.blur();
+                    $$.trigger( 'blur' );
                     thisView.setActiveEl( thisView.hoverEl );
                 }
             });
