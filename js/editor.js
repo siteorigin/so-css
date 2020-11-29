@@ -53,7 +53,7 @@
 		triggerEvent: function ( event ) {
 			event.preventDefault();
 			var $target = $( event.currentTarget );
-			$target.blur();
+			$target.trigger( 'blur' );
 			var value = $target.attr( 'href' ).replace( '#', '' );
 			this.$el.trigger( 'click_' + value );
 		},
@@ -588,9 +588,9 @@
 					this.originalUri.host() !== newUri.host() ||
 					this.originalUri.protocol() !== newUri.protocol()
 				) {
-					$$.blur();
+					$$.trigger( 'blur' );
 					alert( $$.data( 'invalid-uri' ) );
-					$$.focus();
+					$$.trigger( 'focus' );
 				}
 				else {
 					newUri.addQuery( 'so_css_preview', 1 );
@@ -679,7 +679,7 @@
 			}
 			
 			// Click on the first one
-			this.$( '.snippets li.snippet' ).eq( 0 ).click();
+			this.$( '.snippets li.snippet' ).eq( 0 ).trigger( 'click' );
 			
 			this.attach();
 			return this;
@@ -863,7 +863,7 @@
 			}
 			
 			// Switch to the first tab.
-			this.$( '.section-tabs li' ).eq( 0 ).click();
+			this.$( '.section-tabs li' ).eq( 0 ).trigger( 'click' );
 		},
 		
 		onTabClick: function ( event ) {
@@ -1105,7 +1105,7 @@
 				activeSelector = dropdown.find( 'option' ).eq( 0 ).attr( 'val' );
 			}
 			if ( !_.isEmpty( activeSelector ) ) {
-				dropdown.val( activeSelector ).change();
+				dropdown.val( activeSelector ).trigger( 'change' );
 			}
 		},
 		
@@ -1132,7 +1132,7 @@
 			
 			if ( dropdown.val() === selector ) {
 				// Trigger a change event to load the existing selector
-				dropdown.change();
+				dropdown.trigger( 'change' );
 			}
 			else {
 				// The selector doesn't exist, so add it to the CSS, then reload
@@ -1385,7 +1385,7 @@
 				var val = this.args.value.replace( '{{url}}', attachment.url );
 				
 				// Change the field value and trigger a change event
-				this.field.val( val ).change();
+				this.field.val( val ).trigger( 'change' );
 				this.trigger( 'set_value', val );
 				
 				// Close the image selector
@@ -1604,7 +1604,7 @@
 			var direction = $button.is( '.dec-button' ) ? -1 : 1;
 			var intervalId;
 			var timeoutId;
-			$button.mousedown( function () {
+			$button.on( 'mousedown', function() {
 				this.stepValue( direction );
 				timeoutId = setTimeout( function () {
 					intervalId = setInterval( function () {
@@ -1688,7 +1688,7 @@
 			var direction = $button.is( '.dec-button' ) ? this.args.decrement : this.args.increment;
 			var intervalId;
 			var timeoutId;
-			$button.mousedown( function () {
+			$button.on( 'mousedown', function() {
 				this.stepValue( direction );
 				timeoutId = setTimeout( function () {
 					intervalId = setInterval( function () {
@@ -1810,7 +1810,7 @@ jQuery( function ( $ ) {
 	editor.setSnippets( socssOptions.snippets );
 	
 	// This is for hiding the getting started video
-	$( '#so-custom-css-getting-started a.hide' ).click( function ( e ) {
+	$( '#so-custom-css-getting-started a.hide' ).on( 'click', function( e ) {
 		e.preventDefault();
 		$( '#so-custom-css-getting-started' ).slideUp();
 		$.get( $( this ).attr( 'href' ) );
@@ -1819,7 +1819,7 @@ jQuery( function ( $ ) {
 	window.socss.mainEditor = editor;
 	$( socss ).trigger( 'initialized' );
 
-	$( '.button-primary[name="siteorigin_custom_css_save"]' ).click( function() {
-		$( '#so-custom-css-form' ).submit();
+	$( '.button-primary[name="siteorigin_custom_css_save"]' ).on( 'click', function() {
+		$( '#so-custom-css-form' ).trigger( 'submit' );
 	} );
 } );
