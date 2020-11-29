@@ -70,12 +70,13 @@
                     return true;
                 }
 
-                e.preventDefault();
-                e.stopPropagation();
+                var $$ = $( this );
+                if ( ! wcCheck || ! $$.parents( '.wc-tabs' ).length ) {
+                    e.preventDefault();
 
-                var $$ = $(this);
-                $$.blur();
-                thisView.setActiveEl( thisView.hoverEl );
+                    $$.blur();
+                    thisView.setActiveEl( thisView.hoverEl );
+                }
             });
 
             this.$('.socss-enable-inspector').click( function(){
