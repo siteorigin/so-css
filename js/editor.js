@@ -561,15 +561,17 @@
 			this.currentUri.removeQuery( 'so_css_preview' );
 			this.$( '#preview-navigator input' ).val( this.currentUri.toString() );
 			this.currentUri.addQuery( 'so_css_preview', 1 );
-			
+
+			var wcCheck = $$.contents().find( '.single-product' ).length;
 			$$.contents().find( 'a' ).each( function () {
-				var href = $( this ).attr( 'href' );
-				if ( href === undefined ) {
+				var link = $( this );
+				var href = link.attr( 'href' );
+				if ( href === undefined || ( wcCheck && link.parents( '.wc-tabs' ).length ) ) {
 					return true;
 				}
-				
+
 				var firstSeperator = ( href.indexOf( '?' ) === -1 ? '?' : '&' );
-				$( this ).attr( 'href', href + firstSeperator + 'so_css_preview=1' );
+				link.attr( 'href', href + firstSeperator + 'so_css_preview=1' );
 			} );
 			
 			this.updatePreviewCss();
