@@ -66,7 +66,7 @@
 
             // Setup the click event
             var wcCheck = $( '.single-product' ).length;
-            $('body *').click(function( e ){
+            $('body *').on( 'click', function( e ) {
                 if( !thisView.active || thisView.$el.is(':hover') ) {
                     return true;
                 }
@@ -80,11 +80,11 @@
                 }
             });
 
-            this.$('.socss-enable-inspector').click( function(){
+            this.$('.socss-enable-inspector').on( 'click', function(){
                 thisView.toggleActive();
             } );
 
-            this.$el.mouseenter( function(){
+            this.$el.on( 'mouseenter', function() {
                 thisView.hl.clear();
             } );
 
@@ -162,10 +162,10 @@
                     .data('el', $('body'));
 
                 this.$('.socss-hierarchy .socss-selector')
-                    .hover(function () {
+                    .on( 'mouseenter', function () {
                         thisView.hl.highlight($(this).data('el'));
                     })
-                    .click(function (e) {
+                    .on( 'click', function(e) {
                         e.preventDefault();
                         e.stopPropagation();
                         thisView.setActiveEl($(this).data('el'));
@@ -195,10 +195,10 @@
                 );
             } );
             container.find('> div')
-                .mouseenter( function(){
+                .on( 'mouseenter', function() {
                     thisView.hl.highlight( $(this).data('selector') );
                 } )
-                .click( function(e){
+                .on( 'click', function( e ) {
                     e.preventDefault();
                     e.stopPropagation();
 
@@ -217,7 +217,7 @@
             } );
 
             container.find('> div')
-                .click( function(e){
+                .on( 'click', function( e ) {
                     e.preventDefault();
                     e.stopPropagation();
 
