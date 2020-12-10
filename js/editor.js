@@ -340,20 +340,22 @@
 				}
 			}.bind( this ) );
 			
-			// This sets up automatic autocompletion at all times
-			this.codeMirror.on( 'keyup', function ( cm, e ) {
-				if (
-					( e.keyCode >= 65 && e.keyCode <= 90 ) ||
-					( e.keyCode === 189 && !e.shiftKey ) ||
-					( e.keyCode === 190 && !e.shiftKey ) ||
-					( e.keyCode === 51 && e.shiftKey ) ||
-					( e.keyCode === 189 && e.shiftKey )
-				) {
-					cm.showHint( {
-						completeSingle: false
-					} );
-				}
-			} );
+			if ( typeof CodeMirror.showHint == 'function' ) {
+				// This sets up automatic autocompletion at all times
+				this.codeMirror.on( 'keyup', function ( cm, e ) {
+					if (
+						( e.keyCode >= 65 && e.keyCode <= 90 ) ||
+						( e.keyCode === 189 && !e.shiftKey ) ||
+						( e.keyCode === 190 && !e.shiftKey ) ||
+						( e.keyCode === 51 && e.shiftKey ) ||
+						( e.keyCode === 189 && e.shiftKey )
+					) {
+						cm.showHint( {
+							completeSingle: false
+						} );
+					}
+				} );
+			}
 		},
 		
 		/**
