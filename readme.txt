@@ -1,7 +1,7 @@
 === SiteOrigin CSS ===
 Tags: css, design, edit, customize
 Requires at least: 3.9
-Tested up to: 5.5
+Tested up to: 5.6
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv2 or later
@@ -64,6 +64,9 @@ We're actively developing SiteOrigin CSS. Keep track of what's happening over on
 We offer free support on the [SiteOrigin support forums](https://siteorigin.com/thread/).
 
 == Changelog ==
+
+= 1.2.12 - 12 December 2020 =
+* Developer: jQuery updates for WordPress 5.6.
 
 = 1.2.11 - 21 October 2020 =
 * Fixed Background image setting writing to CSS.
