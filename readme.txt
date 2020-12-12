@@ -65,7 +65,7 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
-= 1.2.12 - 11 December 2020 =
+= 1.2.12 - 12 December 2020 =
 * Developer: jQuery updates for WordPress 5.6.
 
 = 1.2.11 - 21 October 2020 =
