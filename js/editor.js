@@ -165,9 +165,7 @@
 		/**
 		 * Do the initial setup of the CodeMirror editor
 		 */
-		setupEditor: function () {
-			this.registerCodeMirrorAutocomplete();
-			
+		setupEditor: function () {			
 			// Setup the Codemirror instance
 			var $textArea = this.$( 'textarea.css-editor' );
 			this.initValue = $textArea.val();
@@ -177,7 +175,8 @@
 			var lineCount = newlineMatches ? newlineMatches.length + 1 : 1;
 			var paddedValue = this.initValue;
 			$textArea.val( paddedValue );
-			this.codeMirror = CodeMirror.fromTextArea( $textArea.get( 0 ), {
+
+			var codeMirrorSettings = {
 				tabSize: 2,
 				lineNumbers: true,
 				mode: 'css',
@@ -193,8 +192,20 @@
 				extraKeys: {
 					'Ctrl-F': 'findPersistent',
 					'Alt-G': 'jumpToLine',
-				}
-			} );
+				},
+			}
+
+			if ( typeof wp.codeEditor != "undefined" ) {
+				codeMirrorSettings = _.extend(
+					wp.codeEditor.defaultSettings.codemirror,
+					codeMirrorSettings
+				);
+				this.codeMirror = wp.codeEditor.initialize( $textArea.get( 0 ), codeMirrorSettings ).codemirror;
+			} else {
+				this.registerCodeMirrorAutocomplete();
+				this.codeMirror = CodeMirror.fromTextArea( $textArea.get( 0 ), codeMirrorSettings );
+				this.setupCodeMirrorExtensions();
+			}
 			
 			this.codeMirror.on( 'change', function ( cm, change ) {
 				var selectedPost = this.model.get( 'selectedPost' );
@@ -220,9 +231,6 @@
 			$( window ).on( 'resize', function () {
 				this.scaleEditor();
 			}.bind( this ) );
-			
-			// Setup the extensions
-			this.setupCodeMirrorExtensions();
 		},
 		
 		onSubmit: function () {
