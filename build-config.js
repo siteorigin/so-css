@@ -21,7 +21,6 @@ module.exports = {
             'lib/**/*.js',
             '!js/main.js',                      // Ignore main.js used to compile css.js
             '!{build,build/**}',                // Ignore build/ and contents
-            '!{tests,tests/**}',                // Ignore tests/ and contents
             '!{tmp,tmp/**}'                     // Ignore dist/ and contents
         ]
     },
@@ -42,10 +41,8 @@ module.exports = {
             'lib/**/*.*',                       // libraries used at runtime
             '!{node_modules,node_modules/**}',  // Ignore build/ and contents
             '!{build,build/**}',                // Ignore build/ and contents
-            '!{tests,tests/**}',                // Ignore tests/ and contents
             '!{tmp,tmp/**}',                    // Ignore tmp/ and contents
             '!{dist,dist/**}',                  // Ignore dist/ and contents
-            '!phpunit.xml',                     // Not the unit tests configuration file.
             '!so-css.php',                      // Not the base plugin file. It is copied by the 'version' task.
             '!readme.txt',                      // Not the readme.txt file. It is copied by the 'version' task.
             '!package.json',                    // Not the package.json file.
