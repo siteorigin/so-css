@@ -65,17 +65,19 @@
             });
 
             // Setup the click event
+            var wcCheck = $( '.single-product' ).length;
             $('body *').on( 'click', function( e ) {
                 if( !thisView.active || thisView.$el.is(':hover') ) {
                     return true;
                 }
 
-                e.preventDefault();
-                e.stopPropagation();
+                var $$ = $( this );
+                if ( ! wcCheck || ! $$.parents( '.wc-tabs' ).length ) {
+                    e.preventDefault();
 
-                var $$ = $(this);
-                $$.trigger( 'blur' );
-                thisView.setActiveEl( thisView.hoverEl );
+                    $$.trigger( 'blur' );
+                    thisView.setActiveEl( thisView.hoverEl );
+                }
             });
 
             this.$('.socss-enable-inspector').on( 'click', function(){
