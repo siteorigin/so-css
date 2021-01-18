@@ -319,6 +319,7 @@ class SiteOrigin_CSS {
 		} else {
 			$this->enqueue_fallback_codemirror();
 		}
+		wp_enqueue_style( 'socss-codemirror-theme-neat', plugin_dir_url( __FILE__ ) . 'lib/codemirror/theme/neat.css', array(), '5.2.0' );
 
 		// Enqueue the scripts for theme CSS processing
 		wp_enqueue_script( 'siteorigin-css-parser-lib', plugin_dir_url( __FILE__ ) . 'js/css' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
@@ -400,7 +401,6 @@ class SiteOrigin_CSS {
 
 		// All the CodeMirror styles
 		wp_enqueue_style( 'socss-codemirror', plugin_dir_url( __FILE__ ) . 'lib/codemirror/lib/codemirror.css', array(), '5.2.0' );
-		wp_enqueue_style( 'socss-codemirror-theme-neat', plugin_dir_url( __FILE__ ) . 'lib/codemirror/theme/neat.css', array(), '5.2.0' );
 		wp_enqueue_style( 'socss-codemirror-lint-css', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/lint/lint.css', array(), '5.2.0' );
 		wp_enqueue_style( 'socss-codemirror-show-hint', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/hint/show-hint.css', array(), '5.2.0' );
 		wp_enqueue_style( 'socss-codemirror-dialog', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/dialog/dialog.css', '5.2.0' );
