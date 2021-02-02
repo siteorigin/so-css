@@ -65,6 +65,14 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.2.13 - 01 February 2021 =
+* Inspector: Added support for WooCommerce single product tabs.
+* Inspector: Highlight important classes when element with class is selected.
+* Restored the scrollbar in the Custom CSS content field.
+* Developer: Further changes for jQuery 3.5.
+* Developer: For WP 4.9+ use the WordPress version of CodeMirror if available.
+* Developer: Removed `socss-codemirror-show-hint` as a dependency. The script can now be removed to disable hints.
+
 = 1.2.12 - 12 December 2020 =
 * Developer: jQuery updates for WordPress 5.6.
 

@@ -165,9 +165,7 @@
 		/**
 		 * Do the initial setup of the CodeMirror editor
 		 */
-		setupEditor: function () {
-			this.registerCodeMirrorAutocomplete();
-			
+		setupEditor: function () {			
 			// Setup the Codemirror instance
 			var $textArea = this.$( 'textarea.css-editor' );
 			this.initValue = $textArea.val();
@@ -177,7 +175,8 @@
 			var lineCount = newlineMatches ? newlineMatches.length + 1 : 1;
 			var paddedValue = this.initValue;
 			$textArea.val( paddedValue );
-			this.codeMirror = CodeMirror.fromTextArea( $textArea.get( 0 ), {
+
+			var codeMirrorSettings = {
 				tabSize: 2,
 				lineNumbers: true,
 				mode: 'css',
@@ -193,8 +192,20 @@
 				extraKeys: {
 					'Ctrl-F': 'findPersistent',
 					'Alt-G': 'jumpToLine',
-				}
-			} );
+				},
+			}
+
+			if ( typeof wp.codeEditor != "undefined" ) {
+				codeMirrorSettings = _.extend(
+					wp.codeEditor.defaultSettings.codemirror,
+					codeMirrorSettings
+				);
+				this.codeMirror = wp.codeEditor.initialize( $textArea.get( 0 ), codeMirrorSettings ).codemirror;
+			} else {
+				this.registerCodeMirrorAutocomplete();
+				this.codeMirror = CodeMirror.fromTextArea( $textArea.get( 0 ), codeMirrorSettings );
+				this.setupCodeMirrorExtensions();
+			}
 			
 			this.codeMirror.on( 'change', function ( cm, change ) {
 				var selectedPost = this.model.get( 'selectedPost' );
@@ -220,9 +231,6 @@
 			$( window ).on( 'resize', function () {
 				this.scaleEditor();
 			}.bind( this ) );
-			
-			// Setup the extensions
-			this.setupCodeMirrorExtensions();
 		},
 		
 		onSubmit: function () {
@@ -340,20 +348,22 @@
 				}
 			}.bind( this ) );
 			
-			// This sets up automatic autocompletion at all times
-			this.codeMirror.on( 'keyup', function ( cm, e ) {
-				if (
-					( e.keyCode >= 65 && e.keyCode <= 90 ) ||
-					( e.keyCode === 189 && !e.shiftKey ) ||
-					( e.keyCode === 190 && !e.shiftKey ) ||
-					( e.keyCode === 51 && e.shiftKey ) ||
-					( e.keyCode === 189 && e.shiftKey )
-				) {
-					cm.showHint( {
-						completeSingle: false
-					} );
-				}
-			} );
+			if ( typeof CodeMirror.showHint == 'function' ) {
+				// This sets up automatic autocompletion at all times
+				this.codeMirror.on( 'keyup', function ( cm, e ) {
+					if (
+						( e.keyCode >= 65 && e.keyCode <= 90 ) ||
+						( e.keyCode === 189 && !e.shiftKey ) ||
+						( e.keyCode === 190 && !e.shiftKey ) ||
+						( e.keyCode === 51 && e.shiftKey ) ||
+						( e.keyCode === 189 && e.shiftKey )
+					) {
+						cm.showHint( {
+							completeSingle: false
+						} );
+					}
+				} );
+			}
 		},
 		
 		/**
@@ -373,9 +383,8 @@
 					$( '#siteorigin-custom-css' ).find( '> h2' ).outerHeight( true ) +
 					$form.find( '> .custom-css-toolbar' ).outerHeight( true ) +
 					$form.find( '> p.description' ).outerHeight( true ) +
-					$form.find( '> p.so-custom-css-submit' ).outerHeight( true ) +
 					parseFloat( $( '#wpbody-content' ).css( 'padding-bottom' ) );
-				this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', windowHeight - otherEltsHeight );
+				this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', windowHeight - otherEltsHeight + 'px' );
 				this.codeMirror.setSize( '100%', 'auto' );
 			}
 		},
@@ -561,15 +570,17 @@
 			this.currentUri.removeQuery( 'so_css_preview' );
 			this.$( '#preview-navigator input' ).val( this.currentUri.toString() );
 			this.currentUri.addQuery( 'so_css_preview', 1 );
-			
+
+			var wcCheck = $$.contents().find( '.single-product' ).length;
 			$$.contents().find( 'a' ).each( function () {
-				var href = $( this ).attr( 'href' );
-				if ( href === undefined ) {
+				var link = $( this );
+				var href = link.attr( 'href' );
+				if ( href === undefined || ( wcCheck && link.parents( '.wc-tabs' ).length ) ) {
 					return true;
 				}
-				
+
 				var firstSeperator = ( href.indexOf( '?' ) === -1 ? '?' : '&' );
-				$( this ).attr( 'href', href + firstSeperator + 'so_css_preview=1' );
+				link.attr( 'href', href + firstSeperator + 'so_css_preview=1' );
 			} );
 			
 			this.updatePreviewCss();

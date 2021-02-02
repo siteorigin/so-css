@@ -306,43 +306,21 @@ class SiteOrigin_CSS {
 		
 		// Core WordPress stuff that we use
 		wp_enqueue_media();
-		
-		// Enqueue the codemirror scripts. Call Underscore and Backbone dependencies so they're enqueued first to prevent conflicts.
-		wp_enqueue_script( 'socss-codemirror', plugin_dir_url( __FILE__ ) . 'lib/codemirror/lib/codemirror' . SOCSS_JS_SUFFIX . '.js', array(
-			'underscore',
-			'backbone'
-		), '5.2.0' );
-		wp_enqueue_script( 'socss-codemirror-mode-css', plugin_dir_url( __FILE__ ) . 'lib/codemirror/mode/css/css' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
-		
-		// Add in all the linting libs
-		wp_enqueue_script( 'socss-codemirror-lint', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/lint/lint' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror' ), '5.2.0' );
-		wp_enqueue_script( 'socss-codemirror-lint-css', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/lint/css-lint' . SOCSS_JS_SUFFIX . '.js', array(
-			'socss-codemirror',
-			'socss-codemirror-lint-css-lib'
-		), '5.2.0' );
-		wp_enqueue_script( 'socss-codemirror-lint-css-lib', plugin_dir_url( __FILE__ ) . 'js/csslint' . SOCSS_JS_SUFFIX . '.js', array(), '0.10.0' );
-		
-		// The CodeMirror autocomplete library
-		wp_enqueue_script( 'socss-codemirror-show-hint', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/hint/show-hint' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror' ), '5.2.0' );
 
-		// CodeMirror search and dialog addons
-		wp_enqueue_script( 'socss-codemirror-dialog', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/dialog/dialog' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror' ), '5.2.0' );
-
-		wp_enqueue_script( 'socss-codemirror-search', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/search' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror' ), '5.37.0' );
-		wp_enqueue_script( 'socss-codemirror-search-searchcursor', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/searchcursor' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror', 'socss-codemirror-search' ), '5.37.0' );
-		wp_enqueue_script( 'socss-codemirror-search-match-cursor', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/match-highlighter' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror', 'socss-codemirror-search' ), '5.37.0' );
-		wp_enqueue_script( 'socss-codemirror-search-matchesonscrollbar', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/matchesonscrollbar' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror', 'socss-codemirror-search' ), '5.37.0' );
-		wp_enqueue_script( 'socss-codemirror-scroll-annotatescrollbar', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/scroll/annotatescrollbar' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror', 'socss-codemirror-search', 'socss-codemirror-search-matchesonscrollbar' ), '5.37.0' );
-		wp_enqueue_script( 'socss-codemirror-jump-to-line', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/jump-to-line' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror', 'socss-codemirror-search' ), '5.37.0' );
-
-		// All the CodeMirror styles
-		wp_enqueue_style( 'socss-codemirror', plugin_dir_url( __FILE__ ) . 'lib/codemirror/lib/codemirror.css', array(), '5.2.0' );
+		global $wp_version;
+		if ( version_compare( $wp_version, '4.9', '>=' ) && wp_get_current_user()->syntax_highlighting ) {
+			wp_enqueue_code_editor( array(
+					'type' => 'css',
+					'codemirror' => array(
+						'lint' => true,
+					),
+				)
+			);
+		} else {
+			$this->enqueue_fallback_codemirror();
+		}
 		wp_enqueue_style( 'socss-codemirror-theme-neat', plugin_dir_url( __FILE__ ) . 'lib/codemirror/theme/neat.css', array(), '5.2.0' );
-		wp_enqueue_style( 'socss-codemirror-lint-css', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/lint/lint.css', array(), '5.2.0' );
-		wp_enqueue_style( 'socss-codemirror-show-hint', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/hint/show-hint.css', array(), '5.2.0' );
-		wp_enqueue_style( 'socss-codemirror-dialog', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/dialog/dialog.css', '5.2.0' );
-		wp_enqueue_style( 'socss-codemirror-search-matchesonscrollbar', plugin_dir_url(__FILE__) . 'lib/codemirror/addon/search/matchesonscrollbar.css', array(), '5.37.0' );
-		
+
 		// Enqueue the scripts for theme CSS processing
 		wp_enqueue_script( 'siteorigin-css-parser-lib', plugin_dir_url( __FILE__ ) . 'js/css' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
 		
@@ -357,7 +335,7 @@ class SiteOrigin_CSS {
 		wp_enqueue_script( 'siteorigin-uri', plugin_dir_url( __FILE__ ) . 'js/URI' . SOCSS_JS_SUFFIX . '.js', array(), SOCSS_VERSION, true );
 		
 		// All the custom SiteOrigin CSS stuff
-		wp_enqueue_script( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'js/editor' . SOCSS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone', 'siteorigin-css-parser-lib', 'socss-codemirror' ), SOCSS_VERSION, true );
+		wp_enqueue_script( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'js/editor' . SOCSS_JS_SUFFIX . '.js', array( 'jquery', 'underscore', 'backbone' ), SOCSS_VERSION, true );
 		wp_enqueue_style( 'siteorigin-custom-css', plugin_dir_url(__FILE__) . 'css/admin.css', array( ), SOCSS_VERSION );
 
 		
@@ -392,6 +370,41 @@ class SiteOrigin_CSS {
 		// This is for the templates required by the CSS editor. Ideally this would be out in the footer, but we need
 		// it earlier for dependent scripts.
 		include plugin_dir_path( __FILE__ ) . 'tpl/js-templates.php';
+	}
+
+	// Handles loading the fallback version of CodeMirror.
+	function enqueue_fallback_codemirror() {
+		// Enqueue the codemirror scripts. Call Underscore and Backbone dependencies so they're enqueued first to prevent conflicts.
+		wp_enqueue_script( 'socss-codemirror', plugin_dir_url( __FILE__ ) . 'lib/codemirror/lib/codemirror' . SOCSS_JS_SUFFIX . '.js', array( 'underscore', 'backbone' ), '5.2.0' );
+		wp_enqueue_script( 'socss-codemirror-mode-css', plugin_dir_url( __FILE__ ) . 'lib/codemirror/mode/css/css' . SOCSS_JS_SUFFIX . '.js', array(), '5.2.0' );
+		
+		// Add in all the linting libs
+		wp_enqueue_script( 'socss-codemirror-lint', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/lint/lint' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror' ), '5.2.0' );
+		wp_enqueue_script( 'socss-codemirror-lint-css', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/lint/css-lint' . SOCSS_JS_SUFFIX . '.js', array(
+			'socss-codemirror',
+			'socss-codemirror-lint-css-lib'
+		), '5.2.0' );
+		wp_enqueue_script( 'socss-codemirror-lint-css-lib', plugin_dir_url( __FILE__ ) . 'js/csslint' . SOCSS_JS_SUFFIX . '.js', array(), '0.10.0' );
+		
+		// The CodeMirror autocomplete library
+		wp_enqueue_script( 'socss-codemirror-show-hint', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/hint/show-hint' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror' ), '5.2.0' );
+
+		// CodeMirror search and dialog addons
+		wp_enqueue_script( 'socss-codemirror-dialog', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/dialog/dialog' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror' ), '5.2.0' );
+
+		wp_enqueue_script( 'socss-codemirror-search', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/search/search' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror' ), '5.37.0' );
+		wp_enqueue_script( 'socss-codemirror-search-searchcursor', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/search/searchcursor' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror', 'socss-codemirror-search' ), '5.37.0' );
+		wp_enqueue_script( 'socss-codemirror-search-match-cursor', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/search/match-highlighter' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror', 'socss-codemirror-search' ), '5.37.0' );
+		wp_enqueue_script( 'socss-codemirror-search-matchesonscrollbar', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/search/matchesonscrollbar' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror', 'socss-codemirror-search' ), '5.37.0' );
+		wp_enqueue_script( 'socss-codemirror-scroll-annotatescrollbar', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/scroll/annotatescrollbar' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror', 'socss-codemirror-search', 'socss-codemirror-search-matchesonscrollbar' ), '5.37.0' );
+		wp_enqueue_script( 'socss-codemirror-jump-to-line', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/search/jump-to-line' . SOCSS_JS_SUFFIX . '.js', array( 'socss-codemirror', 'socss-codemirror-search' ), '5.37.0' );
+
+		// All the CodeMirror styles
+		wp_enqueue_style( 'socss-codemirror', plugin_dir_url( __FILE__ ) . 'lib/codemirror/lib/codemirror.css', array(), '5.2.0' );
+		wp_enqueue_style( 'socss-codemirror-lint-css', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/lint/lint.css', array(), '5.2.0' );
+		wp_enqueue_style( 'socss-codemirror-show-hint', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/hint/show-hint.css', array(), '5.2.0' );
+		wp_enqueue_style( 'socss-codemirror-dialog', plugin_dir_url( __FILE__ ) . 'lib/codemirror/addon/dialog/dialog.css', '5.2.0' );
+		wp_enqueue_style( 'socss-codemirror-search-matchesonscrollbar', plugin_dir_url(__FILE__ ) . 'lib/codemirror/addon/search/matchesonscrollbar.css', array(), '5.37.0' );
 	}
 	
 	/**

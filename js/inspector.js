@@ -42,6 +42,11 @@
         pageSelectors: [],
 
         selectorTemplate: _.template('<div class="socss-selector"><%= selector %></div>'),
+        importantClasses: [
+            'menu-item-',
+            'postid-',
+            'page-id-',
+        ],
 
         initialize: function(){
             var thisView = this;
@@ -65,17 +70,19 @@
             });
 
             // Setup the click event
+            var wcCheck = $( '.single-product' ).length;
             $('body *').on( 'click', function( e ) {
                 if( !thisView.active || thisView.$el.is(':hover') ) {
                     return true;
                 }
 
-                e.preventDefault();
-                e.stopPropagation();
+                var $$ = $( this );
+                if ( ! wcCheck || ! $$.parents( '.wc-tabs' ).length ) {
+                    e.preventDefault();
 
-                var $$ = $(this);
-                $$.trigger( 'blur' );
-                thisView.setActiveEl( thisView.hoverEl );
+                    $$.trigger( 'blur' );
+                    thisView.setActiveEl( thisView.hoverEl );
+                }
             });
 
             this.$('.socss-enable-inspector').on( 'click', function(){
@@ -149,7 +156,15 @@
             if (el.prop('tagName').toLowerCase() !== 'body') {
                 var cel = $(el);
                 do {
-                    $(this.selectorTemplate({selector: socss.fn.elSelector(cel)}))
+                    var selector = socss.fn.elSelector( cel );
+                    thisView.importantClasses.forEach( function( importantClass ) {
+                        if ( selector.indexOf( importantClass ) >= 0 ) {
+                            var selectorRegex = new RegExp( '(' + importantClass + '\\d+)', 'g' );
+                            selector = selector.replace( selectorRegex, "<strong>$1</strong>");
+                        }
+                    } );
+
+                    $( this.selectorTemplate( { selector: selector } ) )
                         .prependTo($h)
                         .data('el', cel);
                     cel = cel.parent();
