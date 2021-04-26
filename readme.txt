@@ -65,6 +65,9 @@ We offer free support on the [SiteOrigin support forums](https://siteorigin.com/
 
 == Changelog ==
 
+= 1.2.14 - 26 April 2021 =
+* Resolved Photo Gallery by 10Web plugin conflict.
+
 = 1.2.13 - 01 February 2021 =
 * Inspector: Added support for WooCommerce single product tabs.
 * Inspector: Highlight important classes when element with class is selected.
