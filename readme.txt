@@ -5,7 +5,7 @@ Tested up to: 5.7
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv2 or later
-Contributors: gpriday
+Contributors: gpriday, alexgso
 Donate link: https://siteorigin.com/downloads/premium/
 
 SiteOrigin CSS is the simple, yet powerful CSS editor for WordPress. It gives you visual controls that let you edit the look and feel of your site in real-time.
