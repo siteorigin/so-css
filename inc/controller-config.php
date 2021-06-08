@@ -193,7 +193,7 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Background image', 'so-css'),
+				'title' => __('Background Image', 'so-css'),
 				'type' => 'image',
 				'args' => array(
 					'property' => 'background-image',
