@@ -1749,6 +1749,12 @@
 				this.$( '.select-tab' ).eq( 0 ).remove();
 				this.$( '.select-tab' ).css( 'width', '25%' );
 			}
+
+			if ( ! this.args.isRadius ) {
+				this.$( '.select-tabs[data-type="radius"]' ).remove();
+			} else {
+				this.$( '.select-tabs[data-type="box"]' ).remove();
+			}
 			
 			this.$( '.select-tab' ).each( function ( index, element ) {
 				var dir = $( element ).data( 'direction' );
