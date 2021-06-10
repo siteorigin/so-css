@@ -371,10 +371,12 @@
 		 */
 		scaleEditor: function () {
 			var windowHeight = $( window ).outerHeight();
+			var areaHeight;
 			if ( this.$el.hasClass( 'expanded' ) ) {
 				// If we're in the expanded view, then resize the editor
 				this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', '' );
-				this.codeMirror.setSize( '100%', windowHeight - this.$( '.custom-css-toolbar' ).outerHeight() );
+				areaHeight = windowHeight - this.$( '.custom-css-toolbar' ).outerHeight();
+				this.codeMirror.setSize( '100%', areaHeight );
 			}
 			else {
 				// Attempt to calculate approximate space available for editor when not expanded.
@@ -384,9 +386,17 @@
 					$form.find( '> .custom-css-toolbar' ).outerHeight( true ) +
 					$form.find( '> p.description' ).outerHeight( true ) +
 					parseFloat( $( '#wpbody-content' ).css( 'padding-bottom' ) );
-				this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', windowHeight - otherEltsHeight + 'px' );
+
+				areaHeight = windowHeight - otherEltsHeight;
+				// The container has a min-height of 300px so we need to ensure the areaHeight is at least that large.
+				if ( areaHeight < 300 ) {
+					areaHeight = 300;
+				}
+
+				this.$el.find( '.CodeMirror-scroll' ).css( 'min-height', areaHeight + 'px' );
 				this.codeMirror.setSize( '100%', 'auto' );
 			}
+			this.$el.find( '.CodeMirror-code' ).css( 'min-height', areaHeight + 'px' );
 		},
 		
 		/**
