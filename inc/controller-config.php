@@ -193,7 +193,7 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Background image', 'so-css'),
+				'title' => __('Background Image', 'so-css'),
 				'type' => 'image',
 				'args' => array(
 					'property' => 'background-image',
@@ -299,6 +299,24 @@ return array (
 				)
 			),
 
+			array(
+				'title' => __( 'Border Radius', 'so-css' ),
+				'type' => 'sides',
+				'args' => array(
+					'controllers' => array(
+						array(
+							'type' => 'measurement',
+							'args' => array(
+								'property' => 'border-{dir}-radius',
+								'propertyAll' => 'border-radius',
+								'defaultUnit' => 'px'
+							)
+						),
+					),
+					'isRadius' => true,
+					'hasAll' => true,
+				)
+			),
 		)
 	),
 
