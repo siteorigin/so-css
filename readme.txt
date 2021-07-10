@@ -71,6 +71,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.3.1 - 10 July 2021 =
+* Updated the Plugins page action link list.
+
 = 1.3.0 - 14 June 2021 =
 * Inspector: Added a new Border Radius setting to the Decoration tab.
 * Allowed for right-clicking anywhere in the Basic Editor.
