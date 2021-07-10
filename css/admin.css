@@ -650,8 +650,8 @@
 .socss-button .fa {
   color: #555;
 }
-.CodeMirror-lint-tooltip,
-.CodeMirror-hints {
+body .CodeMirror-lint-tooltip,
+body .CodeMirror-hints {
   /* This is above the editor in full-screen mode */
   z-index: 100002;
 }
