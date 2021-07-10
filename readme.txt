@@ -67,7 +67,7 @@ Free support is available on the [SiteOrigin support forums](https://siteorigin.
 
 [SiteOrigin Premium](https://siteorigin.com/downloads/premium/) enhances SiteOrigin CSS with a Google Web Font Selector. Choose from hundreds of beautiful web fonts right in the visual editor.
 
-SiteOrigin Premium also includes access to our next-level email support service, perfect for those times when you need fast and effective technical support.
+SiteOrigin Premium includes access to our professional email support service, perfect for those times when you need fast and effective technical support. We're standing by to assist you in any way we can.
 
 == Changelog ==
 
