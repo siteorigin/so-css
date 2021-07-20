@@ -71,6 +71,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.3.2 - 20 July 2021 =
+* Updated `Tested up to` tag.
+
 = 1.3.1 - 10 July 2021 =
 * Updated the Plugins page action link list.
 
