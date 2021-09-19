@@ -147,6 +147,9 @@
 #so-custom-css-form .decoration {
   display: none;
 }
+#so-custom-css-form:not(.expanded) .save.socss-button {
+  display: none;
+}
 #so-custom-css-form.expanded {
   z-index: 100000;
   position: fixed;
@@ -241,7 +244,7 @@
 #so-custom-css-properties .toolbar select {
   line-height: 1;
   font-size: 13px;
-  max-width: 265px;
+  max-width: 230px;
   -webkit-transition: all 0.5s ease;
   -moz-transition: all 0.5s ease;
   -o-transition: all 0.5s ease;
@@ -250,7 +253,8 @@
 #so-custom-css-properties .toolbar select.highlighted {
   background: #daeaf7;
 }
-#so-custom-css-properties .toolbar .close {
+#so-custom-css-properties .toolbar .close,
+#so-custom-css-properties .toolbar .save {
   float: right;
   margin: 2px 4px 0 0;
 }
@@ -621,33 +625,45 @@
 .socss-diw .inc-button {
   border-left: 0;
 }
-.socss-button {
+.custom-css-toolbar .socss-button,
+#so-custom-css-properties .toolbar .socss-button {
   cursor: pointer;
   line-height: 1em;
   display: inline-block;
   border: 1px solid #c0c0c0;
-  background: #f7f7f7;
   text-decoration: none;
   padding: 6px;
   font-weight: bold;
   color: #555;
   font-size: 0.95em;
   margin-left: 5px;
+  min-height: 0;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   -o-user-select: none;
   user-select: none;
 }
-.socss-button:hover {
+.custom-css-toolbar .socss-button:not(.save):hover,
+#so-custom-css-properties .toolbar .socss-button:not(.save):hover {
   border-color: #b0b0b0;
   background: #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
-.socss-button:hover .fa {
+.custom-css-toolbar .socss-button:not(.save):hover .fa,
+#so-custom-css-properties .toolbar .socss-button:not(.save):hover .fa {
   color: #333;
 }
-.socss-button .fa {
+.custom-css-toolbar .socss-button .fa,
+#so-custom-css-properties .toolbar .socss-button .fa {
+  color: #555;
+}
+.custom-css-toolbar .socss-button .fa.fa-save,
+#so-custom-css-properties .toolbar .socss-button .fa.fa-save {
+  color: #fff;
+}
+.custom-css-toolbar .socss-button.disabled.save .fa,
+#so-custom-css-properties .toolbar .socss-button.disabled.save .fa {
   color: #555;
 }
 body .CodeMirror-lint-tooltip,

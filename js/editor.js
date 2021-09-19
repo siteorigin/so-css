@@ -47,7 +47,7 @@
 		button: _.template( '<li><a href="#<%= action %>" class="toolbar-button socss-button"><%= text %></a></li>' ),
 		
 		events: {
-			'click .socss-button': 'triggerEvent',
+			'click .socss-button:not(.save)': 'triggerEvent',
 		},
 		
 		triggerEvent: function ( event ) {
@@ -88,6 +88,7 @@
 		events: {
 			'click_expand .custom-css-toolbar': 'toggleExpand',
 			'click_visual .custom-css-toolbar': 'showVisualEditor',
+			'click .socss-button.save': 'save',
 			'submit': 'onSubmit',
 		},
 		
@@ -102,6 +103,10 @@
 				}
 			}.bind( this ) );
 			
+		},
+
+		save: function () {
+			socss.save( this );
 		},
 		
 		getSelectedPostCss: function () {
@@ -766,8 +771,48 @@
 			this.$el.hide();
 		}
 	} );
-	
-	
+
+	socss.save = function ( view ) {
+		let saveBtn = $( '#siteorigin-custom-css .save' );
+		var css;
+		console.log(view);
+
+		if ( ! saveBtn.hasClass( 'disabled' ) ) {
+			saveBtn.addClass( 'disabled' )
+
+			// Which view is the user using?
+			if ( typeof view.editor != 'undefined' ) {
+				// Visual.
+				css = view.editor.codeMirror.getValue().trim();
+				view.updateMainEditor( true );
+			} else {
+				// Expanded.
+				css = view.codeMirror.getValue().trim();
+			}
+			$.post(
+				socssOptions.ajaxurl,
+				{
+					action: 'socss_save_css',
+					css: css,
+				},
+				null,
+				'html'
+			).done( function ( response ) {
+				if ( response.length ) {
+					// Update was successful. Update revisions list.
+					$( '.custom-revisions-list' ).html( response );
+				}
+			})
+			.fail( function ( error ) {
+				// Something went wrong. Output the error message as an alert.
+				alert( error.responseText );
+			} )
+			.always( function () {
+				saveBtn.removeClass( 'disabled' )
+			} );
+		}
+	};
+
 	/**
 	 * The visual properties editor
 	 */
@@ -809,6 +854,7 @@
 		
 		events: {
 			'click .close': 'hide',
+			'click .save': 'save',
 			'click .section-tabs li': 'onTabClick',
 			'change .toolbar select': 'onToolbarSelectChange',
 		},
@@ -1063,6 +1109,10 @@
 			
 			// Update the main editor with compressed CSS when we close the properties editor
 			this.updateMainEditor( true );
+		},
+
+		save: function () {
+			socss.save( this );
 		},
 		
 		/**
