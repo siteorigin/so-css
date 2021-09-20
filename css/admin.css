@@ -630,6 +630,7 @@
   border: 1px solid #c0c0c0;
   color: #555;
   cursor: pointer;
+  float: left;
   display: inline-block;
   font-size: 0.95em;
   font-weight: bold;
