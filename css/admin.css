@@ -243,7 +243,7 @@
 }
 #so-custom-css-properties .toolbar select {
   font-size: 13px;
-  line-height: 1;
+  line-height: 28px;
   max-width: 230px;
   -webkit-transition: all 0.5s ease;
   -moz-transition: all 0.5s ease;
