@@ -773,7 +773,7 @@
 	 */
 	socss.view.properties = Backbone.View.extend( {
 		
-		tabTemplate: _.template( '<li data-section="<%- id %>"><span class="fa fa-<%- icon %>"></span> <%- title %></li>' ),
+		tabTemplate: _.template( '<li data-section="<%- id %>"><span class="so-css-icon so-css-icon-<%- icon %>"></span> <%- title %></li>' ),
 		sectionTemplate: _.template( '<div class="section" data-section="<%- id %>"><table class="fields-table"><tbody></tbody></table></div>' ),
 		controllerTemplate: _.template( '<tr><th scope="row"><%- title %></th><td></td></tr>' ),
 		
@@ -1324,15 +1324,15 @@
 			var $tc = $( '<div class="select-tabs"></div>' ).appendTo( this.$el );
 			
 			// Add the none value
-			$( '<div class="select-tab" data-value=""><span class="fa fa-circle-o"></span></div>' ).appendTo( $tc );
+			$( '<div class="select-tab" data-value=""><span class="so-css-icon so-css-icon-circle"></span></div>' ).appendTo( $tc );
 			
 			// Now add one for each of the option icons
 			for ( var k in this.args.option_icons ) {
 				$( '<div class="select-tab"></div>' )
 				.appendTo( $tc )
 				.append(
-					$( '<span class="fa"></span>' )
-					.addClass( 'fa-' + this.args.option_icons[ k ] )
+					$( '<span class="so-css-icon"></span>' )
+					.addClass( 'so-css-icon-' + this.args.option_icons[ k ] )
 				)
 				.attr( 'data-value', k )
 				;
@@ -1368,7 +1368,7 @@
 	
 	// A field that lets a user upload an image
 	socss.view.properties.controllers.image = socss.view.propertyController.extend( {
-		template: _.template( '<input type="text" value="" /> <span class="select socss-button"><span class="fa fa-upload"></span></span>' ),
+		template: _.template( '<input type="text" value="" /> <span class="select socss-button"><span class="so-css-icon so-css-icon-upload"></span></span>' ),
 		
 		events: {
 			'click .select': 'openMedia',
@@ -1531,8 +1531,8 @@
 			
 			// Now add the increment/decrement buttons
 			var $diw = $( '<div class="socss-diw"></div>' ).appendTo( this.$el );
-			var $dec = $( '<div class="dec-button socss-button"><span class="fa fa-minus"></span></div>' ).appendTo( $diw );
-			var $inc = $( '<div class="inc-button socss-button"><span class="fa fa-plus"></span></div>' ).appendTo( $diw );
+			var $dec = $( '<div class="dec-button socss-button"><span class="so-css-icon so-css-icon-minus"></span></div>' ).appendTo( $diw );
+			var $inc = $( '<div class="inc-button socss-button"><span class="so-css-icon so-css-icon-plus"></span></div>' ).appendTo( $diw );
 			
 			this.setupStepButton( $dec );
 			this.setupStepButton( $inc );
@@ -1673,8 +1673,8 @@
 			
 			// Now add the increment/decrement buttons
 			var $diw = $( '<div class="socss-diw"></div>' ).appendTo( this.$el );
-			var $dec = $( '<div class="dec-button socss-button"><span class="fa fa-minus"></span></div>' ).appendTo( $diw );
-			var $inc = $( '<div class="inc-button socss-button"><span class="fa fa-plus"></span></div>' ).appendTo( $diw );
+			var $dec = $( '<div class="dec-button socss-button"><span class="so-css-icon so-css-icon-minus"></span></div>' ).appendTo( $diw );
+			var $inc = $( '<div class="inc-button socss-button"><span class="so-css-icon so-css-icon-plus"></span></div>' ).appendTo( $diw );
 			
 			this.setupStepButton( $dec );
 			this.setupStepButton( $inc );

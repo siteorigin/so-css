@@ -1,5 +1,104 @@
 @import "mixins";
 
+@font-face {
+	font-family: 'SoCSSIcons';
+	src: url( 'icons/so-css-icons.ttf?joepfs' ) format( 'truetype' ),
+		url( 'icons/so-css-icons.woff?joepfs' ) format( 'woff' ),
+		url( 'icons/so-css-icons.svg?joepfs#icomoon' ) format(' svg' );
+	font-weight: normal;
+	font-style: normal;
+	font-display: block;
+}
+
+.so-css-icon {
+	display: inline-block;
+	font: normal normal normal 14px/1 SoCSSIcons;
+	font-size: inherit;
+	text-rendering: auto;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	transform: translate(0, 0);
+
+	&-compress:before {
+		content: "\f066";
+	}
+
+	&-plus:before {
+		content: "\f067";
+	}
+
+	&-minus:before {
+		content: "\f068";
+	}
+
+	&-check:before {
+		content: "\f00c";
+	}
+
+	&-font:before {
+		content: "\f031";
+	}
+
+	&-bold:before {
+		content: "\f032";
+	}
+
+	&-italic:before {
+		content: "\f033";
+	}
+
+	&-align-left:before {
+		content: "\f036";
+	}
+
+	&-align-center:before {
+		content: "\f037";
+	}
+
+	&-align-right:before {
+		content: "\f038";
+	}
+	&-align-justify:before {
+		content: "\f039";
+	}
+
+	&-expand:before {
+		content: "\f065";
+	}
+
+	&-compress:before {
+		content: "\f066";
+	}
+
+	&-eye:before {
+		content: "\f06e";
+	}
+
+	&-upload:before {
+		content: "\f093";
+	}
+
+	&-strikethrough:before {
+		content: "\f0cc";
+	}
+
+	&-underline:before {
+		content: "\f0cd";
+	}
+
+	&-columns:before {
+		content: "\f0db";
+	}
+
+	&-circle:before {
+		content: "\f10c";
+	}
+
+	&-eyedropper:before {
+		content: "\f1fb";
+	}
+}
+
 #siteorigin-custom-css {
 	color: #333;
 	margin: 0 0 0 -20px;
@@ -147,7 +246,7 @@
 				text-decoration: none;
 				color: #666;
 
-				.fa-compress {
+				.so-css-icon-compress {
 					display: none;
 				}
 			}
@@ -208,10 +307,10 @@
 
 			.editor-expand {
 
-				.fa-expand {
+				.so-css-icon-expand {
 					display: none;
 				}
-				.fa-compress {
+				.so-css-icon-compress {
 					display: inline-block;
 				}
 

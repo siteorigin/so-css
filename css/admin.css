@@ -1,3 +1,79 @@
+@font-face {
+  font-family: 'SoCSSIcons';
+  src: url('icons/so-css-icons.ttf?joepfs') format('truetype'), url('icons/so-css-icons.woff?joepfs') format('woff'), url('icons/so-css-icons.svg?joepfs#icomoon') format(' svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+.so-css-icon {
+  display: inline-block;
+  font: normal normal normal 14px/1 SoCSSIcons;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transform: translate(0, 0);
+}
+.so-css-icon-compress:before {
+  content: "\f066";
+}
+.so-css-icon-plus:before {
+  content: "\f067";
+}
+.so-css-icon-minus:before {
+  content: "\f068";
+}
+.so-css-icon-check:before {
+  content: "\f00c";
+}
+.so-css-icon-font:before {
+  content: "\f031";
+}
+.so-css-icon-bold:before {
+  content: "\f032";
+}
+.so-css-icon-italic:before {
+  content: "\f033";
+}
+.so-css-icon-align-left:before {
+  content: "\f036";
+}
+.so-css-icon-align-center:before {
+  content: "\f037";
+}
+.so-css-icon-align-right:before {
+  content: "\f038";
+}
+.so-css-icon-align-justify:before {
+  content: "\f039";
+}
+.so-css-icon-expand:before {
+  content: "\f065";
+}
+.so-css-icon-compress:before {
+  content: "\f066";
+}
+.so-css-icon-eye:before {
+  content: "\f06e";
+}
+.so-css-icon-upload:before {
+  content: "\f093";
+}
+.so-css-icon-strikethrough:before {
+  content: "\f0cc";
+}
+.so-css-icon-underline:before {
+  content: "\f0cd";
+}
+.so-css-icon-columns:before {
+  content: "\f0db";
+}
+.so-css-icon-circle:before {
+  content: "\f10c";
+}
+.so-css-icon-eyedropper:before {
+  content: "\f1fb";
+}
 #siteorigin-custom-css {
   color: #333;
   margin: 0 0 0 -20px;
@@ -111,7 +187,7 @@
   text-decoration: none;
   color: #666;
 }
-#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .fa-compress {
+#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .so-css-icon-compress {
   display: none;
 }
 #so-custom-css-form .custom-css-toolbar .fa {
@@ -155,10 +231,10 @@
   bottom: 0;
   width: 340px;
 }
-#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .fa-expand {
+#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .so-css-icon-expand {
   display: none;
 }
-#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .fa-compress {
+#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .so-css-icon-compress {
   display: inline-block;
 }
 #so-custom-css-form.expanded .decoration {
