@@ -190,7 +190,7 @@
 #so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .so-css-icon-compress {
   display: none;
 }
-#so-custom-css-form .custom-css-toolbar .fa {
+#so-custom-css-form .custom-css-toolbar .so-css-icon {
   font-size: 14px;
 }
 #so-custom-css-form .custom-css-container {
@@ -356,7 +356,7 @@
 #so-custom-css-properties .section-tabs li:hover {
   background: #fff;
 }
-#so-custom-css-properties .section-tabs li .fa {
+#so-custom-css-properties .section-tabs li .so-css-icon {
   float: left;
   display: block;
   margin: -1px 6px -1px 0;
@@ -370,7 +370,7 @@
   color: #444;
   background: #e8e8e8;
 }
-#so-custom-css-properties .section-tabs li.active .fa {
+#so-custom-css-properties .section-tabs li.active .so-css-icon {
   color: #333;
 }
 #so-custom-css-properties .sections .section {
@@ -454,7 +454,7 @@
   border-right-width: 0;
   background: #f7f7f7;
 }
-#so-custom-css-properties .sections .fields-table .select-tabs .select-tab .fa {
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab .so-css-icon {
   line-height: 14px;
   font-size: 14px;
   color: #777;
@@ -466,8 +466,8 @@
 #so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active {
   background: #e9e9e9;
 }
-#so-custom-css-properties .sections .fields-table .select-tabs .select-tab:hover .fa,
-#so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active .fa {
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab:hover .so-css-icon,
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active .so-css-icon {
   color: #333;
 }
 #so-custom-css-properties .sections .fields-table .side-tabs {
@@ -692,6 +692,9 @@
   margin: 0;
   width: 30px;
   height: 30px;
+}
+.socss-diw .inc-button .so-css-icon,
+.socss-diw .dec-button .so-css-icon {
   font-size: 10px;
 }
 .socss-diw .inc-button {
@@ -720,10 +723,10 @@
   background: #fff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
-.socss-button:hover .fa {
+.socss-button:hover .so-css-icon {
   color: #333;
 }
-.socss-button .fa {
+.socss-button .so-css-icon {
   color: #555;
 }
 body .CodeMirror-lint-tooltip,
