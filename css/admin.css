@@ -59,6 +59,9 @@
 .so-css-icon-upload:before {
   content: "\f093";
 }
+.so-css-icon-save:before {
+  content: "\e900";
+}
 .so-css-icon-strikethrough:before {
   content: "\f0cc";
 }

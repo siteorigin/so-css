@@ -87,6 +87,9 @@ if ( ! empty( $current_revision ) ) {
 				</div>
 
 				<div class="toolbar-action-buttons">
+					<span class="save socss-button button-primary">
+						<span class="so-css-icon so-css-icon-save"></span>
+					</span>
 
 					<a href="#visual" class="editor-visual socss-button">
 						<span class="so-css-icon so-css-icon-eye"></span>
@@ -120,6 +123,9 @@ if ( ! empty( $current_revision ) ) {
 				</select>
 				<div class="close socss-button">
 					<span class="so-css-icon so-css-icon-check"></span>
+				</div>
+				<div class="save socss-button button-primary">
+					<span class="so-css-icon so-css-icon-save"></span>
 				</div>
 			</div>
 
