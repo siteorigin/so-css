@@ -775,7 +775,6 @@
 	socss.save = function ( view ) {
 		let saveBtn = $( '#siteorigin-custom-css .save' );
 		var css;
-		console.log(view);
 
 		if ( ! saveBtn.hasClass( 'disabled' ) ) {
 			saveBtn.addClass( 'disabled' )
