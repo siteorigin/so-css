@@ -1,5 +1,108 @@
 @import "mixins";
 
+@font-face {
+	font-family: 'SoCSSIcons';
+	src: url( 'icons/so-css-icons.ttf?joepfs' ) format( 'truetype' ),
+		url( 'icons/so-css-icons.woff?joepfs' ) format( 'woff' ),
+		url( 'icons/so-css-icons.svg?joepfs#icomoon' ) format(' svg' );
+	font-weight: normal;
+	font-style: normal;
+	font-display: block;
+}
+
+.so-css-icon {
+	display: inline-block;
+	font: normal normal normal 14px/1 SoCSSIcons;
+	font-size: inherit;
+	text-rendering: auto;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	transform: translate(0, 0);
+
+	&-compress:before {
+		content: "\f066";
+	}
+
+	&-plus:before {
+		content: "\f067";
+	}
+
+	&-minus:before {
+		content: "\f068";
+	}
+
+	&-check:before {
+		content: "\f00c";
+	}
+
+	&-font:before {
+		content: "\f031";
+	}
+
+	&-bold:before {
+		content: "\f032";
+	}
+
+	&-italic:before {
+		content: "\f033";
+	}
+
+	&-align-left:before {
+		content: "\f036";
+	}
+
+	&-align-center:before {
+		content: "\f037";
+	}
+
+	&-align-right:before {
+		content: "\f038";
+	}
+	&-align-justify:before {
+		content: "\f039";
+	}
+
+	&-expand:before {
+		content: "\f065";
+	}
+
+	&-compress:before {
+		content: "\f066";
+	}
+
+	&-eye:before {
+		content: "\f06e";
+	}
+
+	&-upload:before {
+		content: "\f093";
+	}
+
+	&-save:before {
+		content: "\e900";
+	}
+
+	&-strikethrough:before {
+		content: "\f0cc";
+	}
+
+	&-underline:before {
+		content: "\f0cd";
+	}
+
+	&-columns:before {
+		content: "\f0db";
+	}
+
+	&-circle:before {
+		content: "\f10c";
+	}
+
+	&-eyedropper:before {
+		content: "\f1fb";
+	}
+}
+
 #siteorigin-custom-css {
 	color: #333;
 	margin: 0 0 0 -20px;
@@ -147,13 +250,13 @@
 				text-decoration: none;
 				color: #666;
 
-				.fa-compress {
+				.so-css-icon-compress {
 					display: none;
 				}
 			}
 		}
 
-		.fa {
+		.so-css-icon {
 			font-size: 14px;
 		}
 	}
@@ -212,10 +315,10 @@
 
 			.editor-expand {
 
-				.fa-expand {
+				.so-css-icon-expand {
 					display: none;
 				}
-				.fa-compress {
+				.so-css-icon-compress {
 					display: inline-block;
 				}
 
@@ -350,7 +453,7 @@
 				background: #fff;
 			}
 
-			.fa {
+			.so-css-icon {
 				float: left;
 				display: block;
 				margin: -1px 6px -1px 0;
@@ -366,7 +469,7 @@
 				color: #444;
 				background: #e8e8e8;
 
-				.fa {
+				.so-css-icon {
 					color: #333;
 				}
 			}
@@ -454,7 +557,7 @@
 					border-right-width: 0;
 					background: #f7f7f7;
 
-					.fa {
+					.so-css-icon {
 						line-height: 14px;
 						font-size: 14px;
 						color: #777;
@@ -467,7 +570,7 @@
 					&:hover, &.active {
 						background: #e9e9e9;
 
-						.fa {
+						.so-css-icon {
 							color: #333;
 						}
 					}
@@ -752,7 +855,10 @@
 		margin: 0;
 		width: 30px;
 		height: 30px;
-		font-size: 10px;
+
+		.so-css-icon {
+			font-size: 10px;
+		}
 	}
 
 	.inc-button {
@@ -785,20 +891,20 @@
 		border-color:#b0b0b0;
 		box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 
-		.fa {
+		.so-css-icon {
 			color: #333;
 		}
 	}
 
-	.fa {
+	.so-css-icon {
 		color: #555;
 
-		&.fa-save {
+		&.so-css-icon-save {
 			color: #fff;
 		}
 	}
 
-	&.disabled.save .fa {
+	&.disabled.save .so-css-icon-save {
 		color: #555;
 	}
 }

@@ -328,10 +328,7 @@ class SiteOrigin_CSS {
 		// There are conflicts between CSS linting and the built in WordPress color picker, so use something else
 		wp_enqueue_style( 'siteorigin-custom-css-minicolors', plugin_dir_url( __FILE__ ) . 'lib/minicolors/jquery.minicolors.css', array(), '2.1.7' );
 		wp_enqueue_script( 'siteorigin-custom-css-minicolors', plugin_dir_url( __FILE__ ) . 'lib/minicolors/jquery.minicolors' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), '2.1.7' );
-		
-		// We need Font Awesome
-		wp_enqueue_style( 'siteorigin-custom-css-font-awesome', plugin_dir_url( __FILE__ ) . 'lib/fontawesome/css/font-awesome.min.css', array(), SOCSS_VERSION );
-		
+
 		// URI parsing for preview navigation
 		wp_enqueue_script( 'siteorigin-uri', plugin_dir_url( __FILE__ ) . 'js/URI' . SOCSS_JS_SUFFIX . '.js', array(), SOCSS_VERSION, true );
 		
