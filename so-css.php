@@ -48,6 +48,7 @@ class SiteOrigin_CSS {
 		
 		add_action( 'wp_ajax_socss_get_post_css', array( $this, 'admin_action_get_post_css' ) );
 		add_action( 'wp_ajax_socss_get_revisions_list', array( $this, 'admin_action_get_revisions_list' ) );
+		add_action( 'wp_ajax_socss_save_css', array( $this, 'admin_action_save_css' ) );
   
 		if ( ! is_admin() ) {
 			if( isset( $_GET['so_css_preview'] )  ) {
@@ -352,6 +353,7 @@ class SiteOrigin_CSS {
 			'homeURL' => $home_url,
 			'postCssUrlRoot' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_post_css'), 'get_post_css' ),
 			'getRevisionsListAjaxUrl' => wp_nonce_url( admin_url('admin-ajax.php?action=socss_get_revisions_list'), 'get_revisions_list' ),
+			'ajaxurl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'so-css-ajax' ),
 			'openVisualEditor' => $open_visual_editor,
 			
 			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() ),
@@ -563,6 +565,37 @@ class SiteOrigin_CSS {
 		
 		$this->custom_css_revisions_list( $this->theme, $post_id );
 		
+		wp_die();
+	}
+
+	/**
+	 * Retrieves the past revisions of post specific CSS for the supplied postId.
+	 */
+	function admin_action_save_css() {
+		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'so-css-ajax' ) ) {
+			wp_die(
+				__( 'The supplied nonce is invalid.', 'siteorigin-panels' ),
+				__( 'Invalid nonce.', 'siteorigin-panels' ),
+				403
+			);
+		}
+
+		if ( current_user_can( 'edit_theme_options' ) && isset( $_POST['css'] ) ) {
+			// Sanitize CSS input. Should keep most tags, apart from script and style tags.
+			$custom_css = self::sanitize_css( $_POST['css'] );
+			
+			$current = $this->get_custom_css( $this->theme );
+			$this->save_custom_css( $custom_css, $this->theme );
+			
+			// If this has changed, then add a revision.
+			if ( $current != $custom_css ) {
+				$this->add_custom_css_revision( $custom_css, $this->theme );
+				$this->save_custom_css_file( $custom_css, $this->theme );
+
+				// Output the full revisions list.
+				$this->custom_css_revisions_list( $this->theme );
+			}
+		}		
 		wp_die();
 	}
 	

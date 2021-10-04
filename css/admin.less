@@ -297,6 +297,10 @@
 		display: none;
 	}
 
+	&:not(.expanded) .save.socss-button {
+		display: none;
+	}
+
 	&.expanded {
 		@expanded_form_width: 340px;
 
@@ -402,9 +406,9 @@
 		text-align: left;
 
 		select {
-			line-height: 28px;
 			font-size: 13px;
-			max-width: 265px;
+			line-height: 28px;
+			max-width: 230px;
 			.transition(0.5s);
 
 			&.highlighted {
@@ -412,7 +416,8 @@
 			}
 		}
 
-		.close {
+		.close,
+		.save {
 			float: right;
 			margin: 2px 4px 0 0;
 		}
@@ -861,29 +866,29 @@
 	}
 }
 
-.socss-button {
-	cursor: pointer;
-
-	line-height: 1em;
-	display: inline-block;
+.custom-css-toolbar .socss-button,
+#so-custom-css-properties .toolbar .socss-button {
 	border: 1px solid #c0c0c0;
-	background: #f7f7f7;
-	text-decoration: none;
-	padding: 6px;
-	font-weight: bold;
 	color: #555;
+	cursor: pointer;
+	float: left;
+	display: inline-block;
 	font-size: 0.95em;
+	font-weight: bold;
+	line-height: 1em;
 	margin-left: 5px;
-
+	min-height: 0;
+	padding: 6px;
+	text-decoration: none;
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
 	-o-user-select: none;
 	user-select: none;
 
-	&:hover {
-		border-color:#b0b0b0;
+	&:not(.save):hover {
 		background: #fff;
+		border-color:#b0b0b0;
 		box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 
 		.so-css-icon {
@@ -892,6 +897,14 @@
 	}
 
 	.so-css-icon {
+		color: #555;
+
+		&.so-css-icon-save {
+			color: #fff;
+		}
+	}
+
+	&.disabled.save .so-css-icon-save {
 		color: #555;
 	}
 }
