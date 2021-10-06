@@ -87,17 +87,17 @@ if ( ! empty( $current_revision ) ) {
 				</div>
 
 				<div class="toolbar-action-buttons">
-					<span class="save socss-button button-primary">
+					<span class="save socss-button button-primary" title="<?php esc_attr_e( 'Save CSS', 'so-css' ); ?>">
 						<span class="so-css-icon so-css-icon-save"></span>
 					</span>
 
-					<a href="#visual" class="editor-visual socss-button">
+					<a href="#visual" class="editor-visual socss-button" title="<?php esc_attr_e( 'Open Visual Mode', 'so-css' ); ?>">
 						<span class="so-css-icon so-css-icon-eye"></span>
 					</a>
 
 					<a href="#expand" class="editor-expand socss-button">
-						<span class="so-css-icon so-css-icon-expand"></span>
-						<span class="so-css-icon so-css-icon-compress"></span>
+						<span class="so-css-icon so-css-icon-expand" title="<?php esc_attr_e( 'Open Expanded Mode', 'so-css' ); ?>"></span>
+						<span class="so-css-icon so-css-icon-compress" title="<?php esc_attr_e( 'Close Expanded Mode', 'so-css' ); ?>"></span>
 					</a>
 				</div>
 			</div>
@@ -121,10 +121,10 @@ if ( ! empty( $current_revision ) ) {
 			<div class="toolbar">
 				<select>
 				</select>
-				<div class="close socss-button">
+				<div class="close socss-button" title="<?php esc_attr_e( 'Close', 'so-css' ); ?>">
 					<span class="so-css-icon so-css-icon-check"></span>
 				</div>
-				<div class="save socss-button button-primary">
+				<div class="save socss-button button-primary" title="<?php esc_attr_e( 'Save CSS', 'so-css' ); ?>">
 					<span class="so-css-icon so-css-icon-save"></span>
 				</div>
 			</div>
