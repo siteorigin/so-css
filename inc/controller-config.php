@@ -2,18 +2,18 @@
 
 return array (
 	'text' => array(
-		'title' => __('Text', 'so-css'),
+		'title' => esc_html( 'Text', 'so-css' ),
 		'icon' => 'align-left',
 		'controllers' => array(
 			array(
-				'title' => __('Text Color', 'so-css'),
+				'title' => esc_html( 'Text Color', 'so-css' ),
 				'type' => 'color',
 				'args' => array(
 					'property' => 'color'
 				)
 			),
 			array(
-				'title' => __('Font Size', 'so-css'),
+				'title' => esc_html( 'Font Size', 'so-css' ),
 				'type' => 'measurement',
 				'args' => array(
 					'property' => 'font-size',
@@ -21,7 +21,7 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Line Height', 'so-css'),
+				'title' => esc_html( 'Line Height', 'so-css' ),
 				'type' => 'measurement',
 				'args' => array(
 					'property' => 'line-height',
@@ -29,15 +29,15 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Font Weight', 'so-css'),
+				'title' => esc_html( 'Font Weight', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'font-weight',
 					'options' => array(
-						'normal' => __('Normal', 'so-css'),
-						'bold' => __('Bold', 'so-css'),
-						'bolder' => __('Bolder', 'so-css'),
-						'lighter' => __('Lighter', 'so-css'),
+						'normal' => esc_html( 'Normal', 'so-css' ),
+						'bold' => esc_html( 'Bold', 'so-css' ),
+						'bolder' => esc_html( 'Bolder', 'so-css' ),
+						'lighter' => esc_html( 'Lighter', 'so-css' ),
 						'100' => '100',
 						'200' => '200',
 						'300' => '300',
@@ -51,14 +51,14 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Font Style', 'so-css'),
+				'title' => esc_html( 'Font Style', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'font-style',
 					'options' => array(
-						'none' => __('None', 'so-css'),
-						'normal' => __('Normal', 'so-css'),
-						'italic' => __('Italic', 'so-css'),
+						'none' => esc_html( 'None', 'so-css' ),
+						'normal' => esc_html( 'Normal', 'so-css' ),
+						'italic' => esc_html( 'Italic', 'so-css' ),
 					),
 					'option_icons' => array(
 						'normal' => 'font',
@@ -67,15 +67,15 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Text Decoration', 'so-css'),
+				'title' => esc_html( 'Text Decoration', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'text-decoration',
 					'options' => array(
-						'none' => __('None', 'so-css'),
-						'underline' => __('Underline', 'so-css'),
-						'overline' => __('Overline', 'so-css'),
-						'line-through' => __('Line Through', 'so-css'),
+						'none' => esc_html( 'None', 'so-css' ),
+						'underline' => esc_html( 'Underline', 'so-css' ),
+						'overline' => esc_html( 'Overline', 'so-css' ),
+						'line-through' => esc_html( 'Line Through', 'so-css' ),
 					),
 					'option_icons' => array(
 						'none' => 'font',
@@ -85,46 +85,46 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Font Variant', 'so-css'),
+				'title' => esc_html( 'Font Variant', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'font-variant',
 					'options' => array(
-						'normal' => __('Normal', 'so-css'),
-						'small-caps' => __('Small Caps', 'so-css'),
+						'normal' => esc_html( 'Normal', 'so-css' ),
+						'small-caps' => esc_html( 'Small Caps', 'so-css' ),
 					)
 				)
 			),
 			array(
-				'title' => __('Text Transform', 'so-css'),
+				'title' => esc_html( 'Text Transform', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'text-transform',
 					'options' => array(
-						'none' => __('None', 'so-css'),
-						'capitalize' => __('Capitalize', 'so-css'),
-						'uppercase' => __('Uppercase', 'so-css'),
-						'lowercase' => __('Lowercase', 'so-css'),
+						'none' => esc_html( 'None', 'so-css' ),
+						'capitalize' => esc_html( 'Capitalize', 'so-css' ),
+						'uppercase' => esc_html( 'Uppercase', 'so-css' ),
+						'lowercase' => esc_html( 'Lowercase', 'so-css' ),
 					)
 				)
 			),
 			array(
-				'title' => __('Font Family', 'so-css'),
+				'title' => esc_html( 'Font Family', 'so-css' ),
 				'type' => 'font_select',
 				'args' => array(
 					'property' => 'font-family',
 				)
 			),
 			array(
-				'title' => __('Text Align', 'so-css'),
+				'title' => esc_html( 'Text Align', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'text-align',
 					'options' => array(
-						'left' => __('Left', 'so-css'),
-						'right' => __('Right', 'so-css'),
-						'center' => __('Center', 'so-css'),
-						'justify' => __('Justify', 'so-css'),
+						'left' => esc_html( 'Left', 'so-css' ),
+						'right' => esc_html( 'Right', 'so-css' ),
+						'center' => esc_html( 'Center', 'so-css' ),
+						'justify' => esc_html( 'Justify', 'so-css' ),
 					),
 					'option_icons' => array(
 						'left' => 'align-left',
@@ -135,42 +135,42 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Text Indent', 'so-css'),
+				'title' => esc_html( 'Text Indent', 'so-css' ),
 				'type' => 'measurement',
 				'args' => array(
 					'property' => 'text-indent'
 				)
 			),
 			array(
-				'title' => __('Letter Spacing', 'so-css'),
+				'title' => esc_html( 'Letter Spacing', 'so-css' ),
 				'type' => 'measurement',
 				'args' => array(
 					'property' => 'letter-spacing'
 				)
 			),
 			array(
-				'title' => __('Word Spacing', 'so-css'),
+				'title' => esc_html( 'Word Spacing', 'so-css' ),
 				'type' => 'measurement',
 				'args' => array(
 					'property' => 'word-spacing'
 				)
 			),
 			array(
-				'title' => __('White Space', 'so-css'),
+				'title' => esc_html( 'White Space', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'white-space',
 					'options' => array(
-						'normal' => __('Normal', 'so-css'),
-						'encountered' => __('Encountered', 'so-css'),
-						'pre' => __('Pre', 'so-css'),
-						'pre-line' => __('Pre Line', 'so-css'),
-						'pre-wrap' => __('Pre Wrap', 'so-css'),
+						'normal' => esc_html( 'Normal', 'so-css' ),
+						'encountered' => esc_html( 'Encountered', 'so-css' ),
+						'pre' => esc_html( 'Pre', 'so-css' ),
+						'pre-line' => esc_html( 'Pre Line', 'so-css' ),
+						'pre-wrap' => esc_html( 'Pre Wrap', 'so-css' ),
 					)
 				)
 			),
 			array(
-				'title' => __('Text Shadow', 'so-css'),
+				'title' => esc_html( 'Text Shadow', 'so-css' ),
 				'type' => 'shadow',
 				'args' => array(
 					'property' => 'text-shadow',
@@ -182,18 +182,18 @@ return array (
 	//////////////////////////////////////////////////////////////////////
 
 	'decoration' => array(
-		'title' => __('Decoration', 'so-css'),
+		'title' => esc_html( 'Decoration', 'so-css' ),
 		'icon' => 'eyedropper',
 		'controllers' => array(
 			array(
-				'title' => __('Background Color', 'so-css'),
+				'title' => esc_html( 'Background Color', 'so-css' ),
 				'type' => 'color',
 				'args' => array(
 					'property' => 'background-color'
 				)
 			),
 			array(
-				'title' => __('Background Image', 'so-css'),
+				'title' => esc_html( 'Background Image', 'so-css' ),
 				'type' => 'image',
 				'args' => array(
 					'property' => 'background-image',
@@ -201,42 +201,42 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Background Position', 'so-css'),
+				'title' => esc_html( 'Background Position', 'so-css' ),
 				'type' => 'position',
 				'args' => array(
 					'property' => 'background-position'
 				)
 			),
 			array(
-				'title' => __('Background Repeat', 'so-css'),
+				'title' => esc_html( 'Background Repeat', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'background-repeat',
 					'options' => array(
-						'repeat' => __( 'repeat', 'so-css' ),
-						'repeat-x' => __( 'repeat-x', 'so-css' ),
-						'repeat-y' => __( 'repeat-y', 'so-css' ),
-						'no-repeat' => __( 'no-repeat', 'so-css' ),
+						'repeat' => esc_html( 'repeat', 'so-css' ),
+						'repeat-x' => esc_html( 'repeat-x', 'so-css' ),
+						'repeat-y' => esc_html( 'repeat-y', 'so-css' ),
+						'no-repeat' => esc_html( 'no-repeat', 'so-css' ),
 					)
 				)
 			),
 			array(
-				'title' => __('Background Size', 'so-css'),
+				'title' => esc_html( 'Background Size', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'background-size',
 					'options' => array(
-						'auto' => __( 'auto', 'so-css' ),
-						'length' => __( 'length', 'so-css' ),
-						'percentage' => __( 'percentage', 'so-css' ),
-						'cover' => __( 'cover', 'so-css' ),
-						'contain' => __( 'contain', 'so-css' ),
+						'auto' => esc_html( 'auto', 'so-css' ),
+						'length' => esc_html( 'length', 'so-css' ),
+						'percentage' => esc_html( 'percentage', 'so-css' ),
+						'cover' => esc_html( 'cover', 'so-css' ),
+						'contain' => esc_html( 'contain', 'so-css' ),
 					)
 				)
 			),
 
 			array(
-				'title' => __('Box Shadow', 'so-css'),
+				'title' => esc_html( 'Box Shadow', 'so-css' ),
 				'type' => 'shadow',
 				'args' => array(
 					'property' => 'box-shadow',
@@ -244,7 +244,7 @@ return array (
 			),
 
 			array(
-				'title' => __('Opacity', 'so-css'),
+				'title' => esc_html( 'Opacity', 'so-css' ),
 				'type' => 'number',
 				'args' => array(
 					'property' => 'opacity',
@@ -257,7 +257,7 @@ return array (
 			),
 
 			array(
-				'title' => __('Borders', 'so-css'),
+				'title' => esc_html( 'Borders', 'so-css' ),
 				'type' => 'sides',
 				'args' => array(
 					'controllers' => array(
@@ -300,7 +300,7 @@ return array (
 			),
 
 			array(
-				'title' => __( 'Border Radius', 'so-css' ),
+				'title' => esc_html( 'Border Radius', 'so-css' ),
 				'type' => 'sides',
 				'args' => array(
 					'controllers' => array(
@@ -323,11 +323,11 @@ return array (
 	//////////////////////////////////////////////////////////////////////
 
 	'layout' => array(
-		'title' => __('Layout', 'so-css'),
+		'title' => esc_html( 'Layout', 'so-css' ),
 		'icon' => 'columns',
 		'controllers' => array(
 			array(
-				'title' => __('Margin', 'so-css'),
+				'title' => esc_html( 'Margin', 'so-css' ),
 				'type' => 'sides',
 				'args' => array(
 					'controllers' => array(
@@ -344,7 +344,7 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Padding', 'so-css'),
+				'title' => esc_html( 'Padding', 'so-css' ),
 				'type' => 'sides',
 				'args' => array(
 					'controllers' => array(
@@ -361,21 +361,21 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Position', 'so-css'),
+				'title' => esc_html( 'Position', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'position',
 					'options' => array(
-						'absolute' => __( 'Absolute', 'so-css' ),
-						'fixed' => __( 'Fixed', 'so-css' ),
-						'relative' => __( 'Relative', 'so-css' ),
-						'static' => __( 'Static', 'so-css' ),
-						'inherit' => __( 'Inherit', 'so-css' ),
+						'absolute' => esc_html( 'Absolute', 'so-css' ),
+						'fixed' => esc_html( 'Fixed', 'so-css' ),
+						'relative' => esc_html( 'Relative', 'so-css' ),
+						'static' => esc_html( 'Static', 'so-css' ),
+						'inherit' => esc_html( 'Inherit', 'so-css' ),
 					)
 				)
 			),
 			array(
-				'title' => __('Absolute Position', 'so-css'),
+				'title' => esc_html( 'Absolute Position', 'so-css' ),
 				'type' => 'sides',
 				'args' => array(
 					'controllers' => array(
@@ -391,7 +391,7 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Width', 'so-css'),
+				'title' => esc_html( 'Width', 'so-css' ),
 				'type' => 'measurement',
 				'args' => array(
 					'property' => 'width',
@@ -399,7 +399,7 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Height', 'so-css'),
+				'title' => esc_html( 'Height', 'so-css' ),
 				'type' => 'measurement',
 				'args' => array(
 					'property' => 'height',
@@ -407,110 +407,110 @@ return array (
 				)
 			),
 			array(
-				'title' => __('Display', 'so-css'),
+				'title' => esc_html( 'Display', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'display',
 					'options' => array(
-						'none' => __( 'None', 'so-css'),
-						'inline' => __( 'Inline', 'so-css'),
-						'block' => __( 'Block', 'so-css'),
-						'flex' => __( 'Flex', 'so-css'),
-						'inline-block' => __( 'Inline Block', 'so-css'),
-						'inline-flex' => __( 'Inline Flex', 'so-css'),
-						'inline-table' => __( 'Inline Table', 'so-css'),
-						'list-item' => __( 'List Item', 'so-css'),
-						'run-in' => __( 'Run In', 'so-css'),
-						'table' => __( 'Table', 'so-css'),
-						'table-caption' => __( 'Table Caption', 'so-css'),
-						'table-column-group' => __( 'Table Column Group', 'so-css'),
-						'table-header-group' => __( 'Table Header Group', 'so-css'),
-						'table-footer-group' => __( 'Table Footer Group', 'so-css'),
-						'table-row-group' => __( 'Table Row Group', 'so-css'),
-						'table-cell' => __( 'Table Cell', 'so-css'),
-						'table-column' => __( 'Table Column', 'so-css'),
-						'table-row' => __( 'Table Row', 'so-css'),
+						'none' => esc_html( 'None', 'so-css' ),
+						'inline' => esc_html( 'Inline', 'so-css' ),
+						'block' => esc_html( 'Block', 'so-css' ),
+						'flex' => esc_html( 'Flex', 'so-css' ),
+						'inline-block' => esc_html( 'Inline Block', 'so-css' ),
+						'inline-flex' => esc_html( 'Inline Flex', 'so-css' ),
+						'inline-table' => esc_html( 'Inline Table', 'so-css' ),
+						'list-item' => esc_html( 'List Item', 'so-css' ),
+						'run-in' => esc_html( 'Run In', 'so-css' ),
+						'table' => esc_html( 'Table', 'so-css' ),
+						'table-caption' => esc_html( 'Table Caption', 'so-css' ),
+						'table-column-group' => esc_html( 'Table Column Group', 'so-css' ),
+						'table-header-group' => esc_html( 'Table Header Group', 'so-css' ),
+						'table-footer-group' => esc_html( 'Table Footer Group', 'so-css' ),
+						'table-row-group' => esc_html( 'Table Row Group', 'so-css' ),
+						'table-cell' => esc_html( 'Table Cell', 'so-css' ),
+						'table-column' => esc_html( 'Table Column', 'so-css' ),
+						'table-row' => esc_html( 'Table Row', 'so-css' ),
 					)
 				)
 			),
 			array(
-				'title' => __('Float', 'so-css'),
+				'title' => esc_html( 'Float', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'float',
 					'options' => array(
-						'none' => __( 'None', 'so-css'),
-						'left' => __( 'Left', 'so-css'),
-						'right' => __( 'Right', 'so-css'),
+						'none' => esc_html( 'None', 'so-css' ),
+						'left' => esc_html( 'Left', 'so-css' ),
+						'right' => esc_html( 'Right', 'so-css' ),
 					)
 				)
 			),
 			array(
-				'title' => __('Clear', 'so-css'),
+				'title' => esc_html( 'Clear', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'clear',
 					'options' => array(
-						'none' => __( 'None', 'so-css'),
-						'left' => __( 'Left', 'so-css'),
-						'right' => __( 'Right', 'so-css'),
-						'both' => __( 'Both', 'so-css'),
+						'none' => esc_html( 'None', 'so-css' ),
+						'left' => esc_html( 'Left', 'so-css' ),
+						'right' => esc_html( 'Right', 'so-css' ),
+						'both' => esc_html( 'Both', 'so-css' ),
 					)
 				)
 			),
 			array(
-				'title' => __('Visibility', 'so-css'),
+				'title' => esc_html( 'Visibility', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'visibility',
 					'options' => array(
-						'visible' => __( 'Visible', 'so-css'),
-						'hidden' => __( 'Hidden', 'so-css'),
-						'collapse' => __( 'Collapse', 'so-css'),
+						'visible' => esc_html( 'Visible', 'so-css' ),
+						'hidden' => esc_html( 'Hidden', 'so-css' ),
+						'collapse' => esc_html( 'Collapse', 'so-css' ),
 					)
 				)
 			),
 			array(
-				'title' => __('Overflow', 'so-css'),
+				'title' => esc_html( 'Overflow', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'overflow',
 					'options' => array(
-						'visible' => __( 'Visible', 'so-css'),
-						'hidden' => __( 'Hidden', 'so-css'),
-						'scroll' => __( 'Scroll', 'so-css'),
-						'auto' => __( 'Auto', 'so-css'),
+						'visible' => esc_html( 'Visible', 'so-css' ),
+						'hidden' => esc_html( 'Hidden', 'so-css' ),
+						'scroll' => esc_html( 'Scroll', 'so-css' ),
+						'auto' => esc_html( 'Auto', 'so-css' ),
 					)
 				)
 			),
 			array(
-				'title' => __('Overflow X', 'so-css'),
+				'title' => esc_html( 'Overflow X', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'overflow-x',
 					'options' => array(
-						'visible' => __( 'Visible', 'so-css'),
-						'hidden' => __( 'Hidden', 'so-css'),
-						'scroll' => __( 'Scroll', 'so-css'),
-						'auto' => __( 'Auto', 'so-css'),
+						'visible' => esc_html( 'Visible', 'so-css' ),
+						'hidden' => esc_html( 'Hidden', 'so-css' ),
+						'scroll' => esc_html( 'Scroll', 'so-css' ),
+						'auto' => esc_html( 'Auto', 'so-css' ),
 					)
 				)
 			),
 			array(
-				'title' => __('Overflow Y', 'so-css'),
+				'title' => esc_html( 'Overflow Y', 'so-css' ),
 				'type' => 'select',
 				'args' => array(
 					'property' => 'overflow-y',
 					'options' => array(
-						'visible' => __( 'Visible', 'so-css'),
-						'hidden' => __( 'Hidden', 'so-css'),
-						'scroll' => __( 'Scroll', 'so-css'),
-						'auto' => __( 'Auto', 'so-css'),
+						'visible' => esc_html( 'Visible', 'so-css' ),
+						'hidden' => esc_html( 'Hidden', 'so-css' ),
+						'scroll' => esc_html( 'Scroll', 'so-css' ),
+						'auto' => esc_html( 'Auto', 'so-css' ),
 					)
 				)
 			),
 			array(
-				'title' => __('Z-Index', 'so-css'),
+				'title' => esc_html( 'Z-Index', 'so-css' ),
 				'type' => 'number',
 				'args' => array(
 					'property' => 'z-index',
