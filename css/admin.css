@@ -322,8 +322,10 @@
 }
 #so-custom-css-properties .toolbar select {
   font-size: 13px;
+  height: 28px;
   line-height: 28px;
   max-width: 230px;
+  min-height: 0;
   -webkit-transition: all 0.5s ease;
   -moz-transition: all 0.5s ease;
   -o-transition: all 0.5s ease;
@@ -335,7 +337,7 @@
 #so-custom-css-properties .toolbar .close,
 #so-custom-css-properties .toolbar .save {
   float: right;
-  margin: 2px 4px 0 0;
+  margin-right: 4px;
 }
 #so-custom-css-properties .section-tabs {
   list-style: none;
