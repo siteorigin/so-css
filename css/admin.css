@@ -730,6 +730,9 @@
   user-select: none;
   width: 28px;
 }
+.custom-css-toolbar .socss-button.save,
+#so-custom-css-properties .toolbar .socss-button.save {
+  border-color: transparent;
 }
 .custom-css-toolbar .socss-button:not(.save):hover,
 #so-custom-css-properties .toolbar .socss-button:not(.save):hover {
