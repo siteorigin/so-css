@@ -5,7 +5,7 @@
 
 	<div class="snippet-browser-dialog">
 		<div class="toolbar">
-			<h1><?php _e('CSS Snippets', 'so-css') ?></h1>
+			<h1><?php esc_html_e( 'CSS Snippets', 'so-css' ); ?></h1>
 			<span href="#" class="close">
 				<span class="icon"></span>
 			</span>
@@ -66,7 +66,7 @@
 	<small style="color: #888">
 		<?php
 		printf(
-			__( 'Get a %sGoogle Font%s selector.', 'so-css' ) ,
+			esc_html( 'Get a %sGoogle Font%s selector.', 'so-css' ) ,
 			'<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugin/web-font-selector" target="_blank">',
 			'</a>'
 		);
