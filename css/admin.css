@@ -322,8 +322,10 @@
 }
 #so-custom-css-properties .toolbar select {
   font-size: 13px;
-  line-height: 28px;
+  height: 30px;
+  line-height: 30px;
   max-width: 230px;
+  min-height: 0;
   -webkit-transition: all 0.5s ease;
   -moz-transition: all 0.5s ease;
   -o-transition: all 0.5s ease;
@@ -335,7 +337,7 @@
 #so-custom-css-properties .toolbar .close,
 #so-custom-css-properties .toolbar .save {
   float: right;
-  margin: 2px 4px 0 0;
+  margin-right: 4px;
 }
 #so-custom-css-properties .section-tabs {
   list-style: none;
@@ -709,23 +711,35 @@
 }
 .custom-css-toolbar .socss-button,
 #so-custom-css-properties .toolbar .socss-button {
+  align-items: center;
   border: 1px solid #c0c0c0;
   color: #555;
   cursor: pointer;
+  display: flex;
   float: left;
-  display: inline-block;
   font-size: 0.95em;
   font-weight: bold;
+  justify-content: center;
   line-height: 1em;
   margin-left: 5px;
   min-height: 0;
-  padding: 6px;
   text-decoration: none;
-  -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   -o-user-select: none;
+  -webkit-user-select: none;
   user-select: none;
+}
+.custom-css-toolbar .socss-button:not(.save),
+#so-custom-css-properties .toolbar .socss-button:not(.save) {
+  height: 28px;
+  width: 28px;
+}
+.custom-css-toolbar .socss-button.save,
+#so-custom-css-properties .toolbar .socss-button.save {
+  border: none;
+  height: 30px;
+  width: 30px;
 }
 .custom-css-toolbar .socss-button:not(.save):hover,
 #so-custom-css-properties .toolbar .socss-button:not(.save):hover {
