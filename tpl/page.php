@@ -87,18 +87,18 @@ if ( ! empty( $current_revision ) ) {
 				</div>
 
 				<div class="toolbar-action-buttons">
-					<span class="save socss-button button-primary">
-						<span class="so-css-icon so-css-icon-save"></span>
-					</span>
+					<a href="#expand" class="editor-expand socss-button">
+						<span class="so-css-icon so-css-icon-expand"></span>
+						<span class="so-css-icon so-css-icon-compress"></span>
+					</a>
 
 					<a href="#visual" class="editor-visual socss-button">
 						<span class="so-css-icon so-css-icon-eye"></span>
 					</a>
 
-					<a href="#expand" class="editor-expand socss-button">
-						<span class="so-css-icon so-css-icon-expand"></span>
-						<span class="so-css-icon so-css-icon-compress"></span>
-					</a>
+					<span class="save socss-button button-primary">
+						<span class="so-css-icon so-css-icon-save"></span>
+					</span>
 				</div>
 			</div>
 
