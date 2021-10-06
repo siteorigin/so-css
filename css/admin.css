@@ -322,8 +322,8 @@
 }
 #so-custom-css-properties .toolbar select {
   font-size: 13px;
-  height: 28px;
-  line-height: 28px;
+  height: 30px;
+  line-height: 30px;
   max-width: 230px;
   min-height: 0;
   -webkit-transition: all 0.5s ease;
@@ -719,7 +719,6 @@
   float: left;
   font-size: 0.95em;
   font-weight: bold;
-  height: 28px;
   justify-content: center;
   line-height: 1em;
   margin-left: 5px;
@@ -730,11 +729,16 @@
   -o-user-select: none;
   -webkit-user-select: none;
   user-select: none;
-  width: 28px;
+  width: 30px;
+}
+.custom-css-toolbar .socss-button:not(.save),
+#so-custom-css-properties .toolbar .socss-button:not(.save) {
+  height: 28px;
 }
 .custom-css-toolbar .socss-button.save,
 #so-custom-css-properties .toolbar .socss-button.save {
-  border-color: transparent;
+  border: none;
+  height: 30px;
 }
 .custom-css-toolbar .socss-button:not(.save):hover,
 #so-custom-css-properties .toolbar .socss-button:not(.save):hover {
