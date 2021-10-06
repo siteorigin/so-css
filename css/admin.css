@@ -323,7 +323,7 @@
 #so-custom-css-properties .toolbar select {
   font-size: 13px;
   height: 30px;
-  line-height: 38px;
+  line-height: 30px;
   max-width: 220px;
   min-height: 0;
   -webkit-transition: all 0.5s ease;
@@ -716,7 +716,7 @@
   color: #555;
   cursor: pointer;
   display: flex;
-  float: left;
+  float: right;
   font-size: 0.95em;
   font-weight: bold;
   justify-content: center;
