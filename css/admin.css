@@ -709,23 +709,27 @@
 }
 .custom-css-toolbar .socss-button,
 #so-custom-css-properties .toolbar .socss-button {
+  align-items: center;
   border: 1px solid #c0c0c0;
   color: #555;
   cursor: pointer;
+  display: flex;
   float: left;
-  display: inline-block;
   font-size: 0.95em;
   font-weight: bold;
+  height: 28px;
+  justify-content: center;
   line-height: 1em;
   margin-left: 5px;
   min-height: 0;
-  padding: 6px;
   text-decoration: none;
-  -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   -o-user-select: none;
+  -webkit-user-select: none;
   user-select: none;
+  width: 28px;
+}
 }
 .custom-css-toolbar .socss-button:not(.save):hover,
 #so-custom-css-properties .toolbar .socss-button:not(.save):hover {
