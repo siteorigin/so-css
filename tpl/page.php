@@ -25,7 +25,7 @@ if ( ! empty( $current_revision ) ) {
 
 
 	<?php if( isset($_POST['siteorigin_custom_css']) ) : ?>
-		<div class="notice notice-success"><p><?php _e('Site design updated.', 'so-css') ?></p></div>
+		<div class="notice notice-success"><p><?php esc_html_e( 'Site design updated.', 'so-css' ); ?></p></div>
 	<?php endif; ?>
 
 	<?php if ( ! empty( $current_revision ) ) : ?>
