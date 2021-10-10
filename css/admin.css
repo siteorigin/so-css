@@ -324,12 +324,13 @@
   font-size: 13px;
   height: 30px;
   line-height: 30px;
-  max-width: 220px;
+  max-width: 225px;
   min-height: 0;
   -webkit-transition: all 0.5s ease;
   -moz-transition: all 0.5s ease;
   -o-transition: all 0.5s ease;
   transition: all 0.5s ease;
+  width: 100%;
 }
 #so-custom-css-properties .toolbar select.highlighted {
   background: #daeaf7;
@@ -337,7 +338,6 @@
 #so-custom-css-properties .toolbar .close,
 #so-custom-css-properties .toolbar .save {
   float: right;
-  margin-right: 4px;
 }
 #so-custom-css-properties .section-tabs {
   list-style: none;
@@ -721,7 +721,7 @@
   font-weight: bold;
   justify-content: center;
   line-height: 1em;
-  margin-left: 5px;
+  margin-left: 7px;
   min-height: 0;
   text-decoration: none;
   -moz-user-select: none;
