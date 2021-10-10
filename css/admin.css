@@ -735,12 +735,6 @@
   height: 28px;
   width: 28px;
 }
-.custom-css-toolbar .socss-button.save,
-#so-custom-css-properties .toolbar .socss-button.save {
-  border: none;
-  height: 30px;
-  width: 30px;
-}
 .custom-css-toolbar .socss-button:not(.save):hover,
 #so-custom-css-properties .toolbar .socss-button:not(.save):hover {
   background: #fff;
@@ -759,9 +753,19 @@
 #so-custom-css-properties .toolbar .socss-button .so-css-icon.so-css-icon-save {
   color: #fff;
 }
-.custom-css-toolbar .socss-button.disabled.save .so-css-icon-save,
-#so-custom-css-properties .toolbar .socss-button.disabled.save .so-css-icon-save {
-  color: #555;
+.custom-css-toolbar .socss-button.save,
+#so-custom-css-properties .toolbar .socss-button.save {
+  border-color: #dcdcde;
+  height: 30px;
+  width: 30px;
+}
+.custom-css-toolbar .socss-button.save.button-primary-disabled,
+#so-custom-css-properties .toolbar .socss-button.save.button-primary-disabled {
+  cursor: default;
+}
+.custom-css-toolbar .socss-button.save.button-primary-disabled .so-css-icon-save,
+#so-custom-css-properties .toolbar .socss-button.save.button-primary-disabled .so-css-icon-save {
+  color: #a7aaad;
 }
 body .CodeMirror-lint-tooltip,
 body .CodeMirror-hints {
