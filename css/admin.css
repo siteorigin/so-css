@@ -326,10 +326,6 @@
   line-height: 30px;
   max-width: 225px;
   min-height: 0;
-  -webkit-transition: all 0.5s ease;
-  -moz-transition: all 0.5s ease;
-  -o-transition: all 0.5s ease;
-  transition: all 0.5s ease;
   width: 100%;
 }
 #so-custom-css-properties .toolbar select.highlighted {
