@@ -324,12 +324,9 @@
   font-size: 13px;
   height: 30px;
   line-height: 30px;
-  max-width: 230px;
+  max-width: 225px;
   min-height: 0;
-  -webkit-transition: all 0.5s ease;
-  -moz-transition: all 0.5s ease;
-  -o-transition: all 0.5s ease;
-  transition: all 0.5s ease;
+  width: 100%;
 }
 #so-custom-css-properties .toolbar select.highlighted {
   background: #daeaf7;
@@ -337,7 +334,6 @@
 #so-custom-css-properties .toolbar .close,
 #so-custom-css-properties .toolbar .save {
   float: right;
-  margin-right: 4px;
 }
 #so-custom-css-properties .section-tabs {
   list-style: none;
@@ -716,12 +712,12 @@
   color: #555;
   cursor: pointer;
   display: flex;
-  float: left;
+  float: right;
   font-size: 0.95em;
   font-weight: bold;
   justify-content: center;
   line-height: 1em;
-  margin-left: 5px;
+  margin-left: 7px;
   min-height: 0;
   text-decoration: none;
   -moz-user-select: none;
@@ -734,12 +730,6 @@
 #so-custom-css-properties .toolbar .socss-button:not(.save) {
   height: 28px;
   width: 28px;
-}
-.custom-css-toolbar .socss-button.save,
-#so-custom-css-properties .toolbar .socss-button.save {
-  border: none;
-  height: 30px;
-  width: 30px;
 }
 .custom-css-toolbar .socss-button:not(.save):hover,
 #so-custom-css-properties .toolbar .socss-button:not(.save):hover {
@@ -759,9 +749,19 @@
 #so-custom-css-properties .toolbar .socss-button .so-css-icon.so-css-icon-save {
   color: #fff;
 }
-.custom-css-toolbar .socss-button.disabled.save .so-css-icon-save,
-#so-custom-css-properties .toolbar .socss-button.disabled.save .so-css-icon-save {
-  color: #555;
+.custom-css-toolbar .socss-button.save,
+#so-custom-css-properties .toolbar .socss-button.save {
+  border-color: #dcdcde;
+  height: 30px;
+  width: 30px;
+}
+.custom-css-toolbar .socss-button.save.button-primary-disabled,
+#so-custom-css-properties .toolbar .socss-button.save.button-primary-disabled {
+  cursor: default;
+}
+.custom-css-toolbar .socss-button.save.button-primary-disabled .so-css-icon-save,
+#so-custom-css-properties .toolbar .socss-button.save.button-primary-disabled .so-css-icon-save {
+  color: #a7aaad;
 }
 body .CodeMirror-lint-tooltip,
 body .CodeMirror-hints {

@@ -25,7 +25,7 @@ if ( ! empty( $current_revision ) ) {
 
 
 	<?php if( isset($_POST['siteorigin_custom_css']) ) : ?>
-		<div class="notice notice-success"><p><?php esc_html_e( 'Site design updated.', 'so-css' ); ?></p></div>
+		<div class="notice notice-success"><p><?php _e('Site design updated.', 'so-css') ?></p></div>
 	<?php endif; ?>
 
 	<?php if ( ! empty( $current_revision ) ) : ?>
@@ -87,18 +87,18 @@ if ( ! empty( $current_revision ) ) {
 				</div>
 
 				<div class="toolbar-action-buttons">
-					<span class="save socss-button button-primary" title="<?php esc_attr_e( 'Save CSS', 'so-css' ); ?>">
-						<span class="so-css-icon so-css-icon-save"></span>
-					</span>
+					<a href="#expand" class="editor-expand socss-button">
+						<span class="so-css-icon so-css-icon-expand" title="<?php esc_attr_e( 'Open Expanded Mode', 'so-css' ); ?>"></span>
+						<span class="so-css-icon so-css-icon-compress" title="<?php esc_attr_e( 'Close Expanded Mode', 'so-css' ); ?>"></span>
+					</a>
 
 					<a href="#visual" class="editor-visual socss-button" title="<?php esc_attr_e( 'Open Visual Mode', 'so-css' ); ?>">
 						<span class="so-css-icon so-css-icon-eye"></span>
 					</a>
 
-					<a href="#expand" class="editor-expand socss-button">
-						<span class="so-css-icon so-css-icon-expand" title="<?php esc_attr_e( 'Open Expanded Mode', 'so-css' ); ?>"></span>
-						<span class="so-css-icon so-css-icon-compress" title="<?php esc_attr_e( 'Close Expanded Mode', 'so-css' ); ?>"></span>
-					</a>
+					<span class="save socss-button button-primary" title="<?php esc_attr_e( 'Save CSS', 'so-css' ); ?>">
+						<span class="so-css-icon so-css-icon-save"></span>
+					</span>
 				</div>
 			</div>
 

@@ -776,8 +776,8 @@
 		let saveBtn = $( '#siteorigin-custom-css .save' );
 		var css;
 
-		if ( ! saveBtn.hasClass( 'disabled' ) ) {
-			saveBtn.addClass( 'disabled' )
+		if ( ! saveBtn.hasClass( 'button-primary-disabled' ) ) {
+			saveBtn.addClass( 'button-primary-disabled' )
 
 			// Which view is the user using?
 			if ( typeof view.editor != 'undefined' ) {
@@ -807,7 +807,7 @@
 				alert( error.responseText );
 			} )
 			.always( function () {
-				saveBtn.removeClass( 'disabled' )
+				saveBtn.removeClass( 'button-primary-disabled' )
 			} );
 		}
 	};
