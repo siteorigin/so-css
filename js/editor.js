@@ -47,7 +47,7 @@
 		button: _.template( '<li><a href="#<%= action %>" class="toolbar-button socss-button"><%= text %></a></li>' ),
 		
 		events: {
-			'click .socss-button': 'triggerEvent',
+			'click .socss-button:not(.save)': 'triggerEvent',
 		},
 		
 		triggerEvent: function ( event ) {
@@ -88,6 +88,7 @@
 		events: {
 			'click_expand .custom-css-toolbar': 'toggleExpand',
 			'click_visual .custom-css-toolbar': 'showVisualEditor',
+			'click .socss-button.save': 'save',
 			'submit': 'onSubmit',
 		},
 		
@@ -102,6 +103,10 @@
 				}
 			}.bind( this ) );
 			
+		},
+
+		save: function () {
+			socss.save( this );
 		},
 		
 		getSelectedPostCss: function () {
@@ -766,14 +771,53 @@
 			this.$el.hide();
 		}
 	} );
-	
-	
+
+	socss.save = function ( view ) {
+		let saveBtn = $( '#siteorigin-custom-css .save' );
+		var css;
+
+		if ( ! saveBtn.hasClass( 'button-primary-disabled' ) ) {
+			saveBtn.addClass( 'button-primary-disabled' )
+
+			// Which view is the user using?
+			if ( typeof view.editor != 'undefined' ) {
+				// Visual.
+				css = view.editor.codeMirror.getValue().trim();
+				view.updateMainEditor( true );
+			} else {
+				// Expanded.
+				css = view.codeMirror.getValue().trim();
+			}
+			$.post(
+				socssOptions.ajaxurl,
+				{
+					action: 'socss_save_css',
+					css: css,
+				},
+				null,
+				'html'
+			).done( function ( response ) {
+				if ( response.length ) {
+					// Update was successful. Update revisions list.
+					$( '.custom-revisions-list' ).html( response );
+				}
+			})
+			.fail( function ( error ) {
+				// Something went wrong. Output the error message as an alert.
+				alert( error.responseText );
+			} )
+			.always( function () {
+				saveBtn.removeClass( 'button-primary-disabled' )
+			} );
+		}
+	};
+
 	/**
 	 * The visual properties editor
 	 */
 	socss.view.properties = Backbone.View.extend( {
 		
-		tabTemplate: _.template( '<li data-section="<%- id %>"><span class="fa fa-<%- icon %>"></span> <%- title %></li>' ),
+		tabTemplate: _.template( '<li data-section="<%- id %>"><span class="so-css-icon so-css-icon-<%- icon %>"></span> <%- title %></li>' ),
 		sectionTemplate: _.template( '<div class="section" data-section="<%- id %>"><table class="fields-table"><tbody></tbody></table></div>' ),
 		controllerTemplate: _.template( '<tr><th scope="row"><%- title %></th><td></td></tr>' ),
 		
@@ -809,6 +853,7 @@
 		
 		events: {
 			'click .close': 'hide',
+			'click .save': 'save',
 			'click .section-tabs li': 'onTabClick',
 			'change .toolbar select': 'onToolbarSelectChange',
 		},
@@ -1063,6 +1108,10 @@
 			
 			// Update the main editor with compressed CSS when we close the properties editor
 			this.updateMainEditor( true );
+		},
+
+		save: function () {
+			socss.save( this );
 		},
 		
 		/**
@@ -1324,15 +1373,15 @@
 			var $tc = $( '<div class="select-tabs"></div>' ).appendTo( this.$el );
 			
 			// Add the none value
-			$( '<div class="select-tab" data-value=""><span class="fa fa-circle-o"></span></div>' ).appendTo( $tc );
+			$( '<div class="select-tab" data-value=""><span class="so-css-icon so-css-icon-circle"></span></div>' ).appendTo( $tc );
 			
 			// Now add one for each of the option icons
 			for ( var k in this.args.option_icons ) {
 				$( '<div class="select-tab"></div>' )
 				.appendTo( $tc )
 				.append(
-					$( '<span class="fa"></span>' )
-					.addClass( 'fa-' + this.args.option_icons[ k ] )
+					$( '<span class="so-css-icon"></span>' )
+					.addClass( 'so-css-icon-' + this.args.option_icons[ k ] )
 				)
 				.attr( 'data-value', k )
 				;
@@ -1368,7 +1417,7 @@
 	
 	// A field that lets a user upload an image
 	socss.view.properties.controllers.image = socss.view.propertyController.extend( {
-		template: _.template( '<input type="text" value="" /> <span class="select socss-button"><span class="fa fa-upload"></span></span>' ),
+		template: _.template( '<input type="text" value="" /> <span class="select socss-button"><span class="so-css-icon so-css-icon-upload"></span></span>' ),
 		
 		events: {
 			'click .select': 'openMedia',
@@ -1531,8 +1580,8 @@
 			
 			// Now add the increment/decrement buttons
 			var $diw = $( '<div class="socss-diw"></div>' ).appendTo( this.$el );
-			var $dec = $( '<div class="dec-button socss-button"><span class="fa fa-minus"></span></div>' ).appendTo( $diw );
-			var $inc = $( '<div class="inc-button socss-button"><span class="fa fa-plus"></span></div>' ).appendTo( $diw );
+			var $dec = $( '<div class="dec-button socss-button"><span class="so-css-icon so-css-icon-minus"></span></div>' ).appendTo( $diw );
+			var $inc = $( '<div class="inc-button socss-button"><span class="so-css-icon so-css-icon-plus"></span></div>' ).appendTo( $diw );
 			
 			this.setupStepButton( $dec );
 			this.setupStepButton( $inc );
@@ -1673,8 +1722,8 @@
 			
 			// Now add the increment/decrement buttons
 			var $diw = $( '<div class="socss-diw"></div>' ).appendTo( this.$el );
-			var $dec = $( '<div class="dec-button socss-button"><span class="fa fa-minus"></span></div>' ).appendTo( $diw );
-			var $inc = $( '<div class="inc-button socss-button"><span class="fa fa-plus"></span></div>' ).appendTo( $diw );
+			var $dec = $( '<div class="dec-button socss-button"><span class="so-css-icon so-css-icon-minus"></span></div>' ).appendTo( $diw );
+			var $inc = $( '<div class="inc-button socss-button"><span class="so-css-icon so-css-icon-plus"></span></div>' ).appendTo( $diw );
 			
 			this.setupStepButton( $dec );
 			this.setupStepButton( $inc );

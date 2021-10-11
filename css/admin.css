@@ -1,3 +1,82 @@
+@font-face {
+  font-family: 'SoCSSIcons';
+  src: url('icons/so-css-icons.ttf?joepfs') format('truetype'), url('icons/so-css-icons.woff?joepfs') format('woff'), url('icons/so-css-icons.svg?joepfs#icomoon') format(' svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+.so-css-icon {
+  display: inline-block;
+  font: normal normal normal 14px/1 SoCSSIcons;
+  font-size: inherit;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transform: translate(0, 0);
+}
+.so-css-icon-compress:before {
+  content: "\f066";
+}
+.so-css-icon-plus:before {
+  content: "\f067";
+}
+.so-css-icon-minus:before {
+  content: "\f068";
+}
+.so-css-icon-check:before {
+  content: "\f00c";
+}
+.so-css-icon-font:before {
+  content: "\f031";
+}
+.so-css-icon-bold:before {
+  content: "\f032";
+}
+.so-css-icon-italic:before {
+  content: "\f033";
+}
+.so-css-icon-align-left:before {
+  content: "\f036";
+}
+.so-css-icon-align-center:before {
+  content: "\f037";
+}
+.so-css-icon-align-right:before {
+  content: "\f038";
+}
+.so-css-icon-align-justify:before {
+  content: "\f039";
+}
+.so-css-icon-expand:before {
+  content: "\f065";
+}
+.so-css-icon-compress:before {
+  content: "\f066";
+}
+.so-css-icon-eye:before {
+  content: "\f06e";
+}
+.so-css-icon-upload:before {
+  content: "\f093";
+}
+.so-css-icon-save:before {
+  content: "\e900";
+}
+.so-css-icon-strikethrough:before {
+  content: "\f0cc";
+}
+.so-css-icon-underline:before {
+  content: "\f0cd";
+}
+.so-css-icon-columns:before {
+  content: "\f0db";
+}
+.so-css-icon-circle:before {
+  content: "\f10c";
+}
+.so-css-icon-eyedropper:before {
+  content: "\f1fb";
+}
 #siteorigin-custom-css {
   color: #333;
   margin: 0 0 0 -20px;
@@ -111,10 +190,10 @@
   text-decoration: none;
   color: #666;
 }
-#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .fa-compress {
+#so-custom-css-form .custom-css-toolbar .toolbar-action-buttons .editor-expand .so-css-icon-compress {
   display: none;
 }
-#so-custom-css-form .custom-css-toolbar .fa {
+#so-custom-css-form .custom-css-toolbar .so-css-icon {
   font-size: 14px;
 }
 #so-custom-css-form .custom-css-container {
@@ -147,6 +226,9 @@
 #so-custom-css-form .decoration {
   display: none;
 }
+#so-custom-css-form:not(.expanded) .save.socss-button {
+  display: none;
+}
 #so-custom-css-form.expanded {
   z-index: 100000;
   position: fixed;
@@ -155,10 +237,10 @@
   bottom: 0;
   width: 340px;
 }
-#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .fa-expand {
+#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .so-css-icon-expand {
   display: none;
 }
-#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .fa-compress {
+#so-custom-css-form.expanded .custom-css-toolbar .editor-expand .so-css-icon-compress {
   display: inline-block;
 }
 #so-custom-css-form.expanded .decoration {
@@ -239,20 +321,19 @@
   text-align: left;
 }
 #so-custom-css-properties .toolbar select {
-  line-height: 1;
   font-size: 13px;
-  max-width: 265px;
-  -webkit-transition: all 0.5s ease;
-  -moz-transition: all 0.5s ease;
-  -o-transition: all 0.5s ease;
-  transition: all 0.5s ease;
+  height: 30px;
+  line-height: 30px;
+  max-width: 225px;
+  min-height: 0;
+  width: 100%;
 }
 #so-custom-css-properties .toolbar select.highlighted {
   background: #daeaf7;
 }
-#so-custom-css-properties .toolbar .close {
+#so-custom-css-properties .toolbar .close,
+#so-custom-css-properties .toolbar .save {
   float: right;
-  margin: 2px 4px 0 0;
 }
 #so-custom-css-properties .section-tabs {
   list-style: none;
@@ -280,7 +361,7 @@
 #so-custom-css-properties .section-tabs li:hover {
   background: #fff;
 }
-#so-custom-css-properties .section-tabs li .fa {
+#so-custom-css-properties .section-tabs li .so-css-icon {
   float: left;
   display: block;
   margin: -1px 6px -1px 0;
@@ -294,7 +375,7 @@
   color: #444;
   background: #e8e8e8;
 }
-#so-custom-css-properties .section-tabs li.active .fa {
+#so-custom-css-properties .section-tabs li.active .so-css-icon {
   color: #333;
 }
 #so-custom-css-properties .sections .section {
@@ -378,7 +459,7 @@
   border-right-width: 0;
   background: #f7f7f7;
 }
-#so-custom-css-properties .sections .fields-table .select-tabs .select-tab .fa {
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab .so-css-icon {
   line-height: 14px;
   font-size: 14px;
   color: #777;
@@ -390,8 +471,8 @@
 #so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active {
   background: #e9e9e9;
 }
-#so-custom-css-properties .sections .fields-table .select-tabs .select-tab:hover .fa,
-#so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active .fa {
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab:hover .so-css-icon,
+#so-custom-css-properties .sections .fields-table .select-tabs .select-tab.active .so-css-icon {
   color: #333;
 }
 #so-custom-css-properties .sections .fields-table .side-tabs {
@@ -616,39 +697,71 @@
   margin: 0;
   width: 30px;
   height: 30px;
+}
+.socss-diw .inc-button .so-css-icon,
+.socss-diw .dec-button .so-css-icon {
   font-size: 10px;
 }
 .socss-diw .inc-button {
   border-left: 0;
 }
-.socss-button {
-  cursor: pointer;
-  line-height: 1em;
-  display: inline-block;
+.custom-css-toolbar .socss-button,
+#so-custom-css-properties .toolbar .socss-button {
+  align-items: center;
   border: 1px solid #c0c0c0;
-  background: #f7f7f7;
-  text-decoration: none;
-  padding: 6px;
-  font-weight: bold;
   color: #555;
+  cursor: pointer;
+  display: flex;
+  float: right;
   font-size: 0.95em;
-  margin-left: 5px;
-  -webkit-user-select: none;
+  font-weight: bold;
+  justify-content: center;
+  line-height: 1em;
+  margin-left: 7px;
+  min-height: 0;
+  text-decoration: none;
   -moz-user-select: none;
   -ms-user-select: none;
   -o-user-select: none;
+  -webkit-user-select: none;
   user-select: none;
 }
-.socss-button:hover {
-  border-color: #b0b0b0;
+.custom-css-toolbar .socss-button:not(.save),
+#so-custom-css-properties .toolbar .socss-button:not(.save) {
+  height: 28px;
+  width: 28px;
+}
+.custom-css-toolbar .socss-button:not(.save):hover,
+#so-custom-css-properties .toolbar .socss-button:not(.save):hover {
   background: #fff;
+  border-color: #b0b0b0;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
-.socss-button:hover .fa {
+.custom-css-toolbar .socss-button:not(.save):hover .so-css-icon,
+#so-custom-css-properties .toolbar .socss-button:not(.save):hover .so-css-icon {
   color: #333;
 }
-.socss-button .fa {
+.custom-css-toolbar .socss-button .so-css-icon,
+#so-custom-css-properties .toolbar .socss-button .so-css-icon {
   color: #555;
+}
+.custom-css-toolbar .socss-button .so-css-icon.so-css-icon-save,
+#so-custom-css-properties .toolbar .socss-button .so-css-icon.so-css-icon-save {
+  color: #fff;
+}
+.custom-css-toolbar .socss-button.save,
+#so-custom-css-properties .toolbar .socss-button.save {
+  border-color: #dcdcde;
+  height: 30px;
+  width: 30px;
+}
+.custom-css-toolbar .socss-button.save.button-primary-disabled,
+#so-custom-css-properties .toolbar .socss-button.save.button-primary-disabled {
+  cursor: default;
+}
+.custom-css-toolbar .socss-button.save.button-primary-disabled .so-css-icon-save,
+#so-custom-css-properties .toolbar .socss-button.save.button-primary-disabled .so-css-icon-save {
+  color: #a7aaad;
 }
 body .CodeMirror-lint-tooltip,
 body .CodeMirror-hints {
