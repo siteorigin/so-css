@@ -71,6 +71,11 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.4.0 - 11 October 2021 =
+* Added Ajax saving. Users can now save in the expanded and visual editors without exiting to basic editor.
+* Expanded/Visual toolbar buttons re-ordered for consistency between modes.
+* Removed Font Awesome. Icons are now added via a custom font.
+
 = 1.3.2 - 20 July 2021 =
 * Updated `Tested up to` tag.
 
