@@ -72,7 +72,7 @@
             // Setup the click event
             var wcCheck = $( '.single-product' ).length;
             $('body *').on( 'click', function( e ) {
-                if ( ! thisView.active || thisView.$el[0] == e.target ) {
+                if ( ! thisView.active || $( e.target ).parent( '.socss-link' ).length ) {
                     return true;
                 }
 
