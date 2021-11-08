@@ -71,6 +71,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.4.2 - 08 November 2021 =
+* Fixed string translation functions.
+
 = 1.4.1 - 02 November 2021 =
 * Removed Save button rounding.
 * Fixed Visual Editor `Navigate To` link functionality.
