@@ -445,30 +445,30 @@ class SiteOrigin_CSS {
 		$theme = filter_input( INPUT_GET, 'theme' );
 		$time = filter_input( INPUT_GET, 'time', FILTER_VALIDATE_INT );
 		
-		$page_title = __( 'SiteOrigin CSS', 'so-css' );
+		$page_title = esc_html__( 'SiteOrigin CSS', 'so-css' );
 		$theme_obj = wp_get_theme();
 		$theme_name = $theme_obj->get( 'Name' );
 		$editor_description = sprintf( esc_html__( 'Changes apply to %s and its child themes', 'so-css' ), $theme_name );
-		$save_button_label = __( 'Save CSS', 'so-css' );
+		$save_button_label = esc_html__( 'Save CSS', 'so-css' );
 		$form_save_url = admin_url( 'themes.php?page=so_custom_css' );
 		
 		if ( ! empty( $socss_post_id ) ) {
 			$selected_post = get_post( $socss_post_id );
 			
 			$page_title = sprintf(
-				__( 'Editing CSS for: %s', 'so-css' ),
+				esc_html__( 'Editing CSS for: %s', 'so-css' ),
 				$selected_post->post_title
 			);
 			
 			$editor_description = sprintf(
-				__( 'Changes apply to the %s %s when the current theme is %s or its child themes', 'so-css' ),
+				esc_html__( 'Changes apply to the %s %s when the current theme is %s or its child themes', 'so-css' ),
 				$selected_post->post_type,
 				$selected_post->post_title,
 				$theme_name
 				);
 			$post_type_obj = get_post_type_object( $selected_post->post_type );
 			$post_type_labels = $post_type_obj->labels;
-			$save_button_label = sprintf( __( 'Save %s CSS', 'so-css' ), $post_type_labels->singular_name );
+			$save_button_label = sprintf( esc_html__( 'Save %s CSS', 'so-css' ), $post_type_labels->singular_name );
 			$form_save_url = add_query_arg( 'socss_post_id', urlencode( $socss_post_id ), $form_save_url );
 		}
 		$custom_css = $this->get_custom_css( $this->theme, $socss_post_id );
@@ -481,7 +481,7 @@ class SiteOrigin_CSS {
 		}
 		
 		if ( ! empty ( $current_revision ) ) {
-			$save_button_label = __( 'Revert to this revision', 'so-css' );
+			$save_button_label = esc_html__( 'Revert to this revision', 'so-css' );
 		}
 		
 		if ( ! empty( $custom_css_revisions ) ) {
@@ -621,7 +621,7 @@ class SiteOrigin_CSS {
 					<?php if ( ! $is_current ) : ?>
 					</a>
 					<?php endif; ?>
-					(<?php printf( __('%d chars', 'so-css'), strlen( $css ) ) ?>)<?php if ( $i == 0 ) : ?> (<?php _e( 'Latest', 'so-css' ) ?>)<?php endif; ?>
+					(<?php printf( __('%d chars', 'so-css'), strlen( $css ) ) ?>)<?php if ( $i == 0 ) : ?> (<?php esc_html_e( 'Latest', 'so-css' ); ?>)<?php endif; ?>
 				</li>
 				<?php
 				$i++;
