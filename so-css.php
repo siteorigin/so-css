@@ -261,7 +261,7 @@ class SiteOrigin_CSS {
 	 * Action to run on the admin action.
 	 */
 	function action_admin_menu() {
-		add_theme_page( esc_html( 'Custom CSS', 'so-css' ), esc_html( 'Custom CSS', 'so-css' ), 'edit_theme_options', 'so_custom_css', array(
+		add_theme_page( esc_html__( 'Custom CSS', 'so-css' ), esc_html__( 'Custom CSS', 'so-css' ), 'edit_theme_options', 'so_custom_css', array(
 			$this,
 			'display_admin_page'
 		) );
@@ -292,10 +292,10 @@ class SiteOrigin_CSS {
 		$screen = get_current_screen();
 		$screen->add_help_tab( array(
 			'id'      => 'custom-css',
-			'title'   => esc_html( 'Custom CSS', 'so-css' ),
+			'title'   => esc_html__( 'Custom CSS', 'so-css' ),
 			'content' => '<p>'
-						 . sprintf( esc_html( "SiteOrigin CSS adds any custom CSS you enter here into your site's header. ", 'so-css' ) )
-						 . esc_html( "These changes will persist across updates so it's best to make all your changes here. ", 'so-css' )
+						 . sprintf( esc_html__( "SiteOrigin CSS adds any custom CSS you enter here into your site's header. ", 'so-css' ) )
+						 . esc_html__( "These changes will persist across updates so it's best to make all your changes here. ", 'so-css' )
 						 . '</p>'
 		) );
 	}
@@ -359,10 +359,10 @@ class SiteOrigin_CSS {
 			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() ),
 			
 			'loc' => array(
-				'unchanged'    => esc_html( 'Unchanged', 'so-css' ),
-				'select'       => esc_html( 'Select', 'so-css' ),
-				'select_image' => esc_html( 'Select Image', 'so-css' ),
-				'leave'        => esc_html( 'Are you sure you want to leave without saving?', 'so-css' ),
+				'unchanged'    => esc_html__( 'Unchanged', 'so-css' ),
+				'select'       => esc_html__( 'Select', 'so-css' ),
+				'select_image' => esc_html__( 'Select Image', 'so-css' ),
+				'leave'        => esc_html__( 'Are you sure you want to leave without saving?', 'so-css' ),
 			)
 		) );
 		
@@ -431,10 +431,10 @@ class SiteOrigin_CSS {
 		if ( isset( $links['edit'] ) ) {
 			unset( $links['edit'] );
 		}
-		$links['css_editor'] = '<a href="' . admin_url( 'themes.php?page=so_custom_css' ) . '">' . esc_html( 'CSS Editor', 'so-css' ) . '</a>';
-		$links['support'] = '<a href="https://siteorigin.com/thread/" target="_blank">' . esc_html( 'Support', 'so-css' ) . '</a>';
+		$links['css_editor'] = '<a href="' . admin_url( 'themes.php?page=so_custom_css' ) . '">' . esc_html__( 'CSS Editor', 'so-css' ) . '</a>';
+		$links['support'] = '<a href="https://siteorigin.com/thread/" target="_blank">' . esc_html__( 'Support', 'so-css' ) . '</a>';
 		if ( apply_filters( 'siteorigin_premium_upgrade_teaser', true ) && ! defined( 'SITEORIGIN_PREMIUM_VERSION' ) ) {
-			$links['addons'] = '<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugin/web-font-selector" style="color: #3db634" target="_blank" rel="noopener noreferrer">' . esc_html( 'Addons', 'so-css' ) . '</a>';
+			$links['addons'] = '<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugin/web-font-selector" style="color: #3db634" target="_blank" rel="noopener noreferrer">' . esc_html__( 'Addons', 'so-css' ) . '</a>';
 		}
 		return $links;
 	}
@@ -448,7 +448,7 @@ class SiteOrigin_CSS {
 		$page_title = __( 'SiteOrigin CSS', 'so-css' );
 		$theme_obj = wp_get_theme();
 		$theme_name = $theme_obj->get( 'Name' );
-		$editor_description = sprintf( esc_html( 'Changes apply to %s and its child themes', 'so-css' ), $theme_name );
+		$editor_description = sprintf( esc_html__( 'Changes apply to %s and its child themes', 'so-css' ), $theme_name );
 		$save_button_label = __( 'Save CSS', 'so-css' );
 		$form_save_url = admin_url( 'themes.php?page=so_custom_css' );
 		
@@ -534,8 +534,8 @@ class SiteOrigin_CSS {
 	function admin_action_get_post_css() {
 		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'get_post_css' ) ) {
 			wp_die(
-				esc_html( 'The supplied nonce is invalid.', 'so-css' ),
-				esc_html( 'Invalid nonce.', 'so-css' ),
+				esc_html__( 'The supplied nonce is invalid.', 'so-css' ),
+				esc_html__( 'Invalid nonce.', 'so-css' ),
 				403
 			);
 		}
@@ -555,8 +555,8 @@ class SiteOrigin_CSS {
 	function admin_action_get_revisions_list() {
 		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'get_revisions_list' ) ) {
 			wp_die(
-				esc_html( 'The supplied nonce is invalid.', 'so-css' ),
-				esc_html( 'Invalid nonce.', 'so-css' ),
+				esc_html__( 'The supplied nonce is invalid.', 'so-css' ),
+				esc_html__( 'Invalid nonce.', 'so-css' ),
 				403
 			);
 		}
@@ -574,8 +574,8 @@ class SiteOrigin_CSS {
 	function admin_action_save_css() {
 		if ( ! isset( $_GET['_wpnonce'] ) || ! wp_verify_nonce( $_GET['_wpnonce'], 'so-css-ajax' ) ) {
 			wp_die(
-				esc_html( 'The supplied nonce is invalid.', 'so-css' ),
-				esc_html( 'Invalid nonce.', 'so-css' ),
+				esc_html__( 'The supplied nonce is invalid.', 'so-css' ),
+				esc_html__( 'Invalid nonce.', 'so-css' ),
 				403
 			);
 		}
@@ -627,7 +627,7 @@ class SiteOrigin_CSS {
 				$i++;
 			}
 		} else {
-			printf( '<em>%s</em>', esc_html( 'No revisions yet.', 'so-css' ) );
+			printf( '<em>%s</em>', esc_html__( 'No revisions yet.', 'so-css' ) );
 		}
 	}
 	

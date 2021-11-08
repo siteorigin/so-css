@@ -2,7 +2,7 @@
 
 return array (
 	'text' => array(
-		'title' => esc_html( 'Text', 'so-css' ),
+		'title' => esc_html__( 'Text', 'so-css' ),
 		'icon' => 'align-left',
 		'controllers' => array(
 			array(
