@@ -621,7 +621,7 @@ class SiteOrigin_CSS {
 					<?php if ( ! $is_current ) : ?>
 					</a>
 					<?php endif; ?>
-					(<?php printf( __('%d chars', 'so-css'), strlen( $css ) ) ?>)<?php if ( $i == 0 ) : ?> (<?php esc_html_e( 'Latest', 'so-css' ); ?>)<?php endif; ?>
+					(<?php printf( esc_html__( '%d chars', 'so-css' ), strlen( $css ) ) ?>)<?php if ( $i == 0 ) : ?> (<?php esc_html_e( 'Latest', 'so-css' ); ?>)<?php endif; ?>
 				</li>
 				<?php
 				$i++;
