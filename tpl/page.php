@@ -106,7 +106,12 @@ if ( ! empty( $current_revision ) ) {
 				<textarea name="siteorigin_custom_css" id="custom-css-textarea" class="css-editor" rows="<?php echo max( 10, substr_count( $custom_css, "\n" ) + 1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
 				<?php wp_nonce_field( 'custom_css', '_sononce' ) ?>
 			</div>
-			<p class="description"><?php esc_html_e( $editor_description ) ?></p>
+			<div class="so-css-footer">
+				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( $save_button_label ); ?>" />
+				<p class="description">
+					<?php esc_html_e( $editor_description ); ?>
+				</p>
+			</div>
 
 			<div class="custom-css-preview">
 

@@ -223,6 +223,18 @@
   border-left: 1px solid #ddd;
   margin-left: 16px;
 }
+#so-custom-css-form .so-css-footer {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+@media (max-width: 800px) {
+  #so-custom-css-form .so-css-footer {
+    flex-direction: column-reverse;
+    align-items: start;
+  }
+}
 #so-custom-css-form .decoration {
   display: none;
 }
