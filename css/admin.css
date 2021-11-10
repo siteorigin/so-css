@@ -231,8 +231,8 @@
 }
 @media (max-width: 800px) {
   #so-custom-css-form .so-css-footer {
-    flex-direction: column-reverse;
     align-items: start;
+    flex-direction: column-reverse;
   }
 }
 #so-custom-css-form .decoration {
