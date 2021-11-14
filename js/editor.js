@@ -398,10 +398,10 @@
 					areaHeight = 300;
 				}
 
-				this.$el.find( '.CodeMirror-scroll' ).css( 'min-height', areaHeight + 'px' );
 				this.codeMirror.setSize( '100%', 'auto' );
+				this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', areaHeight + 'px' );
 			}
-			this.$el.find( '.CodeMirror-code' ).css( 'min-height', areaHeight + 'px' );
+			this.$el.find( '.CodeMirror-code' ).css( 'max-height', areaHeight + 'px' );
 		},
 		
 		/**
