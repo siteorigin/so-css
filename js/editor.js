@@ -389,7 +389,7 @@
 				var otherEltsHeight = $( '#wpadminbar' ).outerHeight( true ) +
 					$( '#siteorigin-custom-css' ).find( '> h2' ).outerHeight( true ) +
 					$form.find( '> .custom-css-toolbar' ).outerHeight( true ) +
-					$form.find( '> p.description' ).outerHeight( true ) +
+					$form.find( '> .so-css-footer' ).outerHeight( true ) +
 					parseFloat( $( '#wpbody-content' ).css( 'padding-bottom' ) );
 
 				areaHeight = windowHeight - otherEltsHeight;
