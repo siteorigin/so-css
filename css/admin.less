@@ -272,7 +272,10 @@
 		}
 
 		.CodeMirror-scroll {
+			margin: 0;
 			min-height: 300px;
+			overflow-x: hidden !important; // important required due to CodeMirror styling.
+			padding: 0;
 		}
 
 		.CodeMirror-lines {

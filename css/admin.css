@@ -206,7 +206,10 @@
   height: auto;
 }
 #so-custom-css-form .custom-css-container .CodeMirror-scroll {
+  margin: 0;
   min-height: 300px;
+  overflow-x: hidden !important;
+  padding: 0;
 }
 #so-custom-css-form .custom-css-container .CodeMirror-lines {
   padding: 8px 0 8px 0;
