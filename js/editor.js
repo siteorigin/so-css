@@ -375,7 +375,7 @@
 		 * Scale the size of the editor depending on whether it's expanded or not
 		 */
 		scaleEditor: function () {
-			var windowHeight = $( window ).outerHeight();
+			var windowHeight = $( window ).outerHeight() * 2;
 			var areaHeight;
 			if ( this.$el.hasClass( 'expanded' ) ) {
 				// If we're in the expanded view, then resize the editor
