@@ -382,6 +382,7 @@
 				this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', '' );
 				areaHeight = windowHeight - this.$( '.custom-css-toolbar' ).outerHeight();
 				this.codeMirror.setSize( '100%', areaHeight );
+				this.$el.find( '.CodeMirror-scroll' ).css( 'height', '100%' );
 			}
 			else {
 				// Attempt to calculate approximate space available for editor when not expanded.
@@ -399,9 +400,9 @@
 				}
 
 				this.codeMirror.setSize( '100%', 'auto' );
-				this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', areaHeight + 'px' );
+				this.$el.find( '.CodeMirror-scroll' ).css( 'height', areaHeight + 'px' );
 			}
-			this.$el.find( '.CodeMirror-code' ).css( 'max-height', areaHeight + 'px' );
+			this.$el.find( '.CodeMirror-code' ).css( 'height', areaHeight + 'px' );
 		},
 		
 		/**
