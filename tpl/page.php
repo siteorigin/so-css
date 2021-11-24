@@ -107,7 +107,6 @@ if ( ! empty( $current_revision ) ) {
 				<?php wp_nonce_field( 'custom_css', '_sononce' ) ?>
 			</div>
 			<div class="so-css-footer">
-				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( $save_button_label ); ?>" />
 				<p class="description">
 					<?php esc_html_e( $editor_description ); ?>
 				</p>
