@@ -272,7 +272,10 @@
 		}
 
 		.CodeMirror-scroll {
+			margin: 0;
 			min-height: 300px;
+			overflow-x: hidden !important; // important required due to CodeMirror styling.
+			padding: 0;
 		}
 
 		.CodeMirror-lines {
@@ -290,6 +293,18 @@
 			line-height: 1.4em;
 			border-left: 1px solid #ddd;
 			margin-left: 16px;
+		}
+	}
+
+	.so-css-footer {
+		align-items: center;
+		display: flex;
+		justify-content: space-between;
+		margin-top: 10px;
+
+		@media (max-width: 800px) {
+			align-items: start;
+			flex-direction: column-reverse;
 		}
 	}
 

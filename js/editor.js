@@ -382,6 +382,7 @@
 				this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', '' );
 				areaHeight = windowHeight - this.$( '.custom-css-toolbar' ).outerHeight();
 				this.codeMirror.setSize( '100%', areaHeight );
+				this.$el.find( '.CodeMirror-scroll' ).css( 'height', '100%' );
 			}
 			else {
 				// Attempt to calculate approximate space available for editor when not expanded.
@@ -389,7 +390,7 @@
 				var otherEltsHeight = $( '#wpadminbar' ).outerHeight( true ) +
 					$( '#siteorigin-custom-css' ).find( '> h2' ).outerHeight( true ) +
 					$form.find( '> .custom-css-toolbar' ).outerHeight( true ) +
-					$form.find( '> p.description' ).outerHeight( true ) +
+					$form.find( '> .so-css-footer' ).outerHeight( true ) +
 					parseFloat( $( '#wpbody-content' ).css( 'padding-bottom' ) );
 
 				areaHeight = windowHeight - otherEltsHeight;
@@ -398,10 +399,10 @@
 					areaHeight = 300;
 				}
 
-				this.$el.find( '.CodeMirror-scroll' ).css( 'min-height', areaHeight + 'px' );
 				this.codeMirror.setSize( '100%', 'auto' );
+				this.$el.find( '.CodeMirror-scroll' ).css( 'height', areaHeight + 'px' );
 			}
-			this.$el.find( '.CodeMirror-code' ).css( 'min-height', areaHeight + 'px' );
+			this.$el.find( '.CodeMirror-code' ).css( 'height', areaHeight + 'px' );
 		},
 		
 		/**

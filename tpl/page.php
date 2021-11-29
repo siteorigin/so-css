@@ -44,7 +44,7 @@ if ( ! empty( $current_revision ) ) {
 				<div class="postbox">
 					<h3 class="hndle"><span><?php esc_html_e( 'Get The Full Experience', 'so-css' ); ?></span></h3>
 					<div class="inside">
-						<?php printf( esc_html__( '%sSiteOrigin Premium%s adds a <strong>Google Web Font</strong> selector to SiteOrigin CSS so you can easily change any font.', 'so-css' ) , '<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugin/web-font-selector" target="_blank">', '</a>' ); ?>
+						<?php printf( wp_kses_post( __( '%sSiteOrigin Premium%s adds a <strong>Google Web Font</strong> selector to SiteOrigin CSS so you can easily change any font.', 'so-css' ) ), '<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugin/web-font-selector" target="_blank">', '</a>' ); ?>
 					</div>
 				</div>
 			<?php endif; ?>
@@ -106,7 +106,11 @@ if ( ! empty( $current_revision ) ) {
 				<textarea name="siteorigin_custom_css" id="custom-css-textarea" class="css-editor" rows="<?php echo max( 10, substr_count( $custom_css, "\n" ) + 1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
 				<?php wp_nonce_field( 'custom_css', '_sononce' ) ?>
 			</div>
-			<p class="description"><?php esc_html_e( $editor_description ) ?></p>
+			<div class="so-css-footer">
+				<p class="description">
+					<?php esc_html_e( $editor_description ); ?>
+				</p>
+			</div>
 
 			<div class="custom-css-preview">
 
