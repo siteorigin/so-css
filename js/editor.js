@@ -213,7 +213,7 @@
 			}
 
 			var editor = this.codeMirror;
-			$( '#css_editor_theme' ).on( 'change', function() {
+			$( '#so_css_editor_theme' ).on( 'change', function() {
 				if ( $( this ).val() == 1 ) {
 					editor.setOption( 'theme', 'neat' );
 				} else {
