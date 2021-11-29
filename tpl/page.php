@@ -35,111 +35,124 @@ if ( ! empty( $current_revision ) ) {
 	<?php endif; ?>
 
 	<div id="poststuff">
-		<div id="so-custom-css-info">
-			<p class="so-custom-css-submit">
-				<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( $save_button_label ); ?>" />
-			</p>
+		<form action="<?php echo esc_url( $form_save_url ) ?>" method="POST">
 
-			<?php if( $this->display_teaser() ) : ?>
-				<div class="postbox">
-					<h3 class="hndle"><span><?php esc_html_e( 'Get The Full Experience', 'so-css' ); ?></span></h3>
-					<div class="inside">
-						<?php printf( wp_kses_post( __( '%sSiteOrigin Premium%s adds a <strong>Google Web Font</strong> selector to SiteOrigin CSS so you can easily change any font.', 'so-css' ) ), '<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugin/web-font-selector" target="_blank">', '</a>' ); ?>
-					</div>
-				</div>
-			<?php endif; ?>
-
-			<?php if( !get_user_meta( $user->ID, 'socss_hide_gs' ) ) : ?>
-				<div class="postbox" id="so-custom-css-getting-started">
-					<h3 class="hndle">
-						<span><?php esc_html_e( 'Getting Started Video', 'so-css' ); ?></span>
-						<a href="<?php echo wp_nonce_url( admin_url('admin-ajax.php?action=socss_hide_getting_started'), 'hide' ) ?>" class="hide"><?php esc_html_e( 'Dismiss', 'so-css' ); ?></a>
-					</h3>
-					<div class="inside">
-						<a href="https://siteorigin.com/css/getting-started/" target="_blank"><img src="<?php echo plugin_dir_url(__FILE__).'../css/images/video.jpg' ?>" /></a>
-					</div>
-				</div>
-			<?php endif; ?>
-
-			<div class="postbox" id="so-custom-css-revisions">
-				<h3 class="hndle"><span><?php esc_html_e( 'CSS Revisions', 'so-css' ); ?></span></h3>
-				<div class="inside">
-					<ol class="custom-revisions-list" data-confirm="<?php esc_attr_e('Are you sure you want to load this revision?', 'so-css') ?>">
-						<?php
-						$this->custom_css_revisions_list( $theme, $socss_post_id, $current_revision );
-						?>
-					</ol>
-				</div>
-			</div>
-
-		</div>
-
-		<form action="<?php echo esc_url( $form_save_url ) ?>" method="POST" id="so-custom-css-form">
-
-			<div class="custom-css-toolbar">
-				<div class="toolbar-function-buttons">
-					<div class="toolbar-functions-dropdown">
-						<span class="dashicons dashicons-menu"></span>
-					</div>
-					
-					<ul class="toolbar-buttons">
-					</ul>
-				</div>
-
-				<div class="toolbar-action-buttons">
-					<a href="#expand" class="editor-expand socss-button">
-						<span class="so-css-icon so-css-icon-expand" title="<?php esc_attr_e( 'Open Expanded Mode', 'so-css' ); ?>"></span>
-						<span class="so-css-icon so-css-icon-compress" title="<?php esc_attr_e( 'Close Expanded Mode', 'so-css' ); ?>"></span>
-					</a>
-
-					<a href="#visual" class="editor-visual socss-button" title="<?php esc_attr_e( 'Open Visual Mode', 'so-css' ); ?>">
-						<span class="so-css-icon so-css-icon-eye"></span>
-					</a>
-
-					<span class="save socss-button button-primary" title="<?php esc_attr_e( 'Save CSS', 'so-css' ); ?>">
-						<span class="so-css-icon so-css-icon-save"></span>
-					</span>
-				</div>
-			</div>
-
-			<div class="custom-css-container">
-				<textarea name="siteorigin_custom_css" id="custom-css-textarea" class="css-editor" rows="<?php echo max( 10, substr_count( $custom_css, "\n" ) + 1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
-				<?php wp_nonce_field( 'custom_css', '_sononce' ) ?>
-			</div>
-			<div class="so-css-footer">
-				<p class="description">
-					<?php esc_html_e( $editor_description ); ?>
+			<div id="so-custom-css-info">
+				<p class="so-custom-css-submit">
+					<input type="submit" name="siteorigin_custom_css_save" class="button-primary" value="<?php esc_attr_e( $save_button_label ); ?>" />
 				</p>
+
+				<?php if ( $this->display_teaser() ) : ?>
+					<div class="postbox">
+						<h3 class="hndle"><span><?php esc_html_e( 'Get The Full Experience', 'so-css' ); ?></span></h3>
+						<div class="inside">
+							<?php printf( wp_kses_post( __( '%sSiteOrigin Premium%s adds a <strong>Google Web Font</strong> selector to SiteOrigin CSS so you can easily change any font.', 'so-css' ) ), '<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugin/web-font-selector" target="_blank">', '</a>' ); ?>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<?php if ( ! get_user_meta( $user->ID, 'socss_hide_gs' ) ) : ?>
+					<div class="postbox" id="so-custom-css-getting-started">
+						<h3 class="hndle">
+							<span><?php esc_html_e( 'Getting Started Video', 'so-css' ); ?></span>
+							<a href="<?php echo wp_nonce_url( admin_url('admin-ajax.php?action=socss_hide_getting_started'), 'hide' ) ?>" class="hide"><?php esc_html_e( 'Dismiss', 'so-css' ); ?></a>
+						</h3>
+						<div class="inside">
+							<a href="https://siteorigin.com/css/getting-started/" target="_blank"><img src="<?php echo plugin_dir_url(__FILE__).'../css/images/video.jpg' ?>" /></a>
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<div class="postbox" id="so-custom-css-revisions">
+					<h3 class="hndle"><span><?php esc_html_e( 'CSS Revisions', 'so-css' ); ?></span></h3>
+					<div class="inside">
+						<ol class="custom-revisions-list" data-confirm="<?php esc_attr_e( 'Are you sure you want to load this revision?', 'so-css' ); ?>">
+							<?php
+							$this->custom_css_revisions_list( $theme, $socss_post_id, $current_revision );
+							?>
+						</ol>
+					</div>
+				</div>
+
+				<div class="postbox" id="so-custom-css-editor-theme">
+					<h3 class="hndle"><span><?php esc_html_e( 'Editor Theme', 'so-css' ); ?></span></h3>
+					<div class="inside">
+						<select name="so_css_editor_theme" id="css_editor_theme">
+							<option value="neat" selected="selected"><?php esc_attr_e( 'Light (default)', 'so-css' ); ?></option>
+							<option value="ambiance"><?php esc_attr_e( 'Dark', 'so-css' ); ?></option>
+						</select>
+					</div>
+				</div>
+
+					<div class="color-theme">
+					</div>
+
 			</div>
 
-			<div class="custom-css-preview">
+			<div id="so-custom-css-form">
+
+				<div class="custom-css-toolbar">
+					<div class="toolbar-function-buttons">
+						<div class="toolbar-functions-dropdown">
+							<span class="dashicons dashicons-menu"></span>
+						</div>
+						
+						<ul class="toolbar-buttons">
+						</ul>
+					</div>
+
+					<div class="toolbar-action-buttons">
+						<a href="#expand" class="editor-expand socss-button">
+							<span class="so-css-icon so-css-icon-expand" title="<?php esc_attr_e( 'Open Expanded Mode', 'so-css' ); ?>"></span>
+							<span class="so-css-icon so-css-icon-compress" title="<?php esc_attr_e( 'Close Expanded Mode', 'so-css' ); ?>"></span>
+						</a>
+
+						<a href="#visual" class="editor-visual socss-button" title="<?php esc_attr_e( 'Open Visual Mode', 'so-css' ); ?>">
+							<span class="so-css-icon so-css-icon-eye"></span>
+						</a>
+
+						<span class="save socss-button button-primary" title="<?php esc_attr_e( 'Save CSS', 'so-css' ); ?>">
+							<span class="so-css-icon so-css-icon-save"></span>
+						</span>
+					</div>
+				</div>
+
+				<div class="custom-css-container">
+					<textarea
+						name="siteorigin_custom_css" id="custom-css-textarea" data-theme="<?php echo esc_attr( $editor_theme ) ?>" class="css-editor" rows="<?php echo max( 10, substr_count( $custom_css, "\n" ) + 1 ) ?>"><?php echo esc_textarea( $custom_css ) ?></textarea>
+					<?php wp_nonce_field( 'custom_css', '_sononce' ) ?>
+				</div>
+				<div class="so-css-footer">
+					<p class="description">
+						<?php esc_html_e( $editor_description ); ?>
+					</p>
+				</div>
+
+				<div class="custom-css-preview"></div>
+
+				<div class="decoration"></div>
 
 			</div>
 
-			<div class="decoration"></div>
+			<div id="so-custom-css-properties">
+
+				<div class="toolbar">
+					<select></select>
+					<div class="close socss-button" title="<?php esc_attr_e( 'Close', 'so-css' ); ?>">
+						<span class="so-css-icon so-css-icon-check"></span>
+					</div>
+					<div class="save socss-button button-primary" title="<?php esc_attr_e( 'Save CSS', 'so-css' ); ?>">
+						<span class="so-css-icon so-css-icon-save"></span>
+					</div>
+				</div>
+
+				<ul class="section-tabs"></ul>
+
+				<div class="sections"></div>
+
+			</div>
 
 		</form>
-
-		<div id="so-custom-css-properties">
-
-			<div class="toolbar">
-				<select>
-				</select>
-				<div class="close socss-button" title="<?php esc_attr_e( 'Close', 'so-css' ); ?>">
-					<span class="so-css-icon so-css-icon-check"></span>
-				</div>
-				<div class="save socss-button button-primary" title="<?php esc_attr_e( 'Save CSS', 'so-css' ); ?>">
-					<span class="so-css-icon so-css-icon-save"></span>
-				</div>
-			</div>
-
-			<ul class="section-tabs">
-			</ul>
-
-			<div class="sections">
-			</div>
-
-		</div>
 
 	</div>
 
