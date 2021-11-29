@@ -647,6 +647,7 @@ module.exports = function(css, options){
     err.line = lineno;
     err.column = column;
     err.source = css;
+    options.silent = false;
 
     if (options.silent) {
       errorsList.push(err);
@@ -1459,7 +1460,7 @@ module.exports = Compiler;
 function Compiler(options) {
   options = options || {};
   Base.call(this, options);
-  this.indentation = options.indent;
+  this.indentation = typeof options.indent === 'string' ? options.indent : '  ';
 }
 
 /**
@@ -1690,7 +1691,7 @@ Compiler.prototype.indent = function(level) {
     return '';
   }
 
-  return Array(this.level).join(this.indentation || '  ');
+  return Array(this.level).join(this.indentation);
 };
 
 },{"./compiler":8,"inherits":13}],11:[function(require,module,exports){
@@ -1751,7 +1752,6 @@ module.exports = function(node, options){
 var SourceMap = require('source-map').SourceMapGenerator;
 var SourceMapConsumer = require('source-map').SourceMapConsumer;
 var sourceMapResolve = require('source-map-resolve');
-var urix = require('urix');
 var fs = require('fs');
 var path = require('path');
 
@@ -1760,6 +1760,14 @@ var path = require('path');
  */
 
 module.exports = mixin;
+
+/**
+ * Ensure Windows-style paths are formatted properly
+ */
+
+const makeFriendlyPath = function(aPath) {
+  return path.sep === "\\" ? aPath.replace(/\\/g, "/").replace(/^[a-z]:\/?/i, "/") : aPath;
+}
 
 /**
  * Mixin source map support into `compiler`.
@@ -1801,7 +1809,7 @@ exports.updatePosition = function(str) {
 
 exports.emit = function(str, pos) {
   if (pos) {
-    var sourceFile = urix(pos.source || 'source.css');
+    var sourceFile = makeFriendlyPath(pos.source || 'source.css');
 
     this.map.addMapping({
       source: sourceFile,
@@ -1852,7 +1860,7 @@ exports.applySourceMaps = function() {
       if (originalMap) {
         var map = new SourceMapConsumer(originalMap.map);
         var relativeTo = originalMap.sourcesRelativeTo;
-        this.map.applySourceMap(map, file, urix(path.dirname(relativeTo)));
+        this.map.applySourceMap(map, file, makeFriendlyPath(path.dirname(relativeTo)));
       }
     }
   }, this);
