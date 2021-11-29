@@ -71,6 +71,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.4.3 - 29 November 2021 =
+* Restored editor scrollbar.
+* Added a fixed editor height.
+
 = 1.4.2 - 08 November 2021 =
 * Fixed string translation functions.
 
