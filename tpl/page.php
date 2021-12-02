@@ -78,7 +78,7 @@ if ( ! empty( $current_revision ) ) {
 					<h3 class="hndle"><span><?php esc_html_e( 'Editor Theme', 'so-css' ); ?></span></h3>
 					<div class="inside">
 						<select name="so_css_editor_theme" id="so_css_editor_theme">
-							<option value="neat" selected="selected"><?php esc_attr_e( 'Light (default)', 'so-css' ); ?></option>
+							<option value="neat" selected="selected"><?php esc_attr_e( 'Light', 'so-css' ); ?></option>
 							<option value="ambiance"><?php esc_attr_e( 'Dark', 'so-css' ); ?></option>
 						</select>
 					</div>
