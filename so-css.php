@@ -582,7 +582,7 @@ class SiteOrigin_CSS {
 
 		if ( current_user_can( 'edit_theme_options' ) && isset( $_POST['css'] ) ) {
 			// Sanitize CSS input. Should keep most tags, apart from script and style tags.
-			$custom_css = self::sanitize_css( $_POST['css'] );
+			$custom_css = self::sanitize_css( stripslashes( $_POST['css'] ) );
 			
 			$current = $this->get_custom_css( $this->theme );
 			$this->save_custom_css( $custom_css, $this->theme );
