@@ -71,6 +71,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.5.0 - 16 December 2021 =
+* Basic Editor: Added a dark theme option.
+* Ajax Saving: Resolved unintended slashes added during escaping.
+
 = 1.4.3 - 29 November 2021 =
 * Restored editor scrollbar.
 * Added a fixed editor height.

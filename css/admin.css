@@ -127,8 +127,8 @@
   margin-right: 340px;
 }
 #so-custom-css-info {
-  width: 315px;
   float: right;
+  width: 315px;
 }
 #so-custom-css-info *:first-child {
   margin-top: 0;
@@ -144,7 +144,7 @@
   min-height: 40px;
   width: 100%;
 }
-#so-custom-css-info #css_editor_theme {
+#so-custom-css-info #so_css_editor_theme {
   margin-top: 6px;
   width: 100%;
 }
