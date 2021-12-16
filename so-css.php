@@ -282,6 +282,14 @@ class SiteOrigin_CSS {
 				
 				$this->save_custom_css_file( $custom_css, $this->theme, $socss_post_id );
 			}
+
+			// Update Editor Theme.
+			if (
+				$_POST['so_css_editor_theme'] == 'neat' ||
+				$_POST['so_css_editor_theme'] == 'ambiance'
+			) {
+				update_option( 'so_css_editor_theme', $_POST['so_css_editor_theme'] );
+			}
 		}
 	}
 	
@@ -320,7 +328,8 @@ class SiteOrigin_CSS {
 		} else {
 			$this->enqueue_fallback_codemirror();
 		}
-		wp_enqueue_style( 'socss-codemirror-theme-neat', plugin_dir_url( __FILE__ ) . 'lib/codemirror/theme/neat.css', array(), '5.2.0' );
+		wp_enqueue_style( 'socss-codemirror-theme-neat', plugin_dir_url( __FILE__ ) . 'lib/codemirror/theme/neat.css', array(), SOCSS_VERSION );
+		wp_enqueue_style( 'socss-codemirror-theme-ambiance', plugin_dir_url( __FILE__ ) . 'lib/codemirror/theme/ambiance.css', array(), SOCSS_VERSION );
 
 		// Enqueue the scripts for theme CSS processing
 		wp_enqueue_script( 'siteorigin-css-parser-lib', plugin_dir_url( __FILE__ ) . 'js/css' . SOCSS_JS_SUFFIX . '.js', array( 'jquery' ), SOCSS_VERSION );
@@ -489,6 +498,8 @@ class SiteOrigin_CSS {
 		}
 		
 		$theme = basename( get_template_directory() );
+
+		$editor_theme = get_option( 'so_css_editor_theme', 'neat' );
 		
 		include plugin_dir_path( __FILE__ ) . 'tpl/page.php';
 	}
@@ -582,7 +593,7 @@ class SiteOrigin_CSS {
 
 		if ( current_user_can( 'edit_theme_options' ) && isset( $_POST['css'] ) ) {
 			// Sanitize CSS input. Should keep most tags, apart from script and style tags.
-			$custom_css = self::sanitize_css( $_POST['css'] );
+			$custom_css = self::sanitize_css( stripslashes( $_POST['css'] ) );
 			
 			$current = $this->get_custom_css( $this->theme );
 			$this->save_custom_css( $custom_css, $this->theme );

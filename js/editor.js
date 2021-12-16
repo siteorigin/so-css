@@ -185,7 +185,7 @@
 				tabSize: 2,
 				lineNumbers: true,
 				mode: 'css',
-				theme: 'neat',
+				theme: $textArea.data( 'theme' ),
 				inputStyle: 'contenteditable', //necessary to allow context menu (right click) copy/paste etc.
 				gutters: [
 					"CodeMirror-lint-markers"
@@ -211,7 +211,16 @@
 				this.codeMirror = CodeMirror.fromTextArea( $textArea.get( 0 ), codeMirrorSettings );
 				this.setupCodeMirrorExtensions();
 			}
-			
+
+			var editor = this.codeMirror;
+			$( '#so_css_editor_theme' ).on( 'change', function() {
+				if ( $( this ).val() == 1 ) {
+					editor.setOption( 'theme', 'neat' );
+				} else {
+					editor.setOption( 'theme', 'ambiance' );
+				}
+			} );
+
 			this.codeMirror.on( 'change', function ( cm, change ) {
 				var selectedPost = this.model.get( 'selectedPost' );
 				if ( selectedPost && selectedPost.get( 'css' ) !== cm.getValue().trim() ) {
