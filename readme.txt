@@ -71,6 +71,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.5.2 - 27 January 2022 =
+* Updated `Tested up to` tag to `5.9`.
+
 = 1.5.1 - 30 December 2021 =
 * Basic Editor Theme Setting: Updated field to show selected option.
 
