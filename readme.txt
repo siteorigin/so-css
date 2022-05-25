@@ -71,6 +71,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.5.3 - 25 May 2022 =
+* Updated WordPress `Tested up to` tag.
+
 = 1.5.2 - 27 January 2022 =
 * Updated `Tested up to` tag to `5.9`.
 
