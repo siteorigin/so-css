@@ -90,19 +90,23 @@ class SiteOrigin_CSS {
 	 */
 	function get_custom_css( $theme, $post_id = null ) {
 		$custom_css_file = apply_filters( 'siteorigin_custom_css_file', false );
-
-		if ( ! empty( $custom_css_file ) && WP_Filesystem() ) {
+		if (
+			! empty( $custom_css_file ) &&
+			! empty( $custom_css_file['file'] ) &&
+			WP_Filesystem()
+		) {
 			// Did we previously load the CSS file? If not, load it.
 			if ( empty( $this->css_file ) || isset( $_POST['siteorigin_custom_css'] ) ) {
 				global $wp_filesystem;
 
 				// If custom file doesn't exist, create it.
-				if ( ! $wp_filesystem->exists( $custom_css_file ) ) {
-					$wp_filesystem->touch( $custom_css_file );
+				if ( ! $wp_filesystem->exists( $custom_css_file['file'] ) ) {
+					$wp_filesystem->touch( $custom_css_file['file'] );
 				}
 
-				if ( $wp_filesystem->is_writable( $custom_css_file ) ) {
-					$this->css_file = $wp_filesystem->get_contents( $custom_css_file );
+
+				if ( $wp_filesystem->is_writable( $custom_css_file['file'] ) ) {
+					$this->css_file = $wp_filesystem->get_contents( $custom_css_file['file'] );
 				}
 			}
 			return $this->css_file;
@@ -157,7 +161,8 @@ class SiteOrigin_CSS {
 
 			if (
 				empty( $css_file_path ) ||
-				! $wp_filesystem->is_writable( $css_file_path )
+				empty( $css_file_path['file'] ) ||
+				! $wp_filesystem->is_writable( $css_file_path['file'] )
 			) {
 				$upload_dir = wp_upload_dir();
 				$upload_dir_path = $upload_dir['basedir'] . '/so-css/';
@@ -173,6 +178,7 @@ class SiteOrigin_CSS {
 					$wp_filesystem->delete( $css_file_path );
 				}
 			} else {
+				$css_file_path = $css_file_path['file'];
 				$this->css_file = $custom_css;
 			}
 
