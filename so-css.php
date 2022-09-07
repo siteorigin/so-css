@@ -256,26 +256,33 @@ class SiteOrigin_CSS {
 	 *
 	 */
 	function enqueue_custom_css( $theme, $post_id = null ) {
-		
-		$upload_dir = wp_upload_dir();
-		$upload_dir_path = $upload_dir['basedir'] . '/so-css/';
-		
+		add_filter( 'siteorigin_css_enqueue_css', '__return_false' );
 		$css_id = $theme . ( ! empty( $post_id ) ? '_' . $post_id : '' );
-		$css_file_name = 'so-css-' . $css_id;
-		$css_file_path = $upload_dir_path . $css_file_name . '.css';
-		
 		if (
 			empty( $_GET['so_css_preview'] ) &&
 			! is_admin() &&
-			file_exists( $css_file_path ) &&
 			apply_filters( 'siteorigin_css_enqueue_css', true )
 		) {
-			wp_enqueue_style(
-				'so-css-' . $css_id,
-				set_url_scheme( $upload_dir['baseurl'] . '/so-css/' . $css_file_name . '.css' ),
-				array(),
-				$this->get_latest_revision_timestamp()
-			);
+			$custom_css_file = apply_filters( 'siteorigin_custom_css_file', array() );
+			if ( ! empty( $post_id ) || empty( $custom_css_file ) ) {
+				$upload_dir = wp_upload_dir();
+				$upload_dir_path = $upload_dir['basedir'] . '/so-css/';
+				$css_file_name = 'so-css-' . $css_id;
+				$css_file_path = $upload_dir_path . $css_file_name . '.css';
+				$css_file_url = $upload_dir['baseurl'] . '/so-css/' . $css_file_name . '.css';
+			} elseif ( isset( $custom_css_file['url'] ) ) {
+				$css_file_path = $custom_css_file['file'];
+				$css_file_url = $custom_css_file['url'];
+			}
+			
+			if ( ! empty( $css_file_path ) && file_exists( $css_file_path ) ) {
+				wp_enqueue_style(
+					'so-css-' . $css_id,
+					set_url_scheme( $css_file_url ),
+					array(),
+					$this->get_latest_revision_timestamp()
+				);
+			}
 		} else {
 			$custom_css = $this->get_custom_css( $theme, $post_id );
 			// We just need to enqueue a dummy style
