@@ -91,6 +91,7 @@ class SiteOrigin_CSS {
 	function get_custom_css( $theme, $post_id = null ) {
 		$custom_css_file = apply_filters( 'siteorigin_custom_css_file', false );
 		if (
+			empty( $post_id ) &&
 			! empty( $custom_css_file ) &&
 			! empty( $custom_css_file['file'] ) &&
 			WP_Filesystem()
@@ -262,7 +263,6 @@ class SiteOrigin_CSS {
 	 *
 	 */
 	function enqueue_custom_css( $theme, $post_id = null ) {
-		add_filter( 'siteorigin_css_enqueue_css', '__return_false' );
 		$css_id = $theme . ( ! empty( $post_id ) ? '_' . $post_id : '' );
 		if (
 			empty( $_GET['so_css_preview'] ) &&
