@@ -89,38 +89,53 @@ class SiteOrigin_CSS {
 	 * @return string The custom CSS for the theme and post ID combination.
 	 */
 	function get_custom_css( $theme, $post_id = null ) {
-		$custom_css_file = apply_filters( 'siteorigin_custom_css_file', false );
-		if (
-			empty( $post_id ) &&
-			! empty( $custom_css_file ) &&
-			! empty( $custom_css_file['file'] ) &&
-			WP_Filesystem()
-		) {
-			// Did we previously load the CSS file? If not, load it.
-			if ( empty( $this->css_file ) || isset( $_POST['siteorigin_custom_css'] ) ) {
+		$css_key = 'siteorigin_custom_css[' . $theme . ']';
+		if ( empty( $post_id ) && WP_Filesystem() ) {
+			$custom_css_file = apply_filters( 'siteorigin_custom_css_file', false );
+			if (
+				! empty( $custom_css_file ) &&
+				! empty( $custom_css_file['file'] )
+			) {
+				// Did we previously load the CSS file? If not, load it.
+				if ( empty( $this->css_file ) || isset( $_POST['siteorigin_custom_css'] ) ) {
+					global $wp_filesystem;
+
+					// If custom file doesn't exist, create it.
+					if ( ! $wp_filesystem->exists( $custom_css_file['file'] ) ) {
+						$wp_filesystem->touch( $custom_css_file['file'] );
+					}
+
+					if ( empty( get_option( 'siteorigin_custom_file' ) ) ) {
+						update_option( 'siteorigin_custom_file', true, true );
+					}
+
+					if ( $wp_filesystem->is_writable( $custom_css_file['file'] ) ) {
+						$this->css_file = $wp_filesystem->get_contents( $custom_css_file['file'] );
+					}
+				}
+				return $this->css_file;
+			} elseif ( ! empty( get_option( 'siteorigin_custom_file' ) ) ) {
+				// If the Custom file filter was previously active we need to
+				// generate the global CSS file to avoid no CSS outputting
+				// without modification.
+				delete_option( 'siteorigin_custom_file', true );
+				$css_file_path = $this->get_css_file_name( $theme );
+				
 				global $wp_filesystem;
-
-				// If custom file doesn't exist, create it.
-				if ( ! $wp_filesystem->exists( $custom_css_file['file'] ) ) {
-					$wp_filesystem->touch( $custom_css_file['file'] );
-				}
-
-
-				if ( $wp_filesystem->is_writable( $custom_css_file['file'] ) ) {
-					$this->css_file = $wp_filesystem->get_contents( $custom_css_file['file'] );
-				}
+				$wp_filesystem->put_contents(
+					$css_file_path,
+					get_option( $css_key, '' )
+				);
 			}
-			return $this->css_file;
 		}
 
-		$css_key = 'siteorigin_custom_css[' . $theme . ']';
 		if ( ! empty( $post_id ) ) {
 			return get_post_meta( $post_id, $css_key, true );
 		}
 		
 		return get_option( $css_key, '' );
 	}
-	
+
 	/**
 	 * Save custom CSS for a given theme and post id combination.
 	 *
@@ -147,7 +162,26 @@ class SiteOrigin_CSS {
 		
 		return add_post_meta( $post_id, $css_key, $custom_css );
 	}
-	
+
+	/**
+	 * Returns the file name of the CSS file we're editing.
+	 *
+	 * @param $theme
+	 * @param null $post_id
+	 */
+	function get_css_file_name( $theme, $post_id = null ) {
+		global $wp_filesystem;
+		$upload_dir = wp_upload_dir();
+		$upload_dir_path = $upload_dir['basedir'] . '/so-css/';
+
+		if ( ! $wp_filesystem->is_dir( $upload_dir_path ) ) {
+			$wp_filesystem->mkdir( $upload_dir_path );
+		}
+
+		$css_file_name = 'so-css-' . $theme . ( ! empty( $post_id ) ? '_' . $post_id : '' );
+		return $upload_dir_path . $css_file_name . '.css';
+	}
+
 	/**
 	 * Save custom CSS for a given theme and post id combination to a file in the uploads directory to allow for caching.
 	 *
@@ -165,15 +199,7 @@ class SiteOrigin_CSS {
 				empty( $css_file_path['file'] ) ||
 				! $wp_filesystem->is_writable( $css_file_path['file'] )
 			) {
-				$upload_dir = wp_upload_dir();
-				$upload_dir_path = $upload_dir['basedir'] . '/so-css/';
-				
-				if ( ! $wp_filesystem->is_dir( $upload_dir_path ) ) {
-					$wp_filesystem->mkdir( $upload_dir_path );
-				}
-				
-				$css_file_name = 'so-css-' . $theme . ( ! empty( $post_id ) ? '_' . $post_id : '' );
-				$css_file_path = $upload_dir_path . $css_file_name . '.css';
+				$css_file_path = $this->get_css_file_name( $theme, $post_id );
 				
 				if ( file_exists( $css_file_path ) ) {
 					$wp_filesystem->delete( $css_file_path );
