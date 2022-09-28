@@ -115,7 +115,7 @@ class SiteOrigin_CSS {
 				}
 				return $this->css_file;
 			} elseif ( ! empty( get_option( 'siteorigin_custom_file' ) ) ) {
-				// If the Custom file filter was previously active we need to
+				// If the custom file filter was previously active we need to
 				// generate the global CSS file to avoid no CSS outputting
 				// without modification.
 				delete_option( 'siteorigin_custom_file', true );
