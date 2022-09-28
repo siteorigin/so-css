@@ -71,6 +71,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.5.4 - 28 September 2022 =
+* Developer: Introduced definable Custom CSS file name and location using `siteorigin_custom_css_file` and `siteorigin_css_enqueue_css`.
+
 = 1.5.3 - 25 May 2022 =
 * Updated WordPress `Tested up to` tag.
 
