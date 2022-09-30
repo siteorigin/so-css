@@ -31,6 +31,12 @@ class SiteOrigin_CSS {
 		
 		// Main header actions
 		add_action( 'plugins_loaded', array( $this, 'set_plugin_textdomain' ) );
+
+		global $wp_filesystem;
+		if ( ! class_exists( 'wp_filesystem' ) ) {
+			require_once( ABSPATH . '/wp-admin/includes/file.php' );
+			WP_Filesystem();
+		}
 		
 		// Priority 20 is necessary to ensure our CSS takes precedence.
 		add_action( 'wp_head', array( $this, 'enqueue_css' ), 20 );
