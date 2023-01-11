@@ -11,7 +11,7 @@
 			</span>
 		</div>
 		<div class="sidebar">
-			<input type="text" class="snippet-search" placeholder="<?php esc_attr_e('Search Snippets', 'so-css') ?>" />
+			<input type="text" class="snippet-search" placeholder="<?php esc_attr_e( 'Search Snippets', 'so-css' ); ?>" />
 			<ul class="snippets">
 			</ul>
 		</div>
@@ -23,7 +23,7 @@
 			</div>
 		</div>
 		<div class="buttons">
-			<input type="button" class="insert-snippet button-primary" value="<?php esc_attr_e('Insert Snippet', 'so-css') ?>" />
+			<input type="button" class="insert-snippet button-primary" value="<?php esc_attr_e( 'Insert Snippet', 'so-css' ); ?>" />
 		</div>
 	</div>
 </script>
@@ -56,7 +56,7 @@
 
 <script type="text/template" id="template-preview-window">
 	<div id="preview-navigator">
-		<input type="text" data-invalid-uri="<?php esc_attr_e( "Invalid URI. Please make sure you're using a URL from the same site.", 'so-css' ) ?>" />
+		<input type="text" data-invalid-uri="<?php esc_attr_e( "Invalid URI. Please make sure you're using a URL from the same site.", 'so-css' ); ?>" />
 	</div>
 	<iframe id="preview-iframe" seamless="seamless"></iframe>
 </script>
@@ -66,7 +66,7 @@
 	<small style="color: #888">
 		<?php
 		printf(
-			esc_html__( 'Get a %sGoogle Font%s selector.', 'so-css' ) ,
+			esc_html__( 'Get a %sGoogle Font%s selector.', 'so-css' ),
 			'<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugin/web-font-selector" target="_blank">',
 			'</a>'
 		);
