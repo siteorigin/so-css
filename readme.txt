@@ -1,7 +1,7 @@
 === SiteOrigin CSS ===
 Tags: css, visual css, css editor, design, customize
 Requires at least: 3.9
-Tested up to: 6.0
+Tested up to: 6.2
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv2 or later
@@ -70,6 +70,10 @@ Free support is available on the [SiteOrigin support forums](https://siteorigin.
 SiteOrigin Premium includes access to our professional email support service, perfect for those times when you need fast and effective technical support. We're standing by to assist you in any way we can.
 
 == Changelog ==
+
+= 1.5.6 - 07 April 2023 =
+* WordPress PHP Coding Standards improvements.
+* Updated `Tested up to` tag.
 
 = 1.5.5 - 30 September 2022 =
 * Added a check to ensure WP Filesystem is setup. 
