@@ -71,6 +71,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.5.6 - 07 April 2023 =
+* WordPress PHP Coding Standards improvements.
+* Updated `Tested up to` tag.
+
 = 1.5.5 - 30 September 2022 =
 * Added a check to ensure WP Filesystem is setup. 
 
