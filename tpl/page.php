@@ -102,7 +102,7 @@ if ( ! empty( $current_revision ) ) {
 					</div>
 
 					<div class="toolbar-action-buttons">
-						<a href="#expand" class="editor-expand socss-button">
+						<a href="#expand" class="editor-expand socss-button" title="<?php esc_attr_e( 'Open Expanded Mode', 'so-css' ); ?>">
 							<span class="so-css-icon so-css-icon-expand" title="<?php esc_attr_e( 'Open Expanded Mode', 'so-css' ); ?>"></span>
 							<span class="so-css-icon so-css-icon-compress" title="<?php esc_attr_e( 'Close Expanded Mode', 'so-css' ); ?>"></span>
 						</a>
