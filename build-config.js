@@ -46,8 +46,9 @@ module.exports = {
             '!so-css.php',                      // Not the base plugin file. It is copied by the 'version' task.
             '!readme.txt',                      // Not the readme.txt file. It is copied by the 'version' task.
             '!package.json',                    // Not the package.json file.
-            '!package-lock.json',                // Not the package-lock.json file.
-            'inc/installer/css/*css'           // Include Installer CSS.
+            '!package-lock.json',               // Not the package-lock.json file.
+            'inc/installer/css/*css',           // Include Installer CSS.
+            'inc/installer/js/*js'              // Include Installer Js.
         ]
     },
     i18n: {
