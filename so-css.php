@@ -69,6 +69,8 @@ class SiteOrigin_CSS {
 				// We'll be grabbing all the enqueued scripts and outputting them
 				add_action( 'wp_enqueue_scripts', array( $this, 'inline_inspector_scripts' ), 100 );
 			}
+		} elseif ( ! class_exists( 'SiteOrigin_Installer' ) ) {
+			include plugin_dir_path( __FILE__ ) . 'inc/installer/siteorigin-installer.php';
 		}
 	}
 

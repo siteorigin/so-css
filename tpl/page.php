@@ -127,6 +127,31 @@ if ( ! empty( $current_revision ) ) {
 						<?php esc_html_e( $editor_description ); ?>
 					</p>
 				</div>
+				<?php
+				if (
+					! class_exists( 'SiteOrigin_Panels' ) ||
+					! class_exists( 'SiteOrigin_Widgets_Bundle' )
+				) {
+					?>
+					<div class="installer">
+						<a href="#" class="installer-link">
+							<?php _e( 'Other Settings', 'so-css' ); ?>
+						</a>
+
+						<div class="installer-container" style="display: none;">
+							<label>
+								<?php echo __( 'Enable SiteOrigin Installer: ', 'so-css' ); ?>
+								<input
+									type="checkbox"
+									name="installer_status"
+									class="installer_status"
+									<?php checked( get_option( 'siteorigin_installer', true ), 1 ); ?>
+									data-nonce="<?php echo wp_create_nonce( 'siteorigin_installer_status' ); ?>"
+								>
+							</label>
+						</div>
+					</div>
+				<?php } ?>
 
 				<div class="custom-css-preview"></div>
 
