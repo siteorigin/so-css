@@ -67,9 +67,7 @@ if ( ! empty( $current_revision ) ) {
 					<h3 class="hndle"><span><?php esc_html_e( 'CSS Revisions', 'so-css' ); ?></span></h3>
 					<div class="inside">
 						<ol class="custom-revisions-list" data-confirm="<?php esc_attr_e( 'Are you sure you want to load this revision?', 'so-css' ); ?>">
-							<?php
-							$this->custom_css_revisions_list( $theme, $socss_post_id, $current_revision );
-?>
+							<?php $this->custom_css_revisions_list( $theme, $socss_post_id, $current_revision ); ?>
 						</ol>
 					</div>
 				</div>
@@ -129,8 +127,9 @@ if ( ! empty( $current_revision ) ) {
 				</div>
 				<?php
 				if (
-					! class_exists( 'SiteOrigin_Panels' ) ||
-					! class_exists( 'SiteOrigin_Widgets_Bundle' )
+					! class_exists( 'SiteOrigin_Panels' ) &&
+					! class_exists( 'SiteOrigin_Widgets_Bundle' ) &&
+					! class_exists( 'SiteOrigin_Premium' )
 				) {
 					?>
 					<div class="installer">
@@ -145,7 +144,7 @@ if ( ! empty( $current_revision ) ) {
 									type="checkbox"
 									name="installer_status"
 									class="installer_status"
-									<?php checked( get_option( 'siteorigin_installer', true ), 1 ); ?>
+									<?php checked( get_option( 'siteorigin_installer', false ), 1 ); ?>
 									data-nonce="<?php echo wp_create_nonce( 'siteorigin_installer_status' ); ?>"
 								>
 							</label>
