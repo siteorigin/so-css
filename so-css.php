@@ -71,6 +71,13 @@ class SiteOrigin_CSS {
 			}
 		} elseif ( ! class_exists( 'SiteOrigin_Installer' ) ) {
 			include plugin_dir_path( __FILE__ ) . 'inc/installer/siteorigin-installer.php';
+			if (
+				! class_exists( 'SiteOrigin_Panels' ) &&
+				! class_exists( 'SiteOrigin_Widgets_Bundle' ) &&
+				! class_exists( 'SiteOrigin_Premium' )
+			) {
+				add_filter( 'siteorigin_add_installer', array( $this, 'manage_installer' ) );
+			}
 		}
 	}
 
@@ -87,6 +94,14 @@ class SiteOrigin_CSS {
 		}
 
 		return $single;
+	}
+
+	public function manage_installer( $status ) {
+		// If the user hasn't enabled/disabled the installer, disable it by default.
+		if ( empty( get_option( 'siteorigin_installer' ) ) ) {
+				$status = false;
+		}
+		return $status;
 	}
 
 	/**
