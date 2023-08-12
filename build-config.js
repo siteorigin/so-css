@@ -37,18 +37,19 @@ module.exports = {
     },
     copy: {
         src: [
-            '**/!(*.js|*.less)',                // Everything except .js and .less files
-            'lib/**/*.*',                       // libraries used at runtime
-            '!{node_modules,node_modules/**}',  // Ignore build/ and contents
-            '!{build,build/**}',                // Ignore build/ and contents
-            '!{tmp,tmp/**}',                    // Ignore tmp/ and contents
-            '!{dist,dist/**}',                  // Ignore dist/ and contents
-            '!so-css.php',                      // Not the base plugin file. It is copied by the 'version' task.
-            '!readme.txt',                      // Not the readme.txt file. It is copied by the 'version' task.
-            '!package.json',                    // Not the package.json file.
-            '!package-lock.json',               // Not the package-lock.json file.
-            'inc/installer/css/*css',           // Include Installer CSS.
-            'inc/installer/js/*js'              // Include Installer Js.
+            '**/!(*.js|*.less)',                             // Everything except .js and .less files
+            'lib/**/*.*',                                    // libraries used at runtime
+            '!{node_modules,node_modules/**}',               // Ignore build/ and contents
+            '!{build,build/**}',                             // Ignore build/ and contents
+            '!{tmp,tmp/**}',                                 // Ignore tmp/ and contents
+            '!{dist,dist/**}',                               // Ignore dist/ and contents
+            '!so-css.php',                                   // Not the base plugin file. It is copied by the 'version' task.
+            '!readme.txt',                                   // Not the readme.txt file. It is copied by the 'version' task.
+            '!package.json',                                 // Not the package.json file.
+            '!package-lock.json',                            // Not the package-lock.json file.
+            'inc/installer/css/*css',                        // Include Installer CSS.
+            'inc/installer/js/*js'                           // Include Installer Js.
+            '!inc/installer/inc/github-plugin-updater.php',  // Exclude Installer Standalone Updater.
         ]
     },
     i18n: {
