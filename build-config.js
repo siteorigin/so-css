@@ -48,7 +48,7 @@ module.exports = {
             '!package.json',                                 // Not the package.json file.
             '!package-lock.json',                            // Not the package-lock.json file.
             'inc/installer/css/*css',                        // Include Installer CSS.
-            'inc/installer/js/*js'                           // Include Installer Js.
+            'inc/installer/js/*js',                          // Include Installer Js.
             '!inc/installer/inc/github-plugin-updater.php',  // Exclude Installer Standalone Updater.
         ]
     },
