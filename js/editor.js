@@ -1341,8 +1341,36 @@
 			return this.field.minicolors( 'value' ).trim();
 		},
 		
+		convertVarToHex: function( val ) {
+			// Create an element to quickly convert the val to hex.
+			var el = document.createElement( 'div' );
+			el.style.color = val;
+			document.body.appendChild( el );
+			var rgb = window.getComputedStyle( el ).color;
+			document.body.removeChild( el );
+
+			// Were we able to get an RGB?
+			if ( ! rgb.startsWith( 'rgb' ) ) {
+				return false;
+			}
+
+			// Convert the RGB to hex.
+			var color = '#' + rgb.match( /\d+/g ).map( function( x ) {
+				var hex = parseInt( x ).toString( 16 );
+				return hex.length === 1 ? '0' + hex : hex;
+			} ).join( '' );
+
+			return color;
+		},
+
 		setValue: function ( val, options ) {
 			options = _.extend( { silent: false }, options );
+
+			// Check if the value is a hex.
+			if ( ! val.match( /^#[0-9a-f]{3,6}$/i ) ) {
+				// Not a hex. It's possible it's a word.
+				val = this.convertVarToHex( val );
+			}
 			
 			this.field.minicolors( 'value', val );
 			
