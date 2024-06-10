@@ -1366,8 +1366,8 @@
 		setValue: function ( val, options ) {
 			options = _.extend( { silent: false }, options );
 
-			// Check if the value is a hex.
-			if ( ! val.match( /^#[0-9a-f]{3,6}$/i ) ) {
+			// Check if the value is a hex, and not empty.
+			if ( val && ! val.match( /^#[0-9a-f]{3,6}$/i ) ) {
 				// Not a hex. It's possible it's a word.
 				val = this.convertVarToHex( val );
 			}
