@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: SiteOrigin CSS
-Description: An advanced CSS editor from SiteOrigin.
+Description: Powerful, simple CSS editing for WordPress. Visual controls & real-time previews for effortless site customization.
 Version: dev
 Author: SiteOrigin
 Author URI: https://siteorigin.com

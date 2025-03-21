@@ -9,13 +9,13 @@ License: GPLv2 or later
 Contributors: gpriday, alexgso
 Donate link: https://siteorigin.com/downloads/premium/
 
-SiteOrigin CSS is the simple yet powerful CSS editor for WordPress. It gives you visual controls that let you edit the look and feel of your site in real-time.
+Powerful, simple CSS editing for WordPress. Visual controls & real-time previews for effortless site customization.
 
 == Description ==
 
-SiteOrigin CSS is the simple yet powerful CSS editor for WordPress. It gives you visual controls that let you edit the look and feel of your site in real-time.
+SiteOrigin CSS is the intuitive and powerful CSS editor designed to empower your WordPress site customization. Enjoy a seamless editing experience with real-time visual controls, making it easy to tweak your site's look and feel instantly. Whether you're a beginner or an advanced developer, SiteOrigin CSS has you covered.
 
-We've created a site editing experience that will suit both beginners and advanced users alike. Beginners will love the simple visual controls and real-time preview. Advanced users will love the code autocompletion that makes writing CSS faster than ever.
+For beginners, our user-friendly visual controls and live previews eliminate the guesswork from CSS editing. See your changes as you make them, ensuring your site looks exactly as you envision. For advanced users, we offer robust code autocompletion, speeding up your workflow and making CSS writing faster and more efficient than ever before. Take full control of your site's design with SiteOrigin CSS and bring your creative vision to life.
 
 [vimeo https://vimeo.com/129660380]
 
