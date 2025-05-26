@@ -73,6 +73,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.6.4 - 26 May 2025 =
+* Installer: Updated submodule.
+* Updated Tested up to tag.
+
 = 1.6.3 - 15 January 2025 =
 * Resolved Uninstall Notice: Updated `register_uninstall_hook` callback to use a static class method, addressing a WordPress notice introduced in version 3.1.0.
 
@@ -94,27 +98,5 @@ SiteOrigin Premium includes access to our professional email support service, pe
 * Updated SiteOrigin Installer.
 * Updated Tested up to tag.
 * Updated Required PHP version.
-
-= 1.5.9 - 11 November 2023 =
-* Updated Tested up to tag.
-* Updated SiteOrigin Installer.
-
-= 1.5.8 - 11 August 2023 =
-* Updated the SiteOrigin Installer submodule.
-
-= 1.5.7 - 09 August 2023 =
-* Updated the expand/compress title depending on the state in the visual editor.
-* Updated the "Tested up to" version in the readme.txt file from 6.2 to 6.3, indicating compatibility with WordPress version 6.3.
-* Added SiteOrigin Installer submodule and functionality to handle the installer link and status in the editor and page templates.
-
-= 1.5.6 - 07 April 2023 =
-* WordPress PHP Coding Standards improvements.
-* Updated `Tested up to` tag.
-
-= 1.5.5 - 30 September 2022 =
-* Added a check to ensure WP Filesystem is setup. 
-
-= 1.5.4 - 28 September 2022 =
-* Developer: Introduced definable Custom CSS file name and location using `siteorigin_custom_css_file` and `siteorigin_css_enqueue_css`.
 
 [View full changelog.](https://siteorigin.com/css/changelog/)
