@@ -4,11 +4,11 @@ Plugin Name: SiteOrigin CSS
 Description: Powerful, simple CSS editing for WordPress. Visual controls & real-time previews for effortless site customization.
 Version: dev
 Author: SiteOrigin
+Text Domain: so-css
 Author URI: https://siteorigin.com
 Plugin URI: https://siteorigin.com/css/
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
-Text Domain: so-css
 */
 
 // Handle the legacy CSS editor that came with SiteOrigin themes
