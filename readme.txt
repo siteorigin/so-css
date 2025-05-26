@@ -5,7 +5,7 @@ Requires PHP: 7.0.0
 Tested up to: 6.7
 Stable tag: trunk
 Build time: unbuilt
-License: GPLv2 or later
+License: GPLv3
 Contributors: gpriday, alexgso
 Donate link: https://siteorigin.com/downloads/premium/
 

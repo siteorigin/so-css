@@ -6,8 +6,8 @@ Version: dev
 Author: SiteOrigin
 Author URI: https://siteorigin.com
 Plugin URI: https://siteorigin.com/css/
-License: GPL3
-License URI: https://www.gnu.org/licenses/gpl-3.0.txt
+License: GPLv3
+License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: so-css
 */
 
