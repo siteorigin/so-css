@@ -2,20 +2,21 @@
 Tags: css editor, visual css, live editing, theme editor, website styling
 Requires at least: 3.9
 Requires PHP: 7.0.0
-Tested up to: 6.7
+Tested up to: 6.8
 Stable tag: trunk
 Build time: unbuilt
-License: GPLv2 or later
+License: GPLv3
+License URI: http://www.gnu.org/licenses/gpl.html
 Contributors: gpriday, alexgso
 Donate link: https://siteorigin.com/downloads/premium/
 
-SiteOrigin CSS is the simple yet powerful CSS editor for WordPress. It gives you visual controls that let you edit the look and feel of your site in real-time.
+Powerful, simple CSS editing for WordPress. Visual controls & real-time previews for effortless site customization.
 
 == Description ==
 
-SiteOrigin CSS is the simple yet powerful CSS editor for WordPress. It gives you visual controls that let you edit the look and feel of your site in real-time.
+SiteOrigin CSS is the intuitive and powerful CSS editor designed to empower your WordPress site customization. Enjoy a seamless editing experience with real-time visual controls, making it easy to tweak your site's look and feel instantly. Whether you're a beginner or an advanced developer, SiteOrigin CSS has you covered.
 
-We've created a site editing experience that will suit both beginners and advanced users alike. Beginners will love the simple visual controls and real-time preview. Advanced users will love the code autocompletion that makes writing CSS faster than ever.
+For beginners, our user-friendly visual controls and live previews eliminate the guesswork from CSS editing. See your changes as you make them, ensuring your site looks exactly as you envision. For advanced users, we offer robust code autocompletion, speeding up your workflow and making CSS writing faster and more efficient than ever before. Take full control of your site's design with SiteOrigin CSS and bring your creative vision to life.
 
 [vimeo https://vimeo.com/129660380]
 
@@ -72,6 +73,10 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.6.4 - 26 May 2025 =
+* Installer: Updated submodule.
+* Updated Tested up to tag.
+
 = 1.6.3 - 15 January 2025 =
 * Resolved Uninstall Notice: Updated `register_uninstall_hook` callback to use a static class method, addressing a WordPress notice introduced in version 3.1.0.
 
@@ -93,27 +98,5 @@ SiteOrigin Premium includes access to our professional email support service, pe
 * Updated SiteOrigin Installer.
 * Updated Tested up to tag.
 * Updated Required PHP version.
-
-= 1.5.9 - 11 November 2023 =
-* Updated Tested up to tag.
-* Updated SiteOrigin Installer.
-
-= 1.5.8 - 11 August 2023 =
-* Updated the SiteOrigin Installer submodule.
-
-= 1.5.7 - 09 August 2023 =
-* Updated the expand/compress title depending on the state in the visual editor.
-* Updated the "Tested up to" version in the readme.txt file from 6.2 to 6.3, indicating compatibility with WordPress version 6.3.
-* Added SiteOrigin Installer submodule and functionality to handle the installer link and status in the editor and page templates.
-
-= 1.5.6 - 07 April 2023 =
-* WordPress PHP Coding Standards improvements.
-* Updated `Tested up to` tag.
-
-= 1.5.5 - 30 September 2022 =
-* Added a check to ensure WP Filesystem is setup. 
-
-= 1.5.4 - 28 September 2022 =
-* Developer: Introduced definable Custom CSS file name and location using `siteorigin_custom_css_file` and `siteorigin_css_enqueue_css`.
 
 [View full changelog.](https://siteorigin.com/css/changelog/)

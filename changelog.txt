@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 1.6.4 - 26 May 2025 =
+* Installer: Updated submodule.
+* Updated Tested up to tag.
+
 = 1.6.3 - 15 January 2025 =
 * Resolved Uninstall Notice: Updated `register_uninstall_hook` callback to use a static class method, addressing a WordPress notice introduced in version 3.1.0.
 

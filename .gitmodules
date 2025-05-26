@@ -5,3 +5,4 @@
 [submodule "inc/installer"]
 	path = inc/installer
 	url = git@github.com:siteorigin/siteorigin-installer.git
+	branch = master
