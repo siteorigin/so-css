@@ -73,6 +73,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.6.5 - 06 December 2025 =
+* Updated Tested up to tag.
+
 = 1.6.4 - 26 May 2025 =
 * Installer: Updated submodule.
 * Updated Tested up to tag.
