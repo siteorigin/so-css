@@ -191,7 +191,10 @@
 	}
 
 	select {
+		height: 30px;
+		line-height: 30px;
 		margin-top: 6px;
+		min-height: 30px;
 		width: 100%;
 	}
 }
@@ -533,10 +536,16 @@
 				margin: 0 25px 0 0;
 				border: 1px solid #c0c0c0;
 				width: 175px;
+				height: 30px;
+				min-height: 30px;
 
 				box-sizing: border-box;
 				border-radius: 0;
 				font-size: 12px;
+			}
+
+			select {
+				line-height: 30px;
 			}
 
 			.socss-field-number input {
@@ -547,6 +556,7 @@
 			.minicolors input {
 				box-sizing: border-box;
 				height: 30px;
+				min-height: 30px;
 				padding: 5px 0 5px 30px;
 			}
 
@@ -903,6 +913,7 @@
 	line-height: 1em;
 	margin-left: 7px;
 	min-height: 0;
+	padding: 0;
 	text-decoration: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
