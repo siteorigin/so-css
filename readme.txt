@@ -2,7 +2,7 @@
 Tags: css editor, visual css, live editing, theme editor, website styling
 Requires at least: 3.9
 Requires PHP: 7.0.0
-Tested up to: 6.9
+Tested up to: 7.0
 Stable tag: trunk
 Build time: unbuilt
 License: GPLv3
