@@ -73,6 +73,9 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.6.6 - 21 May 2026 =
+* Fixed admin field heights and toolbar button layout for WordPress 7.0 form control changes.
+
 = 1.6.5 - 06 December 2025 =
 * Updated Tested up to tag.
 
