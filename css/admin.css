@@ -147,7 +147,10 @@
   width: 100%;
 }
 #so-custom-css-info select {
+  height: 30px;
+  line-height: 30px;
   margin-top: 6px;
+  min-height: 30px;
   width: 100%;
 }
 #so-custom-css-revisions ol {
@@ -440,9 +443,14 @@
   margin: 0 25px 0 0;
   border: 1px solid #c0c0c0;
   width: 175px;
+  height: 30px;
+  min-height: 30px;
   box-sizing: border-box;
   border-radius: 0;
   font-size: 12px;
+}
+#so-custom-css-properties .sections .fields-table select {
+  line-height: 30px;
 }
 #so-custom-css-properties .sections .fields-table .socss-field-number input {
   margin: 0;
@@ -451,6 +459,7 @@
 #so-custom-css-properties .sections .fields-table .minicolors input {
   box-sizing: border-box;
   height: 30px;
+  min-height: 30px;
   padding: 5px 0 5px 30px;
 }
 #so-custom-css-properties .sections .fields-table .select {
@@ -740,6 +749,7 @@
   line-height: 1em;
   margin-left: 7px;
   min-height: 0;
+  padding: 0;
   text-decoration: none;
   -moz-user-select: none;
   -ms-user-select: none;
