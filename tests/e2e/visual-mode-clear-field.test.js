@@ -4,7 +4,11 @@
  * Regression test for so-css#195. Clearing a field used to delete its
  * declaration and every declaration after it in the rule.
  *
- * Runs via `npm run tests`.
+ * Runs via `npm run tests`, which starts a throwaway Playground site. Point
+ * tests/so-tests.env only at a disposable site: each run saves the CSS three
+ * times, and the plugin keeps the latest 15 revisions, so older revisions on
+ * that site can drop off. A CI workflow must build the plugin before running
+ * the tests, because the shared runner skips its own build under GitHub Actions.
  */
 const {
 	expect,
