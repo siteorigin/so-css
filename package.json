@@ -3,7 +3,14 @@
   "version": "0.0.1",
   "repository": "https://github.com/siteorigin/so-css",
   "license": "GPL-2.0+",
+  "scripts": {
+    "tests": "node ./tests/scripts/run-playwright.js",
+    "test:e2e": "playwright test"
+  },
   "dependencies": {
     "css": "^3.0.0"
+  },
+  "devDependencies": {
+    "siteorigin-tests-common": "github:siteorigin/siteorigin-tests-common"
   }
 }
