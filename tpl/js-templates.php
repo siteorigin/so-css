@@ -63,13 +63,15 @@
 
 <script type="text/template" id="template-webfont-teaser">
 	<input type="text" value="" class="socss-property-controller-input"/>
-	<small style="color: #888">
-		<?php
-		printf(
-			esc_html__( 'Get a %sGoogle Font%s selector.', 'so-css' ),
-			'<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugin/web-font-selector" target="_blank">',
-			'</a>'
-		);
-		?>
-	</small>
+	<?php if ( $this->display_teaser() ) { ?>
+		<small style="color: #888">
+			<?php
+			printf(
+				esc_html__( 'Get a %sGoogle Font%s selector.', 'so-css' ),
+				'<a href="https://siteorigin.com/downloads/premium/?featured_addon=plugin/web-font-selector" target="_blank">',
+				'</a>'
+			);
+			?>
+		</small>
+	<?php } ?>
 </script>
