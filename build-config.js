@@ -43,6 +43,7 @@ module.exports = {
             '!{build,build/**}',                             // Ignore build/ and contents
             '!{tmp,tmp/**}',                                 // Ignore tmp/ and contents
             '!{dist,dist/**}',                               // Ignore dist/ and contents
+            '!{tests,tests/**}',                             // Ignore tests/ and contents
             '!so-css.php',                                   // Not the base plugin file. It is copied by the 'version' task.
             '!readme.txt',                                   // Not the readme.txt file. It is copied by the 'version' task.
             '!package.json',                                 // Not the package.json file.

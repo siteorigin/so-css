@@ -5,3 +5,10 @@ dist/
 
 npm-debug.log
 /tmp
+
+# Playwright.
+tests/cache
+tests/results
+tests/screenshots
+
+so-tests.env

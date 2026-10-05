@@ -985,7 +985,7 @@
 					
 					// Remove empty declarations
 					if ( _.isEmpty( declaration.value ) ) {
-						declarations.splice( declarations.indexOf( declaration ) );
+						declarations.splice( declarations.indexOf( declaration ), 1 );
 					}
 					break;
 				}
