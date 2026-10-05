@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 1.6.7 - 05 October 2026 =
+* Visual Editor: Clearing a field now removes only that property. Previously, it also removed the properties after it in the same rule.
+* Visual Editor: The Font Family Google Font teaser now respects the `siteorigin_premium_upgrade_teaser` filter.
+* Updated Tested up to tag.
+
 = 1.6.6 - 21 May 2026 =
 * Fixed admin field heights and toolbar button layout for WordPress 7.0 form control changes.
 
