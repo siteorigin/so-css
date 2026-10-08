@@ -276,9 +276,18 @@
             var link = el.closest('a[href]');
             var linkContainer = this.$('.socss-link');
             if( link.length ) {
-                linkContainer.show().find('a')
-                    .html( link.attr('href').replace(/[\?&]*so_css_preview=1/, '') )
-                    .attr('href', link.attr('href') );
+                var href = link.attr('href');
+                var linkAnchor = linkContainer.show().find('a')
+                    .text( href.replace(/[\?&]*so_css_preview=1/, '') );
+
+                // Only treat http(s) URLs as navigable. A non-http(s) value
+                // (javascript:, data:, protocol-relative) is shown as the label
+                // text but kept out of the live href attribute.
+                if( /^https?:\/\//i.test( href ) ) {
+                    linkAnchor.attr('href', href);
+                } else {
+                    linkAnchor.removeAttr('href');
+                }
             }
             else {
                 linkContainer.hide();
