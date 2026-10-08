@@ -157,14 +157,19 @@
                 var cel = $(el);
                 do {
                     var selector = socss.fn.elSelector( cel );
+
+                    // Escape the selector for display, then wrap known important
+                    // classes in <strong>. The raw selector is left untouched for
+                    // any non-display use.
+                    var display = _.escape( selector );
                     thisView.importantClasses.forEach( function( importantClass ) {
-                        if ( selector.indexOf( importantClass ) >= 0 ) {
+                        if ( display.indexOf( importantClass ) >= 0 ) {
                             var selectorRegex = new RegExp( '(' + importantClass + '\\d+)', 'g' );
-                            selector = selector.replace( selectorRegex, "<strong>$1</strong>");
+                            display = display.replace( selectorRegex, "<strong>$1</strong>");
                         }
                     } );
 
-                    $( this.selectorTemplate( { selector: selector } ) )
+                    $( this.selectorTemplate( { selector: display } ) )
                         .prependTo($h)
                         .data('el', cel);
                     cel = cel.parent();
@@ -238,7 +243,7 @@
 
             _.each( selectors, function( selector ){
                 container.append(
-                    $( thisView.selectorTemplate( selector ) )
+                    $( thisView.selectorTemplate( { selector: _.escape( selector.selector ) } ) )
                         .data( selector )
                 );
             } );
