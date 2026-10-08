@@ -12,3 +12,7 @@ tests/results
 tests/screenshots
 
 so-tests.env
+
+# Local planning and run working files (never committed)
+docs/plans/
+tasks/runs/
