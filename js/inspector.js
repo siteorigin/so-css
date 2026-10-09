@@ -157,14 +157,19 @@
                 var cel = $(el);
                 do {
                     var selector = socss.fn.elSelector( cel );
+
+                    // Escape the selector for display, then wrap known important
+                    // classes in <strong>. The raw selector is left untouched for
+                    // any non-display use.
+                    var display = _.escape( selector );
                     thisView.importantClasses.forEach( function( importantClass ) {
-                        if ( selector.indexOf( importantClass ) >= 0 ) {
+                        if ( display.indexOf( importantClass ) >= 0 ) {
                             var selectorRegex = new RegExp( '(' + importantClass + '\\d+)', 'g' );
-                            selector = selector.replace( selectorRegex, "<strong>$1</strong>");
+                            display = display.replace( selectorRegex, "<strong>$1</strong>");
                         }
                     } );
 
-                    $( this.selectorTemplate( { selector: selector } ) )
+                    $( this.selectorTemplate( { selector: display } ) )
                         .prependTo($h)
                         .data('el', cel);
                     cel = cel.parent();
@@ -238,7 +243,7 @@
 
             _.each( selectors, function( selector ){
                 container.append(
-                    $( thisView.selectorTemplate( selector ) )
+                    $( thisView.selectorTemplate( { selector: _.escape( selector.selector ) } ) )
                         .data( selector )
                 );
             } );
@@ -276,9 +281,18 @@
             var link = el.closest('a[href]');
             var linkContainer = this.$('.socss-link');
             if( link.length ) {
-                linkContainer.show().find('a')
-                    .html( link.attr('href').replace(/[\?&]*so_css_preview=1/, '') )
-                    .attr('href', link.attr('href') );
+                var href = link.attr('href');
+                var linkAnchor = linkContainer.show().find('a')
+                    .text( href.replace(/[\?&]*so_css_preview=1/, '') );
+
+                // Keep safe links navigable but drop dangerous schemes
+                // (javascript:, data:, vbscript: and the like) from the live
+                // href attribute. The full value is still shown as label text.
+                if( socss.fn.safeHref( href ) ) {
+                    linkAnchor.attr('href', href);
+                } else {
+                    linkAnchor.removeAttr('href');
+                }
             }
             else {
                 linkContainer.hide();
@@ -519,6 +533,28 @@
         }
 
         return elName;
+    };
+
+    // Returns true when a link's href may be assigned to the displayed anchor.
+    // A value with no scheme (relative path, fragment, query, protocol-relative)
+    // is allowed; among schemed values only http, https, mailto and tel are.
+    // Control characters and whitespace are stripped first, the way browsers do,
+    // so an obfuscated scheme such as "java\tscript:" cannot slip through.
+    socss.fn.safeHref = function( href ) {
+        if ( href === undefined || href === null ) {
+            return true;
+        }
+
+        var normalized = String( href ).replace( /[\u0000-\u0020\uFFFD]+/g, '' );
+        var match = normalized.match( /^([a-z][a-z0-9+.\-]*):/i );
+
+        if ( ! match ) {
+            return true;
+        }
+
+        var scheme = match[1].toLowerCase();
+
+        return scheme === 'http' || scheme === 'https' || scheme === 'mailto' || scheme === 'tel';
     };
 
     window.socssInspector = socss;
