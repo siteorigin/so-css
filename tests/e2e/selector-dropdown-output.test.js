@@ -321,6 +321,7 @@ test( 'Clicking menu item selectors from the preview adds no markup to the visua
 		return selectors;
 	} );
 	expect( offered ).toContain( '.menu-item' );
+	expect( offered ).not.toContain( `.${ HOSTILE_CLASS }` );
 
 	const result = await readDropdown( page );
 	expect( result.probeNodes ).toBe( 0 );
@@ -328,4 +329,5 @@ test( 'Clicking menu item selectors from the preview adds no markup to the visua
 		expect( option.children ).toBe( 0 );
 	} );
 	expect( result.options.map( ( option ) => option.value ) ).toContain( '.menu-item' );
+	expect( result.options.map( ( option ) => option.text ) ).not.toContain( `.${ HOSTILE_CLASS }` );
 } );
