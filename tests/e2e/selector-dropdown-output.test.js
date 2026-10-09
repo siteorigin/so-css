@@ -1,10 +1,10 @@
 /**
  * Visual editor selector dropdown output.
  *
- * The visual editor lists every rule of the CSS in a dropdown. Selectors can
- * come from the front-end inspector, which reads them from page markup, so
- * the dropdown must show each selector as text and match it exactly, never
- * insert it as markup.
+ * The visual editor lists the CSS's style rules, including those inside
+ * @media, in a dropdown. Selectors can come from the front-end inspector,
+ * which reads them from page markup, so the dropdown must show each selector
+ * as text and match it exactly, never insert it as markup.
  *
  * Runs via `npm run tests`, which starts a throwaway Playground site. Point
  * tests/so-tests.env only at a disposable site. The CSS is placed in the

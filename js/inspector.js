@@ -215,8 +215,8 @@
                     const existingSelectors = new Set( selectors.map( s => s.selector ) );
 
                     // If a class isn't already present, add it to the selectors array.
-                    // Only plain class names are used: anything CSS.escape would change
-                    // can't be written as a single class selector.
+                    // Only plain class names are used. A class that CSS.escape would change
+                    // can't follow the dot as written, so it's skipped.
                     parentClasses.forEach( cls => {
                         if ( ! cls || CSS.escape( cls ) !== cls ) {
                             return;

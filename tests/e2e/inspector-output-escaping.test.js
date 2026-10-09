@@ -354,8 +354,8 @@ test( 'Menu item classes are offered once each, and only when they are plain cla
 		host.id = 'socss-xss-fixture';
 		document.body.appendChild( host );
 		// menu-item-7 repeats; foo.bar is one class that .foo.bar would
-		// mistake for foo and bar together; md:flex and 1a can't be written
-		// as a plain class selector; the trailing space leaves an empty entry.
+		// mistake for foo and bar together; md:flex and 1a only work after the
+		// dot when escaped; the trailing space leaves an empty entry.
 		host.innerHTML =
 			'<li class="menu-item menu-item-7 menu-item-7 foo bar foo.bar md:flex 1a é ">' +
 			'<a class="probe-menu-link" href="http://e.test/">m</a>' +
