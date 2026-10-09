@@ -193,32 +193,70 @@ test( 'A link URL is displayed as text, not inserted as markup.', async ( { page
 	expect( result.href ).toBe( 'http://e.test/?x=<b/data-xss-probe=1>' );
 } );
 
-// Each non-http(s) scheme is kept out of the live href but shown as the label.
-for ( const scheme of [ 'data:text/plain,x', 'javascript:void(0)', '//evil.example/x' ] ) {
-	test( `A non-http(s) link URL (${ scheme }) is kept out of the href attribute.`, async ( { page } ) => {
-		const result = await page.evaluate( ( href ) => {
-			const $ = window.jQuery;
-			const host = document.createElement( 'div' );
-			host.id = 'socss-xss-fixture';
-			document.body.appendChild( host );
-			const anchor = document.createElement( 'a' );
-			anchor.id = 'probe-scheme';
-			// setAttribute keeps the exact scheme string (no parser resolution).
-			anchor.setAttribute( 'href', href );
-			anchor.textContent = 'd';
-			host.appendChild( anchor );
+/**
+ * Drives setActiveEl on an anchor with the given href and reports the displayed
+ * link's href attribute and label text.
+ *
+ * @param {import('@playwright/test').Page} page The Playwright page object.
+ * @param {string} href The href to set on the fixture anchor.
+ *
+ * @return {Promise<Object>} { hasHref, href, labelText }.
+ */
+const inspectHref = ( page, href ) => page.evaluate( ( value ) => {
+	const $ = window.jQuery;
+	const existing = document.getElementById( 'socss-xss-fixture' );
+	if ( existing ) {
+		existing.remove();
+	}
+	const host = document.createElement( 'div' );
+	host.id = 'socss-xss-fixture';
+	document.body.appendChild( host );
+	const anchor = document.createElement( 'a' );
+	anchor.id = 'probe-scheme';
+	// setAttribute keeps the exact string (no parser resolution).
+	anchor.setAttribute( 'href', value );
+	anchor.textContent = 'x';
+	host.appendChild( anchor );
 
-			window.socssInspector.mainInspector.setActiveEl( $( '#probe-scheme' ) );
+	window.socssInspector.mainInspector.setActiveEl( $( '#probe-scheme' ) );
 
-			const linkAnchor = document.querySelector( '.socss-link a' );
-			return {
-				hasHref: linkAnchor ? linkAnchor.hasAttribute( 'href' ) : null,
-				labelText: linkAnchor ? linkAnchor.textContent : null,
-			};
-		}, scheme );
+	const linkAnchor = document.querySelector( '.socss-link a' );
+	return {
+		hasHref: linkAnchor ? linkAnchor.hasAttribute( 'href' ) : null,
+		href: linkAnchor ? linkAnchor.getAttribute( 'href' ) : null,
+		labelText: linkAnchor ? linkAnchor.textContent : null,
+	};
+}, href );
 
+// Safe links keep a usable href: no scheme (relative, fragment, query,
+// protocol-relative) and the http/https/mailto/tel schemes.
+for ( const href of [
+	'/about', 'about.html', '#top', '?p=2', '//cdn.example/x',
+	'mailto:a@b.com', 'tel:+123', 'http://x.test/', 'HTTPS://X.test/', '',
+] ) {
+	test( `A safe link URL (${ JSON.stringify( href ) }) keeps its href.`, async ( { page } ) => {
+		const result = await inspectHref( page, href );
+		expect( result.hasHref ).toBe( true );
+		expect( result.href ).toBe( href );
+	} );
+}
+
+// Dangerous schemes are dropped from the live href but still shown as the label,
+// including whitespace/case-obfuscated variants.
+for ( const href of [
+	'javascript:alert(1)', 'data:text/html,x', 'vbscript:msgbox(1)',
+	'  javascript:alert(1)', 'JaVaScript:alert(1)', 'java\tscript:alert(1)',
+	'\u0000javascript:alert(1)', '�javascript:alert(1)',
+	'file:///etc/passwd', 'blob:http://x.test/abc',
+] ) {
+	test( `A dangerous link URL (${ JSON.stringify( href ) }) is kept out of the href attribute.`, async ( { page } ) => {
+		const result = await inspectHref( page, href );
+		// The security property: the dangerous value never reaches the live href.
 		expect( result.hasHref ).toBe( false );
-		expect( result.labelText ).toBe( scheme );
+		// It is still shown as text, not dropped. (The browser may normalize
+		// control characters in the label, so this is a non-empty check.)
+		expect( typeof result.labelText ).toBe( 'string' );
+		expect( result.labelText.length ).toBeGreaterThan( 0 );
 	} );
 }
 

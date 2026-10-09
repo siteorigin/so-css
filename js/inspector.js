@@ -285,10 +285,10 @@
                 var linkAnchor = linkContainer.show().find('a')
                     .text( href.replace(/[\?&]*so_css_preview=1/, '') );
 
-                // Only treat http(s) URLs as navigable. A non-http(s) value
-                // (javascript:, data:, protocol-relative) is shown as the label
-                // text but kept out of the live href attribute.
-                if( /^https?:\/\//i.test( href ) ) {
+                // Keep safe links navigable but drop dangerous schemes
+                // (javascript:, data:, vbscript: and the like) from the live
+                // href attribute. The full value is still shown as label text.
+                if( socss.fn.safeHref( href ) ) {
                     linkAnchor.attr('href', href);
                 } else {
                     linkAnchor.removeAttr('href');
@@ -533,6 +533,28 @@
         }
 
         return elName;
+    };
+
+    // Returns true when a link's href may be assigned to the displayed anchor.
+    // A value with no scheme (relative path, fragment, query, protocol-relative)
+    // is allowed; among schemed values only http, https, mailto and tel are.
+    // Control characters and whitespace are stripped first, the way browsers do,
+    // so an obfuscated scheme such as "java\tscript:" cannot slip through.
+    socss.fn.safeHref = function( href ) {
+        if ( href === undefined || href === null ) {
+            return true;
+        }
+
+        var normalized = String( href ).replace( /[\u0000-\u0020\uFFFD]+/g, '' );
+        var match = normalized.match( /^([a-z][a-z0-9+.\-]*):/i );
+
+        if ( ! match ) {
+            return true;
+        }
+
+        var scheme = match[1].toLowerCase();
+
+        return scheme === 'http' || scheme === 'https' || scheme === 'mailto' || scheme === 'tel';
     };
 
     window.socssInspector = socss;
