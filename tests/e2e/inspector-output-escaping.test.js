@@ -381,3 +381,61 @@ test( 'Menu item classes are offered once each, and only when they are plain cla
 	expect( counts[ '.1a' ] ).toBeUndefined();
 	expect( counts[ '.' ] ).toBeUndefined();
 } );
+
+test( 'Hovering the selector rows for a real menu item fires the highlighter without error.', async ( { page } ) => {
+	const pageErrors = [];
+	page.on( 'pageerror', ( error ) => pageErrors.push( String( error ) ) );
+
+	await page.evaluate( () => {
+		const $ = window.jQuery;
+		const host = document.createElement( 'div' );
+		host.id = 'socss-xss-fixture';
+		document.body.appendChild( host );
+		// The exact class string WordPress core gives a classic menu item,
+		// plus a Tailwind-style class and a markup-shaped class a page might
+		// carry. Only the plain core classes may be offered.
+		host.innerHTML =
+			'<ul class="menu"><li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-30387 md:flex x&lt;b/data-xss-probe=1&gt;">' +
+			'<a class="probe-menu-link" href="http://e.test/">Item</a>' +
+			'</li></ul>';
+
+		window.socssInspector.mainInspector.setActiveEl( $( '.probe-menu-link' ) );
+	} );
+
+	const rows = page.locator( '.socss-selectors-window > .socss-selector' );
+	const count = await rows.count();
+	expect( count ).toBeGreaterThan( 0 );
+
+	// Real mouse hover over each row, which fires the row's mouseenter ->
+	// hl.highlight( selector ). An unescaped selector would throw here.
+	for ( let i = 0; i < count; i++ ) {
+		await rows.nth( i ).hover();
+	}
+
+	const result = await page.evaluate( () => {
+		const $ = window.jQuery;
+		const offered = $( '.socss-selectors-window > .socss-selector' )
+			.map( function () {
+				return $( this ).data( 'selector' );
+			} )
+			.get();
+		return {
+			offered,
+			highlighterNodes: document.querySelectorAll( '.socss-highlight, [class*="highlight"]' ).length,
+			probeNodes: document.querySelectorAll( '[data-xss-probe]' ).length,
+		};
+	} );
+
+	expect( pageErrors ).toEqual( [] );
+	expect( result.probeNodes ).toBe( 0 );
+	// Every plain core menu class is offered.
+	for ( const selector of [
+		'.menu-item', '.menu-item-type-post_type', '.menu-item-object-page',
+		'.menu-item-has-children', '.menu-item-30387',
+	] ) {
+		expect( result.offered ).toContain( selector );
+	}
+	// The escaping-required classes are not.
+	expect( result.offered ).not.toContain( '.md:flex' );
+	expect( result.offered ).not.toContain( '.x<b/data-xss-probe=1>' );
+} );
