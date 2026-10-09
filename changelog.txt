@@ -1,5 +1,8 @@
 == Changelog ==
 
+= 1.6.8 - 09 October 2026 =
+* Inspector: Improved output handling for links and selectors.
+
 = 1.6.7 - 05 October 2026 =
 * Visual Editor: Clearing a field now removes only that property. Previously, it also removed the properties after it in the same rule.
 * Visual Editor: The Font Family Google Font teaser now respects the `siteorigin_premium_upgrade_teaser` filter.
