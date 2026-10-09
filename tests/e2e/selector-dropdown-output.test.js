@@ -161,22 +161,58 @@ const addSelector = ( page, selector ) => page.evaluate(
 	selector
 );
 
+// A menu item whose class carries markup, as stored post content can hold it.
+const HOSTILE_CLASS = `x<b/${ PROBE }=9>`;
+const MENU_POST_CONTENT = `<!-- wp:html --><ul><li class="menu-item x&lt;b/${ PROBE }=9&gt;"><a class="probe-menu-link" href="#">menu link</a></li></ul><!-- /wp:html -->`;
+
 let activatedPluginId = null;
+let postId = null;
+let postLink = null;
 
 test.beforeAll( async () => {
 	const requestUtils = await setupRequestUtils();
-	const plugins = await requestUtils.rest( { path: '/wp/v2/plugins' } );
-	await requestUtils.request.dispose();
 
-	const plugin = findPluginUnderTest( plugins );
+	try {
+		const plugins = await requestUtils.rest( { path: '/wp/v2/plugins' } );
+		const plugin = findPluginUnderTest( plugins );
 
-	if ( plugin.status !== 'active' ) {
-		await setPluginStatus( plugin.plugin, 'active' );
-		activatedPluginId = plugin.plugin;
+		if ( plugin.status !== 'active' ) {
+			await setPluginStatus( plugin.plugin, 'active' );
+			activatedPluginId = plugin.plugin;
+		}
+
+		const post = await requestUtils.rest( {
+			method: 'POST',
+			path: '/wp/v2/posts',
+			data: {
+				title: 'SiteOrigin CSS selector dropdown',
+				status: 'publish',
+				content: MENU_POST_CONTENT,
+			},
+		} );
+		postId = post.id;
+		postLink = post.link;
+	} finally {
+		await requestUtils.request.dispose();
 	}
 } );
 
 test.afterAll( async () => {
+	const requestUtils = await setupRequestUtils();
+
+	try {
+		if ( postId ) {
+			await requestUtils.rest( {
+				method: 'DELETE',
+				path: `/wp/v2/posts/${ postId }`,
+				params: { force: true },
+			} );
+			postId = null;
+		}
+	} finally {
+		await requestUtils.request.dispose();
+	}
+
 	if ( activatedPluginId ) {
 		await setPluginStatus( activatedPluginId, 'inactive' );
 		activatedPluginId = null;
@@ -247,4 +283,49 @@ test( 'A new markup-shaped selector is added as text.', async ( { page } ) => {
 	expect( added ).toHaveLength( 1 );
 	expect( added[ 0 ].children ).toBe( 0 );
 	expect( added[ 0 ].value ).toBe( selector );
+} );
+
+test( 'Clicking menu item selectors from the preview adds no markup to the visual editor.', async ( { page } ) => {
+	// A plain seed, so any markup in the dropdown can only come from the page.
+	await openVisualEditor( page, '.entry-title {\n  color: #1d3557;\n}' );
+
+	// The visual editor opens expanded, with the preview frame. Point it at
+	// the post holding the hostile menu item.
+	const iframe = page.locator( '#preview-iframe' );
+	await iframe.evaluate( ( el, url ) => {
+		el.src = url + ( url.includes( '?' ) ? '&' : '?' ) + 'so_css_preview=1';
+	}, postLink );
+
+	const frame = await ( await iframe.elementHandle() ).contentFrame();
+	await frame.waitForSelector( '.probe-menu-link', { state: 'attached' } );
+	await frame.waitForFunction( () => window.socssInspector && window.socssInspector.mainInspector );
+
+	// The hostile class reached the page intact.
+	const className = await frame.evaluate(
+		() => document.querySelector( '.probe-menu-link' ).parentElement.className
+	);
+	expect( className ).toBe( `menu-item ${ HOSTILE_CLASS }` );
+
+	// Inspect the link, then click every selector the inspector offers.
+	const offered = await frame.evaluate( () => {
+		const $ = window.jQuery;
+		window.socssInspector.mainInspector.setActiveEl( $( '.probe-menu-link' ) );
+
+		const rows = $( '.socss-selectors-window > .socss-selector' );
+		const selectors = rows.map( function () {
+			return $( this ).data( 'selector' );
+		} ).get();
+		rows.each( function () {
+			$( this ).trigger( 'click' );
+		} );
+		return selectors;
+	} );
+	expect( offered ).toContain( '.menu-item' );
+
+	const result = await readDropdown( page );
+	expect( result.probeNodes ).toBe( 0 );
+	result.options.forEach( ( option ) => {
+		expect( option.children ).toBe( 0 );
+	} );
+	expect( result.options.map( ( option ) => option.value ) ).toContain( '.menu-item' );
 } );
