@@ -244,7 +244,7 @@ test( 'Adding a selector that already has a rule selects it without adding a rul
 	const before = await readDropdown( page );
 
 	// The parser keeps the rule's own whitespace, so take its exact selector.
-	const spaced = before.options.find( ( option ) => option.text.startsWith( '.c' ) ).value;
+	const spaced = before.options.find( ( option ) => option.text.startsWith( '.c' ) ).text;
 	expect( spaced ).toMatch( /\s{2,}/ );
 
 	for ( const selector of [ '.a', '.a > .b', 'a:hover', '&:not(.x)', spaced ] ) {
