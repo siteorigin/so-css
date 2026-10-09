@@ -260,16 +260,16 @@ for ( const href of [
 	} );
 }
 
-test( 'Element selectors are escaped in the hierarchy and selector lists, and raw values survive.', async ( { page } ) => {
+test( 'Element selectors are escaped in the hierarchy, and a hostile menu item class is not offered.', async ( { page } ) => {
 	const result = await page.evaluate( ( probe ) => {
 		const $ = window.jQuery;
 		const host = document.createElement( 'div' );
 		host.id = 'socss-xss-fixture';
 		document.body.appendChild( host );
-		// Hostile class on the .menu-item ancestor (reaches the selectors
-		// window via the parentClasses branch) and a hostile id on the
-		// inspected anchor (reaches the hierarchy bar via elSelector). A real
-		// menu-item-7 class exercises the <strong> highlight.
+		// Hostile class on the .menu-item ancestor (the parentClasses branch
+		// must not offer it) and a hostile id on the inspected anchor (reaches
+		// the hierarchy bar via elSelector). A real menu-item-7 class exercises
+		// the <strong> highlight.
 		host.innerHTML =
 			`<li class="menu-item menu-item-7 x&lt;b/${ probe }=1&gt;">` +
 			`<a id="y&lt;b/${ probe }=2&gt;" class="probe-cls" href="http://e.test/">m</a>` +
@@ -287,19 +287,20 @@ test( 'Element selectors are escaped in the hierarchy and selector lists, and ra
 
 		window.socssInspector.mainInspector.setActiveEl( $( '.probe-cls' ) );
 
-		const rawSelector = '.x<b/data-xss-probe=1>';
+		const rowFor = ( selector ) => {
+			let found = null;
+			$( '.socss-selectors-window > .socss-selector' ).each( function () {
+				if ( $( this ).data( 'selector' ) === selector ) {
+					found = this;
+				}
+			} );
+			return found;
+		};
 
-		// The selectors-window row carrying the hostile class.
-		let row = null;
-		$( '.socss-selectors-window > .socss-selector' ).each( function () {
-			if ( $( this ).data( 'selector' ) === rawSelector ) {
-				row = this;
-			}
-		} );
-		const rowData = row ? $( row ).data( 'selector' ) : null;
-		const rowText = row ? row.textContent : null;
-		if ( row ) {
-			$( row ).trigger( 'click' );
+		const hostileRow = rowFor( '.x<b/data-xss-probe=1>' );
+		const classRow = rowFor( '.menu-item-7' );
+		if ( classRow ) {
+			$( classRow ).trigger( 'click' );
 		}
 
 		// The hierarchy row for the <li> ancestor should carry the highlight.
@@ -322,9 +323,8 @@ test( 'Element selectors are escaped in the hierarchy and selector lists, and ra
 			probeNodesSelectors: document.querySelectorAll(
 				`.socss-selectors-window [${ probe }]`
 			).length,
-			rowFound: !! row,
-			rowData,
-			rowText,
+			hostileRowFound: !! hostileRow,
+			classRowText: classRow ? classRow.textContent : null,
 			clickPayload,
 			strongCount: strongs.length,
 			strongText: strongs.length ? strongs[ 0 ].textContent : null,
@@ -336,14 +336,48 @@ test( 'Element selectors are escaped in the hierarchy and selector lists, and ra
 	expect( result.probeNodesHierarchy ).toBe( 0 );
 	expect( result.probeNodesSelectors ).toBe( 0 );
 
-	// The hostile selector is shown literally and its raw value is preserved
-	// for the row data and the click_selector event.
-	expect( result.rowFound ).toBe( true );
-	expect( result.rowText ).toContain( '.x<b/data-xss-probe=1>' );
-	expect( result.rowData ).toBe( '.x<b/data-xss-probe=1>' );
-	expect( result.clickPayload ).toBe( '.x<b/data-xss-probe=1>' );
+	// The hostile class is never offered as a selector, while a plain menu
+	// item class is, and clicking it sends that selector.
+	expect( result.hostileRowFound ).toBe( false );
+	expect( result.classRowText ).toBe( '.menu-item-7' );
+	expect( result.clickPayload ).toBe( '.menu-item-7' );
 
 	// The legitimate important-class highlight still renders as real <strong>.
 	expect( result.strongCount ).toBe( 1 );
 	expect( result.strongText ).toBe( 'menu-item-7' );
+} );
+
+test( 'Menu item classes are offered once each, and only when they are plain class names.', async ( { page } ) => {
+	const counts = await page.evaluate( () => {
+		const $ = window.jQuery;
+		const host = document.createElement( 'div' );
+		host.id = 'socss-xss-fixture';
+		document.body.appendChild( host );
+		// menu-item-7 repeats; foo.bar is one class that .foo.bar would
+		// mistake for foo and bar together; md:flex and 1a can't be written
+		// as a plain class selector; the trailing space leaves an empty entry.
+		host.innerHTML =
+			'<li class="menu-item menu-item-7 menu-item-7 foo bar foo.bar md:flex 1a é ">' +
+			'<a class="probe-menu-link" href="http://e.test/">m</a>' +
+			'</li>';
+
+		window.socssInspector.mainInspector.setActiveEl( $( '.probe-menu-link' ) );
+
+		const offered = {};
+		$( '.socss-selectors-window > .socss-selector' ).each( function () {
+			const selector = $( this ).data( 'selector' );
+			offered[ selector ] = ( offered[ selector ] || 0 ) + 1;
+		} );
+		return offered;
+	} );
+
+	expect( counts[ '.menu-item' ] ).toBe( 1 );
+	expect( counts[ '.menu-item-7' ] ).toBe( 1 );
+	expect( counts[ '.foo' ] ).toBe( 1 );
+	expect( counts[ '.bar' ] ).toBe( 1 );
+	expect( counts[ '.é' ] ).toBe( 1 );
+	expect( counts[ '.foo.bar' ] ).toBeUndefined();
+	expect( counts[ '.md:flex' ] ).toBeUndefined();
+	expect( counts[ '.1a' ] ).toBeUndefined();
+	expect( counts[ '.' ] ).toBeUndefined();
 } );

@@ -215,11 +215,19 @@
                     const existingSelectors = new Set( selectors.map( s => s.selector ) );
 
                     // If a class isn't already present, add it to the selectors array.
+                    // Only plain class names are used: anything CSS.escape would change
+                    // can't be written as a single class selector.
                     parentClasses.forEach( cls => {
-                        if ( ! existingSelectors.has( selector ) ) {
+                        if ( ! cls || CSS.escape( cls ) !== cls ) {
+                            return;
+                        }
+
+                        const classSelector = '.' + cls;
+                        if ( ! existingSelectors.has( classSelector ) ) {
+                            existingSelectors.add( classSelector );
                             selectors.push( {
-                                selector: '.' + cls,
-                                specificity: getSelectorSpecificity( '.' + cls )
+                                selector: classSelector,
+                                specificity: getSelectorSpecificity( classSelector )
                             } );
                         }
                     } );
