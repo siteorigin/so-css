@@ -162,7 +162,7 @@ test.afterAll( async () => {
 	}
 } );
 
-test( 'Inspecting elements with fuzzed classes and ids never inserts markup and only offers usable selectors.', async ( { page } ) => {
+test( 'Inspecting fuzzed menu items offers each valid class once, rejects the rest, and never inserts markup.', async ( { page } ) => {
 	await login( page );
 	await page.goto( `${ postLink }?so_css_preview=1` );
 	await page.waitForFunction(
@@ -197,15 +197,29 @@ test( 'Inspecting elements with fuzzed classes and ids never inserts markup and 
 
 		const failures = [];
 
+		// Tokens that are not plain class names: a markup tag and a set of
+		// borderline cases. None may be offered as a menu-item selector.
+		const rejected = [
+			`<img ${ probe }=R>`, 'md:flex', 'w-1/2', '1a', 'foo.bar', 'a"b', "a'b",
+		];
+
 		for ( let i = 0; i < iterations; i++ ) {
-			// Each value is a complete `<img>` tag carrying the probe attribute,
-			// wrapped in random fragments. The tag is what an unescaped display
-			// would turn into a probe node, so invariant 1 can see a leak; the
-			// fragments vary the surrounding selector shape.
+			// The menu item carries, in random order: one plain class (valid,
+			// listed twice to exercise dedup), one rejected token, and a markup
+			// tag. So every iteration probes acceptance, dedup AND rejection.
+			// The filter acts on these menu-item classes; the inspected link is
+			// kept plain here, and the hostile-id/class path on the inspected
+			// element is covered by inspector-output-escaping.test.js.
+			const validClass = 'vc' + i;
+			const reject = rejected[ Math.floor( rng() * rejected.length ) ];
 			const tag = `<img ${ probe }=${ i }>`;
-			const menuClass = fuzz( Math.floor( rng() * 3 ) ) + tag + fuzz( Math.floor( rng() * 3 ) );
-			const elClass = fuzz( Math.floor( rng() * 3 ) ) + tag + fuzz( Math.floor( rng() * 3 ) );
-			const elId = fuzz( Math.floor( rng() * 2 ) ) + tag + fuzz( Math.floor( rng() * 2 ) );
+			const parts = [ validClass, validClass, reject, tag ];
+			// Fisher-Yates shuffle with the seeded rng.
+			for ( let k = parts.length - 1; k > 0; k-- ) {
+				const j = Math.floor( rng() * ( k + 1 ) );
+				[ parts[ k ], parts[ j ] ] = [ parts[ j ], parts[ k ] ];
+			}
+			const menuClass = parts.join( ' ' );
 
 			// The HTML parser decodes entities in attribute values, as a real
 			// stored page would. setAttribute keeps the exact string.
@@ -214,8 +228,7 @@ test( 'Inspecting elements with fuzzed classes and ids never inserts markup and 
 			li.setAttribute( 'class', 'menu-item ' + menuClass );
 			const a = document.createElement( 'a' );
 			a.setAttribute( 'href', 'http://e.test/' );
-			a.setAttribute( 'class', elClass + ' socss-fuzz-link' );
-			a.setAttribute( 'id', elId );
+			a.setAttribute( 'class', 'socss-fuzz-link' );
 			li.appendChild( a );
 			host.appendChild( li );
 
@@ -230,7 +243,23 @@ test( 'Inspecting elements with fuzzed classes and ids never inserts markup and 
 			if ( document.querySelectorAll(
 				`#socss-inspector-interface [${ probe }]`
 			).length ) {
-				failures.push( { i, where: 'inspector-markup', menuClass, elClass, elId } );
+				failures.push( { i, where: 'inspector-markup', menuClass } );
+			}
+
+			const offered = $( '.socss-selectors-window > .socss-selector' )
+				.map( function () {
+					return $( this ).data( 'selector' );
+				} )
+				.get();
+
+			// Invariant 1b: the plain class is offered exactly once (acceptance
+			// and dedup), and the rejected token is never offered.
+			const validCount = offered.filter( ( s ) => s === '.' + validClass ).length;
+			if ( validCount !== 1 ) {
+				failures.push( { i, where: 'valid-class-count', validClass, validCount } );
+			}
+			if ( offered.includes( '.' + reject ) ) {
+				failures.push( { i, where: 'rejected-offered', reject } );
 			}
 
 			// Invariant 2: every offered selector is usable and meaningful. It is

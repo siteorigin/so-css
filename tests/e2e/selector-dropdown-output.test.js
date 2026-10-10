@@ -185,6 +185,9 @@ const saveCss = async ( page, css ) => {
 		page.waitForNavigation(),
 		page.locator( 'input[name="siteorigin_custom_css_save"]' ).click(),
 	] );
+
+	// Confirm the save landed, so a server-side rejection is not read as success.
+	await expect( page.locator( '#custom-css-textarea' ) ).toHaveValue( css );
 };
 
 /**
@@ -247,13 +250,21 @@ test.beforeAll( async ( { browser } ) => {
 } );
 
 test.afterAll( async ( { browser } ) => {
+	// Each cleanup step is independent: a failure in one must not skip the
+	// others. The last error is re-thrown so a broken teardown is still seen.
+	let teardownError = null;
+
 	if ( originalCss !== null ) {
-		await withAdminPage( browser, ( page ) => saveCss( page, originalCss ) );
+		try {
+			// saveCss asserts the restored value, so a rejected restore throws.
+			await withAdminPage( browser, ( page ) => saveCss( page, originalCss ) );
+		} catch ( error ) {
+			teardownError = error;
+		}
 		originalCss = null;
 	}
 
 	const requestUtils = await setupRequestUtils();
-
 	try {
 		if ( postId ) {
 			await requestUtils.rest( {
@@ -263,13 +274,23 @@ test.afterAll( async ( { browser } ) => {
 			} );
 			postId = null;
 		}
+	} catch ( error ) {
+		teardownError = error;
 	} finally {
 		await requestUtils.request.dispose();
 	}
 
 	if ( activatedPluginId ) {
-		await setPluginStatus( activatedPluginId, 'inactive' );
+		try {
+			await setPluginStatus( activatedPluginId, 'inactive' );
+		} catch ( error ) {
+			teardownError = error;
+		}
 		activatedPluginId = null;
+	}
+
+	if ( teardownError ) {
+		throw teardownError;
 	}
 } );
 
@@ -346,7 +367,11 @@ test( 'A new markup-shaped selector is added as text.', async ( { page } ) => {
 	expect( added[ 0 ].value ).toBe( selector );
 } );
 
-test( 'Clicking menu item selectors from the preview adds no markup to the visual editor.', async ( { page } ) => {
+test( 'A hostile menu item class in the preview is filtered and never offered to the editor.', async ( { page } ) => {
+	// This covers the inspector filter end to end: the hostile class must not
+	// be offered, so clicking the offered selectors adds no markup. The
+	// dropdown's own text rendering is covered by the markup-shaped-selector
+	// and fuzz tests, which feed an untrusted value straight to that sink.
 	// A plain seed, so any markup in the dropdown can only come from the page.
 	await openVisualEditor( page, '.entry-title {\n  color: #1d3557;\n}' );
 
