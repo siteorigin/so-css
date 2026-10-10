@@ -338,3 +338,56 @@ test( 'Clicking menu item selectors from the preview adds no markup to the visua
 	expect( result.options.map( ( option ) => option.value ) ).toContain( '.menu-item' );
 	expect( result.options.map( ( option ) => option.text ) ).not.toContain( `.${ HOSTILE_CLASS }` );
 } );
+
+test( 'Selecting a selector by its option value loads that rule, and an edit saves and persists.', async ( { page } ) => {
+	await login( page );
+	await soGoTo( page, EDITOR_URL );
+	await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible();
+
+	// The second selector carries double whitespace, so its option value (the
+	// raw selector) differs from the text a browser collapses an option's value
+	// to. Selecting by the raw value only works because the option now sets an
+	// explicit value attribute.
+	const spacedSelector = '.aaa  >  .zzz';
+	await page.evaluate(
+		() => document.querySelector( '#so-custom-css-form .CodeMirror' ).CodeMirror.setValue(
+			'.plain {\n  font-size: 11px;\n}\n\n.aaa  >  .zzz {\n  font-size: 22px;\n}'
+		)
+	);
+	await page.locator( '#so-custom-css-form a.editor-visual' ).click();
+	const properties = page.locator( '#so-custom-css-properties' );
+	await expect( properties ).toBeVisible();
+
+	// Select the second rule by the option's raw value. Matching on value, not
+	// label, so it depends on the explicit value attribute carrying the exact
+	// whitespace rather than the browser's collapsed fallback.
+	await properties.locator( '.toolbar select' ).selectOption( { value: spacedSelector } );
+	await properties.locator( '.section-tabs li[data-section="text"]' ).click();
+	const section = properties.locator( '.sections .section[data-section="text"]' );
+	await expect( section ).toBeVisible();
+
+	const fontSize = section.locator( 'tr', { has: page.locator( 'th', { hasText: /^Font Size$/ } ) } )
+		.locator( '.socss-field-input' );
+	await expect( fontSize ).toHaveValue( '22' );
+
+	// Edit the value with real key presses, then save and reload.
+	await fontSize.click();
+	await fontSize.selectText();
+	await fontSize.press( 'Backspace' );
+	await fontSize.type( '33' );
+	await expect( fontSize ).toHaveValue( '33' );
+
+	const saved = page.waitForResponse( ( r ) =>
+		r.url().includes( 'admin-ajax.php' ) &&
+		r.request().method() === 'POST' &&
+		( r.request().postData() || '' ).includes( 'action=socss_save_css' ) && r.ok()
+	);
+	page.on( 'dialog', ( d ) => ( d.type() === 'beforeunload' ? d.accept() : d.dismiss() ) );
+	await page.locator( '#so-custom-css-properties .toolbar .save' ).click();
+	await saved;
+	await page.reload();
+
+	const css = await page.locator( '#custom-css-textarea' ).inputValue();
+	expect( css ).toMatch( /\.aaa\s+>\s+\.zzz\s*\{[^}]*font-size:\s*33px/ );
+	expect( css ).toMatch( /\.plain\s*\{[^}]*font-size:\s*11px/ );
+} );
