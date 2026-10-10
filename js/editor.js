@@ -1330,22 +1330,49 @@
 			socss.view.propertyController.prototype.render.apply( this, arguments );
 			// Set this up as a color picker
 			this.field.minicolors( {} );
-			
+
+			var thisView = this;
+			this.field.on( 'keydown', function ( event ) {
+				// An edit of the field drops keptValue; an arrow or a modifier
+				// shortcut (Ctrl+A, Cmd+C) does not.
+				var typingChar = event.key && event.key.length === 1 &&
+					! event.ctrlKey && ! event.metaKey && ! event.altKey;
+				if ( event.key === 'Backspace' || event.key === 'Delete' || typingChar ) {
+					thisView.keptValue = null;
+				}
+			} );
 		},
-		
+
 		onChange: function () {
-			this.trigger( 'change', this.field.minicolors( 'value' ) );
+			// minicolors fires change during a programmatic setValue; ignore it.
+			if ( this.settingValue ) {
+				return;
+			}
+			// A real colour in the field makes the kept value stale.
+			if ( this.field.minicolors( 'value' ).trim() !== '' ) {
+				this.keptValue = null;
+			}
+			this.trigger( 'change', this.getValue() );
 		},
-		
+
 		getValue: function () {
-			return this.field.minicolors( 'value' ).trim();
+			var value = this.field.minicolors( 'value' ).trim();
+			// While the field is blank, fall back to a value minicolors could
+			// not display (keptValue), so it is never written away as empty.
+			return value === '' && this.keptValue ? this.keptValue : value;
 		},
-		
+
 		setValue: function ( val, options ) {
 			options = _.extend( { silent: false }, options );
-			
+
+			// minicolors blanks a value it cannot display (e.g. a keyword) and
+			// fires change. Suppress that change and remember the value, so it
+			// is not written back as empty and getValue can return it.
+			this.settingValue = true;
 			this.field.minicolors( 'value', val );
-			
+			this.settingValue = false;
+			this.keptValue = val && this.field.minicolors( 'value' ).trim() === '' ? val : null;
+
 			if ( !options.silent ) {
 				this.trigger( 'set_value', val );
 			}
