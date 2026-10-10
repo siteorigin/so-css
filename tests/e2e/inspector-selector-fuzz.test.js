@@ -1,12 +1,17 @@
 /**
- * Fuzz the inspector's selector handling and the editor's dropdown.
+ * Stress the inspector's selector handling and the editor's dropdown.
  *
- * Page markup (a link's menu-item classes, and any element's own classes and
- * ids) becomes selectors the inspector offers, and a click sends one to the
- * visual editor's dropdown. This test feeds thousands of seeded-random class
- * and id strings through those paths and checks the invariants hold for every
- * one: nothing is ever inserted as markup, every offered selector is usable,
- * and the dropdown matches a selector it already holds.
+ * A link's menu-item classes become selectors the inspector offers, and adding
+ * one to the visual editor renders it in the dropdown. Two tests:
+ *
+ * 1. A combinatorial boundary test over the menu-item filter: every iteration
+ *    offers one valid class (listed twice, for dedup), one of a fixed set of
+ *    rejected tokens, and a markup tag, in a seeded-random order. It checks the
+ *    valid class is offered once, the rest are rejected, every offered selector
+ *    is usable, and no markup is inserted.
+ * 2. A random fuzz of the dropdown sink: thousands of seeded-random
+ *    markup-shaped selectors go through addSelector; each must render as text,
+ *    with its option value equal to its text and no duplicate rule.
  *
  * Seeded so a failure is reproducible. Runs via `npm run tests`, which starts
  * a throwaway Playground site. Point tests/so-tests.env only at a disposable
@@ -170,7 +175,7 @@ test( 'Inspecting fuzzed menu items offers each valid class once, rejects the re
 	);
 
 	const result = await page.evaluate( ( args ) => {
-		const { probe, fragments, seed, iterations } = args;
+		const { probe, seed, iterations } = args;
 		const $ = window.jQuery;
 
 		// Inlined so the generator runs in the page with the same seed.
@@ -181,13 +186,6 @@ test( 'Inspecting fuzzed menu items offers each valid class once, rejects the re
 			let t = Math.imul( state ^ ( state >>> 15 ), 1 | state );
 			t = ( t + Math.imul( t ^ ( t >>> 7 ), 61 | t ) ) ^ t;
 			return ( ( t ^ ( t >>> 14 ) ) >>> 0 ) / 4294967296;
-		};
-		const fuzz = ( parts ) => {
-			let out = '';
-			for ( let i = 0; i < parts; i++ ) {
-				out += fragments[ Math.floor( rng() * fragments.length ) ];
-			}
-			return out;
 		};
 
 		const inspector = window.socssInspector.mainInspector;
@@ -297,7 +295,7 @@ test( 'Inspecting fuzzed menu items offers each valid class once, rejects the re
 
 		host.remove();
 		return { failures, probeNodes: document.querySelectorAll( `[${ probe }]` ).length };
-	}, { probe: PROBE, fragments: FRAGMENTS, seed: 0x5eed, iterations: 2000 } );
+	}, { probe: PROBE, seed: 0x5eed, iterations: 2000 } );
 
 	expect( result.probeNodes ).toBe( 0 );
 	expect( result.failures ).toEqual( [] );
