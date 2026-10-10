@@ -1165,8 +1165,8 @@
 						}
 						dropdown.append(
 							$( '<option>' )
-							.html( mediaRule + ': ' + subRule.selectors.join( ',' ) )
-							.attr( 'val', mediaRule + ': ' + subRule.selectors.join( ',' ) )
+							.text( mediaRule + ': ' + subRule.selectors.join( ',' ) )
+							.attr( 'value', mediaRule + ': ' + subRule.selectors.join( ',' ) )
 							.data( 'selector', subRule )
 						);
 					}
@@ -1175,15 +1175,15 @@
 				else {
 					dropdown.append(
 						$( '<option>' )
-						.html( rule.selectors.join( ',' ) )
-						.attr( 'val', rule.selectors.join( ',' ) )
+						.text( rule.selectors.join( ',' ) )
+						.attr( 'value', rule.selectors.join( ',' ) )
 						.data( 'selector', rule )
 					);
 				}
 			}
 			
 			if ( typeof activeSelector === 'undefined' ) {
-				activeSelector = dropdown.find( 'option' ).eq( 0 ).attr( 'val' );
+				activeSelector = dropdown.find( 'option' ).eq( 0 ).attr( 'value' );
 			}
 			if ( !_.isEmpty( activeSelector ) ) {
 				dropdown.val( activeSelector ).trigger( 'change' );
