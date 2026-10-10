@@ -7,8 +7,9 @@
  * as text and match it exactly, never insert it as markup.
  *
  * Runs via `npm run tests`, which starts a throwaway Playground site. Point
- * tests/so-tests.env only at a disposable site. The CSS is placed in the
- * editor without saving, so the site's stylesheet is never changed.
+ * tests/so-tests.env only at a disposable site. Most tests place CSS in the
+ * editor without saving; the save-and-reload test does save, so the site's
+ * stylesheet is captured before the suite and restored after it.
  */
 const {
 	expect,
@@ -165,20 +166,63 @@ const addSelector = ( page, selector ) => page.evaluate(
 const HOSTILE_CLASS = `x<b/${ PROBE }=9>`;
 const MENU_POST_CONTENT = `<!-- wp:html --><ul><li class="menu-item x&lt;b/${ PROBE }=9&gt;"><a class="probe-menu-link" href="#">menu link</a></li></ul><!-- /wp:html -->`;
 
-let activatedPluginId = null;
+/**
+ * Writes CSS to the editor and saves it, mirroring visual-mode-clear-field.
+ *
+ * @param {import('@playwright/test').Page} page The Playwright page object.
+ * @param {string} css The CSS to save.
+ */
+const saveCss = async ( page, css ) => {
+	await soGoTo( page, EDITOR_URL );
+	await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible();
+
+	await page.evaluate(
+		( value ) => document.querySelector( '#so-custom-css-form .CodeMirror' ).CodeMirror.setValue( value ),
+		css
+	);
+
+	await Promise.all( [
+		page.waitForNavigation(),
+		page.locator( 'input[name="siteorigin_custom_css_save"]' ).click(),
+	] );
+};
+
+/**
+ * Runs a callback with a logged-in admin page, then closes it.
+ *
+ * @param {import('@playwright/test').Browser} browser The browser.
+ * @param {Function} callback Receives the page.
+ *
+ * @return {Promise<*>} The callback's result.
+ */
+const withAdminPage = async ( browser, callback ) => {
+	const page = await browser.newPage();
+
+	try {
+		await login( page );
+		return await callback( page );
+	} finally {
+		await page.close();
+	}
+};
+
 let postId = null;
 let postLink = null;
+// The save-and-reload test saves CSS, so the site's stylesheet is captured
+// here and restored in afterAll.
+let originalCss = null;
 
-test.beforeAll( async () => {
+test.beforeAll( async ( { browser } ) => {
 	const requestUtils = await setupRequestUtils();
 
 	try {
 		const plugins = await requestUtils.rest( { path: '/wp/v2/plugins' } );
 		const plugin = findPluginUnderTest( plugins );
 
+		// Ensure active without ever deactivating: deactivating in afterAll
+		// would race a parallel worker still using the plugin.
 		if ( plugin.status !== 'active' ) {
 			await setPluginStatus( plugin.plugin, 'active' );
-			activatedPluginId = plugin.plugin;
 		}
 
 		const post = await requestUtils.rest( {
@@ -195,9 +239,19 @@ test.beforeAll( async () => {
 	} finally {
 		await requestUtils.request.dispose();
 	}
+
+	originalCss = await withAdminPage( browser, async ( page ) => {
+		await soGoTo( page, EDITOR_URL );
+		return page.locator( '#custom-css-textarea' ).inputValue();
+	} );
 } );
 
-test.afterAll( async () => {
+test.afterAll( async ( { browser } ) => {
+	if ( originalCss !== null ) {
+		await withAdminPage( browser, ( page ) => saveCss( page, originalCss ) );
+		originalCss = null;
+	}
+
 	const requestUtils = await setupRequestUtils();
 
 	try {
@@ -211,11 +265,6 @@ test.afterAll( async () => {
 		}
 	} finally {
 		await requestUtils.request.dispose();
-	}
-
-	if ( activatedPluginId ) {
-		await setPluginStatus( activatedPluginId, 'inactive' );
-		activatedPluginId = null;
 	}
 } );
 

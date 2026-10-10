@@ -108,7 +108,6 @@ const setPluginStatus = async ( pluginId, status ) => {
 	}
 };
 
-let activatedPluginId = null;
 let postId = null;
 let postLink = null;
 
@@ -119,9 +118,10 @@ test.beforeAll( async () => {
 		const plugins = await requestUtils.rest( { path: '/wp/v2/plugins' } );
 		const plugin = findPluginUnderTest( plugins );
 
+		// Ensure active without ever deactivating: deactivating in afterAll
+		// would race a parallel worker still using the plugin.
 		if ( plugin.status !== 'active' ) {
 			await setPluginStatus( plugin.plugin, 'active' );
-			activatedPluginId = plugin.plugin;
 		}
 
 		const post = await requestUtils.rest( {
@@ -154,11 +154,6 @@ test.afterAll( async () => {
 		}
 	} finally {
 		await requestUtils.request.dispose();
-	}
-
-	if ( activatedPluginId ) {
-		await setPluginStatus( activatedPluginId, 'inactive' );
-		activatedPluginId = null;
 	}
 } );
 
