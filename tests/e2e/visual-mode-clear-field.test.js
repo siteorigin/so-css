@@ -1,13 +1,15 @@
 /**
- * Visual Mode: clearing a field removes only that declaration.
+ * Visual Mode field behaviour.
  *
- * Regression test for so-css#195. Clearing a field used to delete its
- * declaration and every declaration after it in the rule.
+ * Clearing a field removes only that declaration, not the ones after it
+ * (so-css#195). Opening a rule with a keyword colour (e.g. `color: red`) keeps
+ * that declaration; the Text Color control shows blank for a keyword but the
+ * CSS is preserved, and the colour can still be edited or cleared (so-css#208).
  *
  * Runs via `npm run tests`, which starts a throwaway Playground site. Point
- * tests/so-tests.env only at a disposable site: each run saves the CSS three
- * times, and the plugin keeps the latest 15 revisions, so older revisions on
- * that site can drop off. A CI workflow must build the plugin before running
+ * tests/so-tests.env only at a disposable site: these tests save the CSS
+ * repeatedly, and the plugin keeps the latest 15 revisions, so older revisions
+ * on that site can drop off. A CI workflow must build the plugin before running
  * the tests, because the shared runner skips its own build under GitHub Actions.
  */
 const {
@@ -219,22 +221,24 @@ test.beforeEach( async ( { page } ) => {
 } );
 
 /**
- * Saves the seed CSS, then opens Visual Mode on `.entry-title` with the
+ * Saves the given CSS, then opens Visual Mode on the given selector with the
  * Text tab active.
  *
  * @param {import('@playwright/test').Page} page The Playwright page object.
+ * @param {string} css The CSS to save (defaults to the seed).
+ * @param {string} label The selector to open (defaults to `.entry-title`).
  *
  * @return {Promise<import('@playwright/test').Locator>} The Text section.
  */
-const openTextSection = async ( page ) => {
-	await saveCss( page, SEED_CSS );
+const openTextSection = async ( page, css = SEED_CSS, label = '.entry-title' ) => {
+	await saveCss( page, css );
 
 	await page.locator( '#so-custom-css-form a.editor-visual' ).click();
 
 	const properties = page.locator( '#so-custom-css-properties' );
 	await expect( properties ).toBeVisible();
 
-	await properties.locator( '.toolbar select' ).selectOption( { label: '.entry-title' } );
+	await properties.locator( '.toolbar select' ).selectOption( { label } );
 	await properties.locator( '.section-tabs li[data-section="text"]' ).click();
 
 	const section = properties.locator( '.sections .section[data-section="text"]' );
@@ -318,6 +322,113 @@ test( 'Clearing Text Color keeps the declarations after it.', async ( { page } )
 		'letter-spacing': true,
 	};
 
+	expectDeclarations( await getEditorCss( page ), expected );
+	expectDeclarations( await saveAndReload( page ), expected );
+} );
+
+const openRule = ( page, css ) => openTextSection( page, css, '.a' );
+
+const textColorInput = ( page, section ) =>
+	section.locator( 'tr', { has: page.locator( 'th', { hasText: /^Text Color$/ } ) } )
+		.locator( 'input.socss-property-controller-input' );
+
+// Opening a rule must not drop its colour. A keyword colour (red/blue/RED) is the
+// regression; hex and rgb() must keep working too.
+for ( const { value, pattern } of [
+	{ value: 'red', pattern: /color:\s*red\b/ },
+	{ value: 'blue', pattern: /color:\s*blue\b/ },
+	{ value: 'RED', pattern: /color:\s*RED\b/ },
+	{ value: '#1d3557', pattern: /color:\s*#1d3557\b/ },
+	{ value: 'rgb(255, 0, 0)', pattern: /color:\s*rgb\(\s*255\s*,\s*0\s*,\s*0\s*\)/ },
+] ) {
+	test( `Opening a rule keeps its colour (${ value }).`, async ( { page } ) => {
+		await openRule( page, `.a { color: ${ value }; }` );
+		expect( await getEditorCss( page ) ).toMatch( pattern );
+	} );
+}
+
+test( 'A keyword colour and the declaration after it survive a save and reload.', async ( { page } ) => {
+	await openRule( page, '.a { color: red; font-size: 20px; }' );
+
+	expect( await getEditorCss( page ) ).toMatch( /color:\s*red\b/ );
+
+	const saved = await saveAndReload( page );
+	expect( saved ).toMatch( /color:\s*red\b/ );
+	expect( saved ).toMatch( /font-size:\s*20px\b/ );
+} );
+
+test( 'After opening on a keyword colour, typing a hex updates the rule.', async ( { page } ) => {
+	const section = await openRule( page, '.a { color: red; }' );
+	const input = textColorInput( page, section );
+
+	await input.click();
+	await input.selectText();
+	await input.pressSequentially( '#112233' );
+	await input.press( 'Enter' );
+
+	await expect( async () => {
+		expect( await getEditorCss( page ) ).toMatch( /color:\s*#112233\b/ );
+	} ).toPass();
+} );
+
+test( 'Clearing a displayed colour removes the declaration.', async ( { page } ) => {
+	// Open on a hex, which the control displays, so the field is not blank.
+	const section = await openRule( page, '.a { color: #112233; font-size: 20px; }' );
+	const input = textColorInput( page, section );
+	await expect( input ).toHaveValue( '#112233' );
+
+	await clearInput( input );
+
+	const expected = { color: false, 'font-size': true };
+	expectDeclarations( await getEditorCss( page ), expected );
+	expectDeclarations( await saveAndReload( page ), expected );
+} );
+
+test( 'A navigation key over the blank keyword field does not drop the colour.', async ( { page } ) => {
+	// The field is blank for a keyword colour, so a non-editing key (an arrow)
+	// fires keyup over an empty field. The colour must survive.
+	const section = await openRule( page, '.a { color: red; font-size: 20px; }' );
+	const input = textColorInput( page, section );
+	await expect( input ).toHaveValue( '' );
+
+	await input.click();
+	await input.press( 'ArrowLeft' );
+	await input.press( 'End' );
+
+	const expected = { color: true, 'font-size': true };
+	expectDeclarations( await getEditorCss( page ), expected );
+	expect( await getEditorCss( page ) ).toMatch( /color:\s*red\b/ );
+	const saved = await saveAndReload( page );
+	expect( saved ).toMatch( /color:\s*red\b/ );
+} );
+
+test( 'A modifier shortcut over the blank keyword field does not drop the colour.', async ( { page } ) => {
+	// Ctrl+A / Cmd+C carry a one-character key but are not edits: the field is
+	// unchanged, so the colour must survive.
+	const section = await openRule( page, '.a { color: red; font-size: 20px; }' );
+	const input = textColorInput( page, section );
+	await expect( input ).toHaveValue( '' );
+
+	await input.click();
+	await input.press( 'Control+a' );
+	await input.press( 'Meta+c' );
+
+	expect( await getEditorCss( page ) ).toMatch( /color:\s*red\b/ );
+	expect( await saveAndReload( page ) ).toMatch( /color:\s*red\b/ );
+} );
+
+test( 'Clearing a keyword colour with Backspace removes the declaration.', async ( { page } ) => {
+	// The field is blank for a keyword, but Backspace is an editing key: the
+	// user intends to clear it, so the declaration must be removed.
+	const section = await openRule( page, '.a { color: red; font-size: 20px; }' );
+	const input = textColorInput( page, section );
+	await expect( input ).toHaveValue( '' );
+
+	await input.click();
+	await input.press( 'Backspace' );
+	await input.blur();
+
+	const expected = { color: false, 'font-size': true };
 	expectDeclarations( await getEditorCss( page ), expected );
 	expectDeclarations( await saveAndReload( page ), expected );
 } );
