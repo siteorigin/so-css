@@ -198,9 +198,14 @@ test( 'Inspecting elements with fuzzed classes and ids never inserts markup and 
 		const failures = [];
 
 		for ( let i = 0; i < iterations; i++ ) {
-			const menuClass = fuzz( 1 + Math.floor( rng() * 4 ) );
-			const elClass = fuzz( 1 + Math.floor( rng() * 4 ) );
-			const elId = fuzz( 1 + Math.floor( rng() * 3 ) );
+			// Each value is a complete `<img>` tag carrying the probe attribute,
+			// wrapped in random fragments. The tag is what an unescaped display
+			// would turn into a probe node, so invariant 1 can see a leak; the
+			// fragments vary the surrounding selector shape.
+			const tag = `<img ${ probe }=${ i }>`;
+			const menuClass = fuzz( Math.floor( rng() * 3 ) ) + tag + fuzz( Math.floor( rng() * 3 ) );
+			const elClass = fuzz( Math.floor( rng() * 3 ) ) + tag + fuzz( Math.floor( rng() * 3 ) );
+			const elId = fuzz( Math.floor( rng() * 2 ) ) + tag + fuzz( Math.floor( rng() * 2 ) );
 
 			// The HTML parser decodes entities in attribute values, as a real
 			// stored page would. setAttribute keeps the exact string.
@@ -209,13 +214,8 @@ test( 'Inspecting elements with fuzzed classes and ids never inserts markup and 
 			li.setAttribute( 'class', 'menu-item ' + menuClass );
 			const a = document.createElement( 'a' );
 			a.setAttribute( 'href', 'http://e.test/' );
-			if ( elClass ) {
-				a.setAttribute( 'class', elClass );
-			}
-			if ( elId ) {
-				a.setAttribute( 'id', elId );
-			}
-			a.className = ( a.getAttribute( 'class' ) || '' ) + ' socss-fuzz-link';
+			a.setAttribute( 'class', elClass + ' socss-fuzz-link' );
+			a.setAttribute( 'id', elId );
 			li.appendChild( a );
 			host.appendChild( li );
 
@@ -226,7 +226,7 @@ test( 'Inspecting elements with fuzzed classes and ids never inserts markup and 
 				continue;
 			}
 
-			// Invariant 1: no value was inserted as markup in the inspector.
+			// Invariant 1: none of the probe tags became a node in the inspector.
 			if ( document.querySelectorAll(
 				`#socss-inspector-interface [${ probe }]`
 			).length ) {
@@ -297,9 +297,8 @@ test( 'Adding fuzzed selectors to the dropdown never inserts markup, keeps value
 
 		for ( let i = 0; i < iterations; i++ ) {
 			// Every selector carries a real tag (`<b/...>`) surrounded by random
-			// fragments. Under .html() the tag forms an element in the option
-			// and raises a probe node; under .text() it stays text. So a revert
-			// to .html() fails invariant 1 on every iteration.
+			// fragments. The option must show it as text: the probe tag may form
+			// no node and the option value must equal its text.
 			let body = '';
 			for ( let j = 0; j < Math.floor( rng() * 3 ); j++ ) {
 				body += safe[ Math.floor( rng() * safe.length ) ];

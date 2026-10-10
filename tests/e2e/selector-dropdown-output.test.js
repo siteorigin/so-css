@@ -261,12 +261,19 @@ test( 'A selector found only inside @media is added as a top-level rule.', async
 	await openVisualEditor( page, SEED_CSS );
 	const before = await readDropdown( page );
 
+	// In the seed, .only-in-media lives only inside @media, so no rule for it
+	// starts at column 0.
+	const topLevel = /^\.only-in-media\s*\{/gm;
+	expect( before.css.match( topLevel ) ).toBeNull();
+
 	await addSelector( page, '.only-in-media' );
 	const after = await readDropdown( page );
 
 	expect( after.options.length ).toBe( before.options.length + 1 );
 	expect( after.options.filter( ( option ) => option.value === '.only-in-media' ) ).toHaveLength( 1 );
 	expect( after.selected ).toBe( '.only-in-media' );
+	// A new top-level rule was written, not another one inside @media.
+	expect( after.css.match( topLevel ) ).toHaveLength( 1 );
 } );
 
 test( 'A new markup-shaped selector is added as text.', async ( { page } ) => {
