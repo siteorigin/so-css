@@ -1576,7 +1576,7 @@
 		},
 		
 		setupMeasurementField: function () {
-			var defaultUnit = 'px';
+			var defaultUnit = this.args.defaultUnit || 'px';
 			
 			this.field.hide();
 			this.$el.addClass( this.wrapperClass ).data( 'unit', defaultUnit );
