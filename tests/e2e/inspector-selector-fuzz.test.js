@@ -108,6 +108,7 @@ const setPluginStatus = async ( pluginId, status ) => {
 	}
 };
 
+let activatedPluginId = null;
 let postId = null;
 let postLink = null;
 
@@ -118,10 +119,9 @@ test.beforeAll( async () => {
 		const plugins = await requestUtils.rest( { path: '/wp/v2/plugins' } );
 		const plugin = findPluginUnderTest( plugins );
 
-		// Ensure active without ever deactivating: deactivating in afterAll
-		// would race a parallel worker still using the plugin.
 		if ( plugin.status !== 'active' ) {
 			await setPluginStatus( plugin.plugin, 'active' );
+			activatedPluginId = plugin.plugin;
 		}
 
 		const post = await requestUtils.rest( {
@@ -154,6 +154,11 @@ test.afterAll( async () => {
 		}
 	} finally {
 		await requestUtils.request.dispose();
+	}
+
+	if ( activatedPluginId ) {
+		await setPluginStatus( activatedPluginId, 'inactive' );
+		activatedPluginId = null;
 	}
 } );
 
@@ -228,9 +233,13 @@ test( 'Inspecting elements with fuzzed classes and ids never inserts markup and 
 				failures.push( { i, where: 'inspector-markup', menuClass, elClass, elId } );
 			}
 
-			// Invariant 2: every offered selector is usable — it does not throw
-			// in jQuery (the hover highlighter calls $(selector)), and it is a
-			// non-empty string.
+			// Invariant 2: every offered selector is usable and meaningful. It is
+			// a non-empty string, it does not throw in jQuery (the hover
+			// highlighter calls $(selector)), and it actually selects the
+			// inspected link or one of its ancestors — page selectors are
+			// el.is()-filtered and menu-item classes match the ancestor, so a
+			// selector that matches nothing in that chain was offered wrongly.
+			const link = document.querySelector( '.socss-fuzz-link' );
 			$( '.socss-selectors-window > .socss-selector' ).each( function () {
 				const selector = $( this ).data( 'selector' );
 				if ( typeof selector !== 'string' || selector === '' ) {
@@ -241,6 +250,14 @@ test( 'Inspecting elements with fuzzed classes and ids never inserts markup and 
 					$( selector );
 				} catch ( err ) {
 					failures.push( { i, where: 'selector-throws', selector } );
+					return;
+				}
+				try {
+					if ( link.closest( selector ) === null ) {
+						failures.push( { i, where: 'selector-matches-nothing', selector } );
+					}
+				} catch ( err ) {
+					failures.push( { i, where: 'selector-invalid', selector } );
 				}
 			} );
 

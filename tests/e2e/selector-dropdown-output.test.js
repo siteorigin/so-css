@@ -206,6 +206,7 @@ const withAdminPage = async ( browser, callback ) => {
 	}
 };
 
+let activatedPluginId = null;
 let postId = null;
 let postLink = null;
 // The save-and-reload test saves CSS, so the site's stylesheet is captured
@@ -219,10 +220,9 @@ test.beforeAll( async ( { browser } ) => {
 		const plugins = await requestUtils.rest( { path: '/wp/v2/plugins' } );
 		const plugin = findPluginUnderTest( plugins );
 
-		// Ensure active without ever deactivating: deactivating in afterAll
-		// would race a parallel worker still using the plugin.
 		if ( plugin.status !== 'active' ) {
 			await setPluginStatus( plugin.plugin, 'active' );
+			activatedPluginId = plugin.plugin;
 		}
 
 		const post = await requestUtils.rest( {
@@ -265,6 +265,11 @@ test.afterAll( async ( { browser } ) => {
 		}
 	} finally {
 		await requestUtils.request.dispose();
+	}
+
+	if ( activatedPluginId ) {
+		await setPluginStatus( activatedPluginId, 'inactive' );
+		activatedPluginId = null;
 	}
 } );
 
