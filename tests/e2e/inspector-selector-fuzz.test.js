@@ -39,36 +39,6 @@ const FRAGMENTS = [
 	'w-1/2', 'foo.bar', `${ PROBE }=1`, 'menu-item', 'menu-item-7', '',
 ];
 
-/**
- * A tiny seeded PRNG (mulberry32), so a failing run is reproducible.
- *
- * @param {number} seed The seed.
- *
- * @return {Function} A function returning a float in [0, 1).
- */
-const makeRng = ( seed ) => () => {
-	seed |= 0;
-	seed = ( seed + 0x6D2B79F5 ) | 0;
-	let t = Math.imul( seed ^ ( seed >>> 15 ), 1 | seed );
-	t = ( t + Math.imul( t ^ ( t >>> 7 ), 61 | t ) ) ^ t;
-	return ( ( t ^ ( t >>> 14 ) ) >>> 0 ) / 4294967296;
-};
-
-/**
- * Builds a seeded-random string from the fragments.
- *
- * @param {Function} rng   The random source.
- * @param {number}   parts How many fragments to join.
- *
- * @return {string} The string.
- */
-const fuzzString = ( rng, parts ) => {
-	let out = '';
-	for ( let i = 0; i < parts; i++ ) {
-		out += FRAGMENTS[ Math.floor( rng() * FRAGMENTS.length ) ];
-	}
-	return out;
-};
 
 /**
  * Logs in as the admin.
@@ -314,23 +284,27 @@ test( 'Adding fuzzed selectors to the dropdown never inserts markup, keeps value
 			t = ( t + Math.imul( t ^ ( t >>> 7 ), 61 | t ) ) ^ t;
 			return ( ( t ^ ( t >>> 14 ) ) >>> 0 ) / 4294967296;
 		};
-		const fuzz = ( parts ) => {
-			let out = '';
-			for ( let i = 0; i < parts; i++ ) {
-				out += fragments[ Math.floor( rng() * fragments.length ) ];
-			}
-			return out;
-		};
 
 		const vp = window.socss.mainEditor.visualProperties;
 		const select = () => document.querySelector( '#so-custom-css-properties .toolbar select' );
 		const failures = [];
 
+		// Fragments safe to drop into a selector that addSelector writes as a
+		// single CSS rule and reparses: no CSS-structural character
+		// (`{`, `}`, `;`, newline) and no bare space (which the parser would
+		// normalise away).
+		const safe = fragments.filter( ( f ) => f !== '' && ! /[{};\s]/.test( f ) );
+
 		for ( let i = 0; i < iterations; i++ ) {
-			// A class name the inspector would offer: a plain class selector.
-			// (Hostile strings are already covered by invariant 1 of the other
-			// test; here the concern is the dropdown's own handling.)
-			const selector = '.' + fuzz( 1 + Math.floor( rng() * 3 ) ).replace( /[^a-zA-Z0-9_-]/g, '' ) + i;
+			// Every selector carries a real tag (`<b/...>`) surrounded by random
+			// fragments. Under .html() the tag forms an element in the option
+			// and raises a probe node; under .text() it stays text. So a revert
+			// to .html() fails invariant 1 on every iteration.
+			let body = '';
+			for ( let j = 0; j < Math.floor( rng() * 3 ); j++ ) {
+				body += safe[ Math.floor( rng() * safe.length ) ];
+			}
+			const selector = `.x${ body }<b/${ probe }=${ i }>`;
 
 			try {
 				vp.addSelector( selector );

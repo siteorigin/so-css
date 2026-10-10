@@ -412,6 +412,14 @@ test( 'Hovering the selector rows for a real menu item fires the highlighter wit
 		await rows.nth( i ).hover();
 	}
 
+	// Hover a row whose class only this fixture carries, and confirm the
+	// highlighter drew its overlay, so a removed hover handler fails here.
+	const uniqueRow = page.locator( '.socss-selectors-window > .socss-selector', {
+		hasText: /^\.menu-item-30387$/,
+	} );
+	await uniqueRow.hover();
+	await expect( page.locator( 'body > .socss-inspector-hover' ) ).toHaveCount( 1 );
+
 	const result = await page.evaluate( () => {
 		const $ = window.jQuery;
 		const offered = $( '.socss-selectors-window > .socss-selector' )
@@ -421,7 +429,6 @@ test( 'Hovering the selector rows for a real menu item fires the highlighter wit
 			.get();
 		return {
 			offered,
-			highlighterNodes: document.querySelectorAll( '.socss-highlight, [class*="highlight"]' ).length,
 			probeNodes: document.querySelectorAll( '[data-xss-probe]' ).length,
 		};
 	} );
