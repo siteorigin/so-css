@@ -193,6 +193,35 @@ test( 'A link URL is displayed as text, not inserted as markup.', async ( { page
 	expect( result.href ).toBe( 'http://e.test/?x=<b/data-xss-probe=1>' );
 } );
 
+test( 'The navigate-to label reads with a single colon.', async ( { page } ) => {
+	// Inspecting a link shows the label, a space, then the link URL. The checks
+	// read the label around the known URL, so they do not assume the translated
+	// wording — only that a space separates the label from the URL and that no
+	// separator is doubled.
+	const url = 'http://e.test/page';
+	const label = await page.evaluate( ( href ) => {
+		const $ = window.jQuery;
+		const host = document.createElement( 'div' );
+		host.id = 'socss-203-fixture';
+		document.body.appendChild( host );
+		host.innerHTML = '<a id="probe-203" href="' + href + '">hi</a>';
+
+		window.socssInspector.mainInspector.setActiveEl( $( '#probe-203' ) );
+
+		const link = document.querySelector( '.socss-link' );
+		return link ? link.textContent.replace( /\s+/g, ' ' ).trim() : null;
+	}, url );
+
+	expect( label ).not.toBeNull();
+	const idx = label.indexOf( url );
+	expect( idx ).toBeGreaterThan( 0 );
+	// A space separates the label from the URL: guards against the label and
+	// URL being glued together when a translation omits a trailing space.
+	expect( /\s/.test( label.charAt( idx - 1 ) ) ).toBe( true );
+	// The separator is not doubled: guards the duplicate-colon regression.
+	expect( label ).not.toMatch( /:\s*:/ );
+} );
+
 /**
  * Drives setActiveEl on an anchor with the given href and reports the displayed
  * link's href attribute and label text.
