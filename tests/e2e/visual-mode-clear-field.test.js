@@ -290,6 +290,22 @@ const saveAndReload = async ( page ) => {
 	return page.locator( '#custom-css-textarea' ).inputValue();
 };
 
+test( 'Switching the editor theme applies and reverts it.', async ( { page } ) => {
+	await soGoTo( page, EDITOR_URL );
+	const cm = page.locator( '#so-custom-css-form .CodeMirror' );
+	await expect( cm ).toBeVisible();
+	const select = page.locator( '#so_css_editor_theme' );
+
+	// Pick Dark, then Light again. CodeMirror reflects the theme as a
+	// cm-s-<theme> class, so switching back to Light must drop the dark theme.
+	await select.selectOption( 'ambiance' );
+	await expect( cm ).toHaveClass( /cm-s-ambiance/ );
+
+	await select.selectOption( 'neat' );
+	await expect( cm ).toHaveClass( /cm-s-neat/ );
+	await expect( cm ).not.toHaveClass( /cm-s-ambiance/ );
+} );
+
 test( 'Clearing Font Size keeps the declarations after it.', async ( { page } ) => {
 	const section = await openTextSection( page );
 
