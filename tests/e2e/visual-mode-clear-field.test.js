@@ -290,6 +290,25 @@ const saveAndReload = async ( page ) => {
 	return page.locator( '#custom-css-textarea' ).inputValue();
 };
 
+test( 'The removed snippets browser is gone and the editor still loads.', async ( { page } ) => {
+	const errors = [];
+	page.on( 'pageerror', ( e ) => errors.push( String( e ) ) );
+
+	await soGoTo( page, EDITOR_URL );
+	await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible();
+
+	const state = await page.evaluate( () => ( {
+		hasSnippetView: typeof window.socss.view.snippets,
+		hasTemplate: !! document.getElementById( 'template-snippet-browser' ),
+		hasEditor: !! ( window.socss.mainEditor && window.socss.mainEditor.codeMirror ),
+	} ) );
+	expect( state.hasSnippetView ).toBe( 'undefined' );
+	expect( state.hasTemplate ).toBe( false );
+	expect( state.hasEditor ).toBe( true );
+	await expect( page.locator( '#so-custom-css-form .custom-css-toolbar' ) ).not.toContainText( 'Snippets' );
+	expect( errors ).toEqual( [] );
+} );
+
 test( 'Clearing Font Size keeps the declarations after it.', async ( { page } ) => {
 	const section = await openTextSection( page );
 

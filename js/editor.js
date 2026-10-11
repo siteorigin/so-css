@@ -75,7 +75,6 @@
 	socss.view.editor = Backbone.View.extend( {
 		
 		codeMirror: null,
-		snippets: null,
 		toolbar: null,
 		visualProperties: null,
 		
@@ -452,26 +451,7 @@
 			this.visualProperties.loadCSS( this.codeMirror.getValue().trim() );
 			this.visualProperties.show();
 		},
-		
-		/**
-		 * Set the snippets available to this editor
-		 */
-		setSnippets: function ( snippets ) {
-			if ( !_.isEmpty( snippets ) ) {
-				
-				this.snippets = new socss.view.snippets( {
-					snippets: snippets
-				} );
-				this.snippets.editor = this;
-				
-				this.snippets.render();
-				this.toolbar.addButton( 'Snippets', 'snippets' );
-				this.toolbar.on( 'click_snippets', function () {
-					this.snippets.show();
-				}.bind( this ) );
-			}
-		},
-		
+
 		/**
 		 * Add some CSS to the editor.
 		 * @param css
@@ -682,107 +662,6 @@
 		
 	} );
 	
-	/**
-	 * The dialog for the snippets browser
-	 */
-	socss.view.snippets = Backbone.View.extend( {
-		template: _.template( $( '#template-snippet-browser' ).html() ),
-		snippet: _.template( '<li class="snippet"><%- name %></li>' ),
-		className: 'css-editor-snippet-browser',
-		snippets: null,
-		editor: null,
-		
-		events: {
-			'click .close': 'hide',
-			'click .buttons .insert-snippet': 'insertSnippet',
-			'click .snippet': 'clickSnippet',
-		},
-		
-		currentSnippet: null,
-		
-		initialize: function ( args ) {
-			this.snippets = args.snippets;
-		},
-		
-		render: function () {
-			this.$el.html( this.template() );
-			for ( var i = 0; i < this.snippets.length; i++ ) {
-				$( this.snippet( { name: this.snippets[ i ].Name } ) )
-				.data( {
-					'description': this.snippets[ i ].Description,
-					'css': this.snippets[ i ].css
-				} )
-				.appendTo( this.$( 'ul.snippets' ) );
-			}
-			
-			// Click on the first one
-			this.$( '.snippets li.snippet' ).eq( 0 ).trigger( 'click' );
-			
-			this.attach();
-			return this;
-		},
-		
-		clickSnippet: function ( event ) {
-			event.preventDefault();
-			var $$ = $( event.currentTarget );
-			
-			this.$( '.snippets li.snippet' ).removeClass( 'active' );
-			$( this ).addClass( 'active' );
-			this.viewSnippet( {
-				name: $$.html(),
-				description: $$.data( 'description' ),
-				css: $$.data( 'css' )
-			} );
-		},
-		
-		viewSnippet: function ( args ) {
-			var w = this.$( '.main .snippet-view' );
-			
-			w.find( '.snippet-title' ).html( args.name );
-			w.find( '.snippet-description' ).html( args.description );
-			w.find( '.snippet-code' ).html( args.css );
-			
-			this.currentSnippet = args;
-		},
-		
-		insertSnippet: function () {
-			var editor = this.editor.codeMirror;
-			var css = this.currentSnippet.css;
-			
-			var before_css = '';
-			if ( editor.doc.lineCount() === 1 && editor.doc.getLine( editor.doc.lastLine() ).length === 0 ) {
-				before_css = "";
-			}
-			else if ( editor.doc.getLine( editor.doc.lastLine() ).length === 0 ) {
-				before_css = "\n";
-			}
-			else {
-				before_css = "\n\n";
-			}
-			
-			// Now insert the code in the editor
-			editor.doc.setCursor(
-				editor.doc.lastLine(),
-				editor.doc.getLine( editor.doc.lastLine() ).length
-			);
-			editor.doc.replaceSelection( before_css + css );
-			
-			this.hide();
-		},
-		
-		attach: function () {
-			this.$el.appendTo( 'body' );
-		},
-		
-		show: function () {
-			this.$el.show();
-		},
-		
-		hide: function () {
-			this.$el.hide();
-		}
-	} );
-
 	socss.save = function ( view ) {
 		let saveBtn = $( '#siteorigin-custom-css .save' );
 		var css;
@@ -1921,7 +1800,6 @@ jQuery( function ( $ ) {
 		openVisualEditor: socssOptions.openVisualEditor,
 	} );
 	// editor.render();
-	editor.setSnippets( socssOptions.snippets );
 	
 	// This is for hiding the getting started video
 	$( '#so-custom-css-getting-started a.hide' ).on( 'click', function( e ) {
