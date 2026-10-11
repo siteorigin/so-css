@@ -290,6 +290,55 @@ const saveAndReload = async ( page ) => {
 	return page.locator( '#custom-css-textarea' ).inputValue();
 };
 
+test( 'The editor loads when syntax highlighting is disabled.', async ( { page } ) => {
+	// With core syntax highlighting disabled, wp_enqueue_code_editor() enqueues
+	// nothing, so the editor must fall back to the bundled CodeMirror and still
+	// open Visual Mode. The profile setting is read first and restored after.
+	const getHighlightingDisabled = async () => {
+		await soGoTo( page, 'wp-admin/profile.php' );
+		const box = page.locator( '#syntax_highlighting' );
+		await expect( box ).toBeAttached();
+		return box.isChecked();
+	};
+	const setHighlightingDisabled = async ( disabled ) => {
+		await soGoTo( page, 'wp-admin/profile.php' );
+		const box = page.locator( '#syntax_highlighting' );
+		await expect( box ).toBeAttached();
+		// The box is "Disable syntax highlighting"; checked means disabled.
+		if ( ( await box.isChecked() ) !== disabled ) {
+			await box.setChecked( disabled );
+			await Promise.all( [ page.waitForNavigation(), page.locator( '#submit' ).click() ] );
+		}
+		// Confirm the value persisted, so neither the test setup nor its cleanup
+		// can silently leave the preference wrong.
+		await soGoTo( page, 'wp-admin/profile.php' );
+		await expect( page.locator( '#syntax_highlighting' ) ).toBeChecked( { checked: disabled } );
+	};
+
+	const originalDisabled = await getHighlightingDisabled();
+	const errors = [];
+	page.on( 'pageerror', ( e ) => errors.push( String( e ) ) );
+
+	try {
+		await setHighlightingDisabled( true );
+		await soGoTo( page, EDITOR_URL );
+		await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible( { timeout: 20000 } );
+
+		const hasEditor = await page.evaluate(
+			() => !! ( window.socss && window.socss.mainEditor && window.socss.mainEditor.codeMirror )
+		);
+		expect( hasEditor ).toBe( true );
+
+		// Visual Mode opens.
+		await page.locator( '#so-custom-css-form a.editor-visual' ).click();
+		await expect( page.locator( '#so-custom-css-properties' ) ).toBeVisible();
+
+		expect( errors.filter( ( e ) => /CodeMirror is not defined/.test( e ) ) ).toEqual( [] );
+	} finally {
+		await setHighlightingDisabled( originalDisabled );
+	}
+} );
+
 test( 'Clearing Font Size keeps the declarations after it.', async ( { page } ) => {
 	const section = await openTextSection( page );
 
