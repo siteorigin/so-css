@@ -214,11 +214,9 @@
 
 			var editor = this.codeMirror;
 			$( '#so_css_editor_theme' ).on( 'change', function() {
-				if ( $( this ).val() == 1 ) {
-					editor.setOption( 'theme', 'neat' );
-				} else {
-					editor.setOption( 'theme', 'ambiance' );
-				}
+				// The option values are the CodeMirror theme names ("neat",
+				// "ambiance"), so apply the selected value as the theme.
+				editor.setOption( 'theme', $( this ).val() );
 			} );
 
 			this.codeMirror.on( 'change', function ( cm, change ) {
