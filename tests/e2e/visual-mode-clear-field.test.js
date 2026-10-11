@@ -339,6 +339,33 @@ test( 'The editor loads when syntax highlighting is disabled.', async ( { page }
 	}
 } );
 
+test( 'Background Size offers only valid keywords and writes valid CSS.', async ( { page } ) => {
+	await saveCss( page, '.entry-title { color: #111; }' );
+
+	await page.locator( '#so-custom-css-form a.editor-visual' ).click();
+	const properties = page.locator( '#so-custom-css-properties' );
+	await expect( properties ).toBeVisible();
+	await properties.locator( '.toolbar select' ).selectOption( { label: '.entry-title' } );
+	await properties.locator( '.section-tabs li[data-section="decoration"]' ).click();
+	const section = properties.locator( '.sections .section[data-section="decoration"]' );
+	await expect( section ).toBeVisible();
+
+	const bgSize = section
+		.locator( 'tr', { has: page.locator( 'th', { hasText: /^Background Size$/ } ) } )
+		.locator( 'select' );
+
+	// The value is what gets written, so every selectable value must be a valid
+	// background-size keyword. Ignore the blank "unchanged" option.
+	const values = await bgSize.locator( 'option' ).evaluateAll( ( opts ) => opts.map( ( o ) => o.value ) );
+	const selectable = values.filter( ( v ) => v !== '' ).sort();
+	expect( selectable ).toEqual( [ 'auto', 'contain', 'cover' ] );
+
+	// Selecting a keyword writes a valid declaration, not the literal option name.
+	await bgSize.selectOption( 'cover' );
+	await expect.poll( () => getEditorCss( page ) ).toContain( 'background-size: cover' );
+	expect( await getEditorCss( page ) ).not.toMatch( /background-size:\s*(length|percentage)/ );
+} );
+
 test( 'Clearing Font Size keeps the declarations after it.', async ( { page } ) => {
 	const section = await openTextSection( page );
 

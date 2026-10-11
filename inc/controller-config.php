@@ -226,12 +226,13 @@ return array(
 				'type'  => 'select',
 				'args'  => array(
 					'property' => 'background-size',
+					// Each option value is written as the CSS value, so only the
+					// valid background-size keywords belong here. A specific length
+					// or percentage is set in Expanded Mode.
 					'options'  => array(
-						'auto'       => esc_html__( 'auto', 'so-css' ),
-						'length'     => esc_html__( 'length', 'so-css' ),
-						'percentage' => esc_html__( 'percentage', 'so-css' ),
-						'cover'      => esc_html__( 'cover', 'so-css' ),
-						'contain'    => esc_html__( 'contain', 'so-css' ),
+						'auto'    => esc_html__( 'auto', 'so-css' ),
+						'cover'   => esc_html__( 'cover', 'so-css' ),
+						'contain' => esc_html__( 'contain', 'so-css' ),
 					),
 				),
 			),
