@@ -338,17 +338,15 @@ test( 'The editor loads when syntax highlighting is disabled.', async ( { page }
 		expect( highlighting.mode ).not.toBe( 'css' );
 		expect( highlighting.lint ).toBeFalsy();
 
-		// A notice explains why the editor is plain, so the missing colour and
-		// features read as expected rather than broken. Assert the explanatory text,
-		// not just that a box is present.
+		// The notice carries the explanatory text, not just an empty box.
 		const notice = page.locator( '#so-custom-css-form .socss-highlighting-off-notice' );
 		await expect( notice ).toBeVisible();
 		await expect( notice.locator( 'p' ) ).toContainText( 'highlighting' );
 		await expect( notice.locator( 'p' ) ).toContainText( 'Autocomplete' );
 
-		// Expanded Mode still fits the viewport with the notice present, so the
-		// editor does not run off the bottom of the screen.
+		// Expanded Mode engages and still fits the viewport with the notice present.
 		await page.locator( '#so-custom-css-form a.editor-expand' ).click();
+		await expect( page.locator( '#so-custom-css-form' ) ).toHaveClass( /expanded/ );
 		const fits = await page.evaluate( () => {
 			const cm = document.querySelector( '#so-custom-css-form .CodeMirror' );
 			return !! cm && cm.getBoundingClientRect().bottom <= window.innerHeight + 4;
@@ -356,12 +354,10 @@ test( 'The editor loads when syntax highlighting is disabled.', async ( { page }
 		expect( fits ).toBe( true );
 		await page.locator( '#so-custom-css-form a.editor-expand' ).click();
 
-		// The notice dismisses. Do this before opening Visual Mode, whose panel
-		// overlaps the notice in the narrow form.
+		// Dismiss before opening Visual Mode, whose panel overlaps the notice.
 		await notice.locator( '.notice-dismiss' ).click();
 		await expect( notice ).toHaveCount( 0 );
 
-		// Visual Mode still opens.
 		await page.locator( '#so-custom-css-form a.editor-visual' ).click();
 		await expect( page.locator( '#so-custom-css-properties' ) ).toBeVisible();
 

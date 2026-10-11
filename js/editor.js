@@ -427,6 +427,7 @@
 			if ( ! $form.length || $form.find( '.socss-highlighting-off-notice' ).length ) {
 				return;
 			}
+			var self = this;
 			var $notice = $(
 				'<div class="notice notice-info socss-highlighting-off-notice">' +
 					'<p></p>' +
@@ -437,6 +438,8 @@
 			$notice.find( '.screen-reader-text' ).text( socssOptions.loc.dismiss );
 			$notice.on( 'click', '.notice-dismiss', function () {
 				$notice.remove();
+				// Reclaim the height the notice held so the editor fills it.
+				self.scaleEditor();
 			} );
 			$form.find( '.custom-css-toolbar' ).before( $notice );
 		},
