@@ -399,6 +399,11 @@ test( 'The editor stays plain when wp.codeEditor is present but WordPress did no
 	const originalDisabled = await getHighlightingDisabled( page );
 	const errors = [];
 	page.on( 'pageerror', ( e ) => errors.push( String( e ) ) );
+	// Typing below makes the editor dirty, so accept the leave-page prompt that the
+	// cleanup navigation would otherwise trigger, or the profile is left changed.
+	page.on( 'dialog', ( dialog ) => (
+		dialog.type() === 'beforeunload' ? dialog.accept() : dialog.dismiss()
+	) );
 
 	try {
 		await setHighlightingDisabled( page, true );
