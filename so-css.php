@@ -542,8 +542,10 @@ class SiteOrigin_CSS {
 				'select'       => esc_html__( 'Select', 'so-css' ),
 				'select_image' => esc_html__( 'Select Image', 'so-css' ),
 				'leave'        => esc_html__( 'Are you sure you want to leave without saving?', 'so-css' ),
-				'highlightingOff' => esc_html__( 'Syntax highlighting is off, so the editor shows plain text. Autocomplete and live preview highlighting are unavailable.', 'so-css' ),
-				'dismiss'      => esc_html__( 'Dismiss', 'so-css' ),
+				// Inserted with jQuery .text(), which escapes for us, so these stay
+				// unescaped; esc_html__() would turn a translated apostrophe into an entity.
+				'highlightingOff' => __( 'Syntax highlighting is off, so the editor shows plain text. Autocomplete and live preview highlighting are unavailable.', 'so-css' ),
+				'dismiss'      => __( 'Dismiss', 'so-css' ),
 			),
 		) );
 
