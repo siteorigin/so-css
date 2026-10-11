@@ -290,6 +290,62 @@ const saveAndReload = async ( page ) => {
 	return page.locator( '#custom-css-textarea' ).inputValue();
 };
 
+test( 'The default editor gains the preview highlight and keeps WordPress autocomplete.', async ( { page } ) => {
+	await soGoTo( page, EDITOR_URL );
+	await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible();
+
+	// The default install initialises through WordPress's code editor, so this
+	// exercises the wp.codeEditor path, not the fallback.
+	expect( await page.evaluate( () => (
+		typeof window.wp !== 'undefined' && typeof wp.codeEditor !== 'undefined'
+	) ) ).toBe( true );
+
+	// Wait for the preview iframe's inspector to connect, so the highlight call
+	// reaches a live inspector rather than being swallowed when none exists.
+	await page.waitForFunction(
+		() => !! ( window.socss && window.socss.mainEditor && window.socss.mainEditor.inspector ),
+		null,
+		{ timeout: 20000 }
+	);
+
+	// Preview highlight runs: moving the cursor onto the selector fires
+	// cursorActivity, which calls the connected preview with that selector. The
+	// real method is wrapped (not replaced) so it still runs; the spy is
+	// installed after the value is set, so only the cursor move is observed.
+	const highlighted = await page.evaluate( () => {
+		return new Promise( ( resolve ) => {
+			const ed = window.socss.mainEditor;
+			ed.codeMirror.setValue( '.entry-title {\n  color: red;\n}' );
+			ed.codeMirror.setCursor( { line: 1, ch: 0 } );
+
+			const real = ed.preview.highlight.bind( ed.preview );
+			let seen = null;
+			ed.preview.highlight = ( selector ) => {
+				seen = selector;
+				real( selector );
+			};
+			ed.codeMirror.setCursor( { line: 0, ch: 5 } );
+			setTimeout( () => resolve( seen ), 50 );
+		} );
+	} );
+	expect( highlighted ).toBe( '.entry-title' );
+
+	// WordPress's own CSS autocomplete is left in place, not overwritten by the
+	// plugin's smaller helper: typing a pseudo-class prefix offers nth-child,
+	// which only WordPress's helper provides.
+	await page.evaluate( () => {
+		const ed = window.socss.mainEditor.codeMirror;
+		ed.setValue( 'a:' );
+		ed.focus();
+		ed.setCursor( { line: 0, ch: 2 } );
+	} );
+	await page.keyboard.type( 'n' );
+	const hints = page.locator( '.CodeMirror-hints' );
+	await expect( hints ).toBeVisible();
+	await expect( hints ).toContainText( 'nth-child' );
+	await page.keyboard.press( 'Escape' );
+} );
+
 test( 'Clearing Font Size keeps the declarations after it.', async ( { page } ) => {
 	const section = await openTextSection( page );
 
