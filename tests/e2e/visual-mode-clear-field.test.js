@@ -28,6 +28,28 @@ const EDITOR_URL = 'wp-admin/themes.php?page=so_custom_css';
 
 const SEED_CSS = '.entry-title { color: #1d3557; font-size: 28px; letter-spacing: 1px; }';
 
+// Read and set the current user's "Disable syntax highlighting" profile preference.
+// Shared so the highlighting tests set up and restore it the same way.
+const getHighlightingDisabled = async ( page ) => {
+	await soGoTo( page, 'wp-admin/profile.php' );
+	const box = page.locator( '#syntax_highlighting' );
+	await expect( box ).toBeAttached();
+	return box.isChecked();
+};
+const setHighlightingDisabled = async ( page, disabled ) => {
+	await soGoTo( page, 'wp-admin/profile.php' );
+	const box = page.locator( '#syntax_highlighting' );
+	await expect( box ).toBeAttached();
+	// The box is "Disable syntax highlighting"; checked means disabled.
+	if ( ( await box.isChecked() ) !== disabled ) {
+		await box.setChecked( disabled );
+		await Promise.all( [ page.waitForNavigation(), page.locator( '#submit' ).click() ] );
+	}
+	// Confirm the value persisted, so neither setup nor cleanup leaves it wrong.
+	await soGoTo( page, 'wp-admin/profile.php' );
+	await expect( page.locator( '#syntax_highlighting' ) ).toBeChecked( { checked: disabled } );
+};
+
 // Every test saves the site's one custom CSS, so run them in order in one
 // worker rather than in parallel.
 test.describe.configure( { mode: 'default' } );
@@ -293,33 +315,12 @@ test( 'The editor loads when syntax highlighting is disabled.', async ( { page }
 	// With core syntax highlighting disabled, wp_enqueue_code_editor() enqueues
 	// nothing, so the editor must fall back to the bundled CodeMirror and still
 	// open Visual Mode. The profile setting is read first and restored after.
-	const getHighlightingDisabled = async () => {
-		await soGoTo( page, 'wp-admin/profile.php' );
-		const box = page.locator( '#syntax_highlighting' );
-		await expect( box ).toBeAttached();
-		return box.isChecked();
-	};
-	const setHighlightingDisabled = async ( disabled ) => {
-		await soGoTo( page, 'wp-admin/profile.php' );
-		const box = page.locator( '#syntax_highlighting' );
-		await expect( box ).toBeAttached();
-		// The box is "Disable syntax highlighting"; checked means disabled.
-		if ( ( await box.isChecked() ) !== disabled ) {
-			await box.setChecked( disabled );
-			await Promise.all( [ page.waitForNavigation(), page.locator( '#submit' ).click() ] );
-		}
-		// Confirm the value persisted, so neither the test setup nor its cleanup
-		// can silently leave the preference wrong.
-		await soGoTo( page, 'wp-admin/profile.php' );
-		await expect( page.locator( '#syntax_highlighting' ) ).toBeChecked( { checked: disabled } );
-	};
-
-	const originalDisabled = await getHighlightingDisabled();
+	const originalDisabled = await getHighlightingDisabled( page );
 	const errors = [];
 	page.on( 'pageerror', ( e ) => errors.push( String( e ) ) );
 
 	try {
-		await setHighlightingDisabled( true );
+		await setHighlightingDisabled( page, true );
 		await soGoTo( page, EDITOR_URL );
 		await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible( { timeout: 20000 } );
 
@@ -384,7 +385,7 @@ test( 'The editor loads when syntax highlighting is disabled.', async ( { page }
 
 		expect( errors.filter( ( e ) => /CodeMirror is not defined/.test( e ) ) ).toEqual( [] );
 	} finally {
-		await setHighlightingDisabled( originalDisabled );
+		await setHighlightingDisabled( page, originalDisabled );
 	}
 } );
 
@@ -395,30 +396,12 @@ test( 'The editor stays plain when wp.codeEditor is present but WordPress did no
 	// the cause, so this reproduces that branch: disable highlighting in the profile
 	// (usesFallbackEditor becomes true) and inject a wp.codeEditor stub before the
 	// editor initialises. The editor must stay plain and not use wp.codeEditor.
-	const getDisabled = async () => {
-		await soGoTo( page, 'wp-admin/profile.php' );
-		const box = page.locator( '#syntax_highlighting' );
-		await expect( box ).toBeAttached();
-		return box.isChecked();
-	};
-	const setDisabled = async ( disabled ) => {
-		await soGoTo( page, 'wp-admin/profile.php' );
-		const box = page.locator( '#syntax_highlighting' );
-		await expect( box ).toBeAttached();
-		if ( ( await box.isChecked() ) !== disabled ) {
-			await box.setChecked( disabled );
-			await Promise.all( [ page.waitForNavigation(), page.locator( '#submit' ).click() ] );
-		}
-		await soGoTo( page, 'wp-admin/profile.php' );
-		await expect( page.locator( '#syntax_highlighting' ) ).toBeChecked( { checked: disabled } );
-	};
-
-	const originalDisabled = await getDisabled();
+	const originalDisabled = await getHighlightingDisabled( page );
 	const errors = [];
 	page.on( 'pageerror', ( e ) => errors.push( String( e ) ) );
 
 	try {
-		await setDisabled( true );
+		await setHighlightingDisabled( page, true );
 		// Make wp.codeEditor look present before the plugin's editor runs, as another
 		// plugin loading it would. WordPress did not enqueue the real one here.
 		await page.addInitScript( () => {
@@ -451,12 +434,20 @@ test( 'The editor stays plain when wp.codeEditor is present but WordPress did no
 		expect( state.lint ).toBeFalsy();
 		expect( state.notice ).toBe( true );
 
-		// Visual Mode still opens, and mixing the libraries throws no errors.
+		// Fire the cursorActivity handler that setupCodeMirrorExtensions wires: it
+		// calls CodeMirror.innerMode, so it throws if that handler picked a different
+		// library than the one that built this editor. Type and move the cursor.
+		await page.locator( '#so-custom-css-form .CodeMirror' ).click();
+		await page.keyboard.type( '.x{color:red}' );
+		await page.keyboard.press( 'Home' );
+		await page.keyboard.press( 'ArrowRight' );
+
+		// Visual Mode still opens, and none of the above threw a CodeMirror error.
 		await page.locator( '#so-custom-css-form a.editor-visual' ).click();
 		await expect( page.locator( '#so-custom-css-properties' ) ).toBeVisible();
-		expect( errors.filter( ( e ) => /CodeMirror/.test( e ) ) ).toEqual( [] );
+		expect( errors.filter( ( e ) => /CodeMirror|innerMode/.test( e ) ) ).toEqual( [] );
 	} finally {
-		await setDisabled( originalDisabled );
+		await setHighlightingDisabled( page, originalDisabled );
 	}
 } );
 

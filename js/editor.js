@@ -206,23 +206,17 @@
 				},
 			}
 
-			// WordPress did not enqueue its code editor (the user disabled syntax
-			// highlighting, or a site filter turned the code editor off), so load a
-			// plain editor: no CSS mode, no linting, no lint gutter. Visual Mode still
-			// reads and parses the text and Expanded Mode still reflows the editor, so
-			// both open. The colour-based extras (preview highlight, autocomplete) need
-			// token types, so they stay off here; a notice tells the user why.
+			// WordPress did not provide its code editor, so run a plain editor with no
+			// CSS highlighting or linting. The modes read the text themselves, so they
+			// still work; a notice explains the colour-based extras are off.
 			if ( socssOptions.usesFallbackEditor ) {
 				codeMirrorSettings.mode = null;
 				codeMirrorSettings.lint = false;
 				codeMirrorSettings.gutters = [];
 			}
 
-			// In the fallback case, always use the bundled plain editor, even if
-			// another plugin has loaded wp.codeEditor. wp.codeEditor.initialize() reads
-			// overrides from settings.codemirror and would otherwise merge its own CSS
-			// defaults back in. The bundled CodeMirror is enqueued in that case, so it
-			// is available here.
+			// Use the bundled editor in that case even if another plugin loaded
+			// wp.codeEditor, whose initialize() would merge its own CSS defaults back in.
 			if ( typeof wp.codeEditor != "undefined" && ! socssOptions.usesFallbackEditor ) {
 				codeMirrorSettings = _.extend(
 					wp.codeEditor.defaultSettings.codemirror,
