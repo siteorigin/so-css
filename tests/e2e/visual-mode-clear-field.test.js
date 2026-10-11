@@ -344,6 +344,20 @@ test( 'The editor loads when syntax highlighting is disabled.', async ( { page }
 		await expect( notice.locator( 'p' ) ).toContainText( 'highlighting' );
 		await expect( notice.locator( 'p' ) ).toContainText( 'Autocomplete' );
 
+		// The dismiss button sits inside the notice (is-dismissible gives core CSS
+		// the positioning context it needs), not floated to some ancestor.
+		const buttonInside = await page.evaluate( () => {
+			const n = document.querySelector( '#so-custom-css-form .socss-highlighting-off-notice' );
+			const b = n && n.querySelector( '.notice-dismiss' );
+			if ( ! n || ! b ) {
+				return false;
+			}
+			const nr = n.getBoundingClientRect(), br = b.getBoundingClientRect();
+			return br.left >= nr.left - 1 && br.right <= nr.right + 1 &&
+				br.top >= nr.top - 1 && br.bottom <= nr.bottom + 1;
+		} );
+		expect( buttonInside ).toBe( true );
+
 		// Expanded Mode engages and still fits the viewport with the notice present.
 		await page.locator( '#so-custom-css-form a.editor-expand' ).click();
 		await expect( page.locator( '#so-custom-css-form' ) ).toHaveClass( /expanded/ );

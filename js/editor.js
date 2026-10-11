@@ -420,9 +420,11 @@
 			}
 		},
 
-		// Tell the user the editor is plain because they turned syntax highlighting
-		// off, so the missing colour, autocomplete and preview highlight are expected.
-		// Reuses WordPress's admin-notice styles; the dismiss hides it for this view.
+		// Tell the user the editor is plain because WordPress is not providing its
+		// code editor, so the missing colour, autocomplete and preview highlight are
+		// expected. Reuses WordPress's admin-notice styles; the dismiss hides it for
+		// this view. The is-dismissible class gives core's CSS the positioning
+		// context its absolutely-placed dismiss button needs.
 		showHighlightingOffNotice: function () {
 			var $form = $( '#so-custom-css-form' );
 			if ( ! $form.length || $form.find( '.socss-highlighting-off-notice' ).length ) {
@@ -430,7 +432,7 @@
 			}
 			var self = this;
 			var $notice = $(
-				'<div class="notice notice-info socss-highlighting-off-notice">' +
+				'<div class="notice notice-info is-dismissible socss-highlighting-off-notice">' +
 					'<p></p>' +
 					'<button type="button" class="notice-dismiss"><span class="screen-reader-text"></span></button>' +
 				'</div>'
