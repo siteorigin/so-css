@@ -9,7 +9,6 @@
  * @var $save_button_label string Label of the save button depending on whether a post or revision has been selected.
  * @var $form_save_url string URL to use when saving the CSS.
  */
-$snippets = SiteOrigin_CSS::single()->get_snippets();
 $user = wp_get_current_user();
 
 if ( ! empty( $current_revision ) ) {

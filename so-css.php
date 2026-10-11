@@ -23,12 +23,10 @@ define( 'SOCSS_JS_SUFFIX', '' );
 class SiteOrigin_CSS {
 
 	private $theme;
-	private $snippet_paths;
 	private $css_file;
 
 	public function __construct() {
 		$this->theme = basename( get_template_directory() );
-		$this->snippet_paths = array();
 
 		// Main header actions
 		add_action( 'plugins_loaded', array( $this, 'set_plugin_textdomain' ) );
@@ -467,6 +465,14 @@ class SiteOrigin_CSS {
 		// when it is showing post-specific CSS rather than the global stylesheet.
 		$socss_post_id = filter_input( INPUT_GET, 'socss_post_id', FILTER_VALIDATE_INT );
 
+		// Notify an integration still hooked to the retired snippets filter when
+		// the editor loads. apply_filters_deprecated() emits the deprecation and
+		// runs callbacks only when the filter is hooked, and needs WordPress 4.6+
+		// (the readme declares 3.9).
+		if ( function_exists( 'apply_filters_deprecated' ) ) {
+			apply_filters_deprecated( 'siteorigin_css_snippet_paths', array( array() ), '1.6.9' );
+		}
+
 		// Core WordPress stuff that we use
 		wp_enqueue_media();
 
@@ -811,66 +817,41 @@ class SiteOrigin_CSS {
 	}
 
 	/**
-	 *  Add one or more paths to the registered snippet paths
+	 * Deprecated no-op. Registers no snippet path.
+	 *
+	 * @deprecated 1.6.9
 	 *
 	 * @param string|array $path
 	 */
 	public function register_snippet_path( $path ) {
-		$this->snippet_paths = array_merge( $this->snippet_paths, (array) $path );
+		_deprecated_function( __METHOD__, '1.6.9' );
 	}
 
 	/**
-	 * Get all the available snippets
+	 * Deprecated. Returns an empty array.
 	 *
-	 * @return array|bool
+	 * @deprecated 1.6.9
+	 *
+	 * @return array
 	 */
 	public function get_snippets() {
-		// Get the snippet paths
-		$snippet_paths = apply_filters( 'siteorigin_css_snippet_paths', $this->snippet_paths );
-
-		if ( empty( $snippet_paths ) ) {
-			return array();
+		_deprecated_function( __METHOD__, '1.6.9' );
+		// apply_filters_deprecated() needs WordPress 4.6+; the readme declares 3.9.
+		if ( function_exists( 'apply_filters_deprecated' ) ) {
+			apply_filters_deprecated( 'siteorigin_css_snippet_paths', array( array() ), '1.6.9' );
 		}
-
-		static $snippets = array();
-
-		if ( ! empty( $snippets ) ) {
-			return $snippets;
-		}
-
-		if ( ! WP_Filesystem() ) {
-			return false;
-		}
-		global $wp_filesystem;
-
-		foreach ( $snippet_paths as $path ) {
-			foreach ( glob( $path . '/*.css' ) as $css_file ) {
-				$data = get_file_data( $css_file, array(
-					'Name'        => 'Name',
-					'Description' => 'Description',
-				) );
-
-				// Get the CSS and strip out the first header
-				$css = $wp_filesystem->get_contents( $css_file );
-				$css = preg_replace( '!/\*.*?\*/!s', '', $css, 1 );
-
-				$snippets[] = wp_parse_args( $data, array(
-					'css' => str_replace( "\t", '  ', trim( $css ) ),
-				) );
-			}
-		}
-
-		usort( $snippets, array( $this, 'sort_snippet_callback' ) );
-
-		return $snippets;
+		return array();
 	}
 
 	/**
-	 * Sort snippets by name.
+	 * Deprecated sort comparator. Orders two snippet arrays by their Name.
+	 *
+	 * @deprecated 1.6.9
 	 *
 	 * @return int
 	 */
 	public static function sort_snippet_callback( $a, $b ) {
+		_deprecated_function( __METHOD__, '1.6.9' );
 		return $a['Name'] > $b['Name'] ? 1 : - 1;
 	}
 
