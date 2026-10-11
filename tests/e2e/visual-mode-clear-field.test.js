@@ -388,6 +388,78 @@ test( 'The editor loads when syntax highlighting is disabled.', async ( { page }
 	}
 } );
 
+test( 'The editor stays plain when wp.codeEditor is present but WordPress did not provide it.', async ( { page } ) => {
+	// A site can turn WordPress's code editor off (the wp_code_editor_settings
+	// filter, or the user's profile) while another plugin still loads wp.codeEditor.
+	// socssOptions.usesFallbackEditor is what drives the plain editor, regardless of
+	// the cause, so this reproduces that branch: disable highlighting in the profile
+	// (usesFallbackEditor becomes true) and inject a wp.codeEditor stub before the
+	// editor initialises. The editor must stay plain and not use wp.codeEditor.
+	const getDisabled = async () => {
+		await soGoTo( page, 'wp-admin/profile.php' );
+		const box = page.locator( '#syntax_highlighting' );
+		await expect( box ).toBeAttached();
+		return box.isChecked();
+	};
+	const setDisabled = async ( disabled ) => {
+		await soGoTo( page, 'wp-admin/profile.php' );
+		const box = page.locator( '#syntax_highlighting' );
+		await expect( box ).toBeAttached();
+		if ( ( await box.isChecked() ) !== disabled ) {
+			await box.setChecked( disabled );
+			await Promise.all( [ page.waitForNavigation(), page.locator( '#submit' ).click() ] );
+		}
+		await soGoTo( page, 'wp-admin/profile.php' );
+		await expect( page.locator( '#syntax_highlighting' ) ).toBeChecked( { checked: disabled } );
+	};
+
+	const originalDisabled = await getDisabled();
+	const errors = [];
+	page.on( 'pageerror', ( e ) => errors.push( String( e ) ) );
+
+	try {
+		await setDisabled( true );
+		// Make wp.codeEditor look present before the plugin's editor runs, as another
+		// plugin loading it would. WordPress did not enqueue the real one here.
+		await page.addInitScript( () => {
+			window.wp = window.wp || {};
+			if ( typeof window.wp.codeEditor === 'undefined' ) {
+				window.wp.codeEditor = {
+					initialize: function () { return { codemirror: null }; },
+					defaultSettings: { codemirror: {} },
+				};
+			}
+		} );
+		await soGoTo( page, EDITOR_URL );
+		await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible( { timeout: 20000 } );
+
+		const state = await page.evaluate( () => {
+			const cm = window.socss.mainEditor.codeMirror;
+			return {
+				usesFallbackEditor: window.socssOptions.usesFallbackEditor,
+				wpCodeEditorPresent: typeof window.wp.codeEditor !== 'undefined',
+				mode: cm.getOption( 'mode' ),
+				lint: cm.getOption( 'lint' ),
+				notice: !! document.querySelector( '#so-custom-css-form .socss-highlighting-off-notice' ),
+			};
+		} );
+		// The fallback flag is set and wp.codeEditor is present: exactly the edge.
+		expect( state.usesFallbackEditor ).toBeTruthy();
+		expect( state.wpCodeEditorPresent ).toBe( true );
+		// Yet the editor is plain and shows the notice, not CSS highlighting.
+		expect( state.mode ).toBeFalsy();
+		expect( state.lint ).toBeFalsy();
+		expect( state.notice ).toBe( true );
+
+		// Visual Mode still opens, and mixing the libraries throws no errors.
+		await page.locator( '#so-custom-css-form a.editor-visual' ).click();
+		await expect( page.locator( '#so-custom-css-properties' ) ).toBeVisible();
+		expect( errors.filter( ( e ) => /CodeMirror/.test( e ) ) ).toEqual( [] );
+	} finally {
+		await setDisabled( originalDisabled );
+	}
+} );
+
 test( 'Background Size offers only valid keywords and writes valid CSS.', async ( { page } ) => {
 	await saveCss( page, '.entry-title { color: #111; }' );
 
