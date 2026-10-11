@@ -207,17 +207,22 @@
 			}
 
 			// The user turned syntax highlighting off in their profile, so load a
-			// plain editor: no CSS mode, no linting, no lint gutter. The Visual and
-			// Expanded modes read and parse the text themselves, so they still work.
-			// The colour-based extras (preview highlight, autocomplete) need token
-			// types, so they stay off here; a notice tells the user why.
+			// plain editor: no CSS mode, no linting, no lint gutter. Visual Mode still
+			// reads and parses the text and Expanded Mode still reflows the editor, so
+			// both open. The colour-based extras (preview highlight, autocomplete) need
+			// token types, so they stay off here; a notice tells the user why.
 			if ( socssOptions.syntaxHighlightingOff ) {
 				codeMirrorSettings.mode = null;
 				codeMirrorSettings.lint = false;
 				codeMirrorSettings.gutters = [];
 			}
 
-			if ( typeof wp.codeEditor != "undefined" ) {
+			// When highlighting is off, always use the bundled plain editor, even if
+			// another plugin has loaded wp.codeEditor. wp.codeEditor.initialize() reads
+			// overrides from settings.codemirror and would otherwise merge its own CSS
+			// defaults back in. The bundled CodeMirror is enqueued in that case, so it
+			// is available here.
+			if ( typeof wp.codeEditor != "undefined" && ! socssOptions.syntaxHighlightingOff ) {
 				codeMirrorSettings = _.extend(
 					wp.codeEditor.defaultSettings.codemirror,
 					codeMirrorSettings
@@ -442,10 +447,14 @@
 		scaleEditor: function () {
 			var windowHeight = $( window ).outerHeight();
 			var areaHeight;
+			// The syntax-highlighting-off notice sits above the toolbar inside the
+			// form, so it takes height the editor must not claim for itself.
+			var $notice = $( '#so-custom-css-form .socss-highlighting-off-notice' );
+			var noticeHeight = $notice.length ? $notice.outerHeight( true ) : 0;
 			if ( this.$el.hasClass( 'expanded' ) ) {
 				// If we're in the expanded view, then resize the editor
 				this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', '' );
-				areaHeight = windowHeight - this.$( '.custom-css-toolbar' ).outerHeight();
+				areaHeight = windowHeight - this.$( '.custom-css-toolbar' ).outerHeight() - noticeHeight;
 				this.codeMirror.setSize( '100%', areaHeight );
 				this.$el.find( '.CodeMirror-scroll' ).css( 'height', '100%' );
 			}
@@ -456,6 +465,7 @@
 					$( '#siteorigin-custom-css' ).find( '> h2' ).outerHeight( true ) +
 					$form.find( '> .custom-css-toolbar' ).outerHeight( true ) +
 					$form.find( '> .so-css-footer' ).outerHeight( true ) +
+					noticeHeight +
 					parseFloat( $( '#wpbody-content' ).css( 'padding-bottom' ) );
 
 				areaHeight = windowHeight - otherEltsHeight;
