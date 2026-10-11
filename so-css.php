@@ -465,14 +465,6 @@ class SiteOrigin_CSS {
 		// when it is showing post-specific CSS rather than the global stylesheet.
 		$socss_post_id = filter_input( INPUT_GET, 'socss_post_id', FILTER_VALIDATE_INT );
 
-		// Notify an integration still hooked to the retired snippets filter when
-		// the editor loads. apply_filters_deprecated() emits the deprecation and
-		// runs callbacks only when the filter is hooked, and needs WordPress 4.6+
-		// (the readme declares 3.9).
-		if ( function_exists( 'apply_filters_deprecated' ) ) {
-			apply_filters_deprecated( 'siteorigin_css_snippet_paths', array( array() ), '1.6.9' );
-		}
-
 		// Core WordPress stuff that we use
 		wp_enqueue_media();
 
@@ -670,6 +662,15 @@ class SiteOrigin_CSS {
 
 		$editor_theme = get_option( 'so_css_editor_theme', 'neat' );
 		$output_location = get_option( 'so_css_output_location', 'file' );
+
+		// Notify an integration still hooked to the retired snippets filter. The
+		// editor page used to read the filter here while rendering, so fire the
+		// deprecation at the same point to keep reaching a callback added later in
+		// the admin load. apply_filters_deprecated() needs WordPress 4.6+ (the
+		// readme declares 3.9) and runs callbacks only when the filter is hooked.
+		if ( function_exists( 'apply_filters_deprecated' ) ) {
+			apply_filters_deprecated( 'siteorigin_css_snippet_paths', array( array() ), '1.6.9' );
+		}
 
 		include plugin_dir_path( __FILE__ ) . 'tpl/page.php';
 	}

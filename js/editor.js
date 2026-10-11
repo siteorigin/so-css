@@ -90,7 +90,16 @@
 			'click .socss-button.save': 'save',
 			'submit': 'onSubmit',
 		},
-		
+
+		// Deprecated in 1.6.9: the snippets browser was removed. Kept as a no-op so
+		// an external caller of window.socss.mainEditor.setSnippets() still works
+		// instead of throwing, and learns the method is gone.
+		setSnippets: function () {
+			if ( window.console && console.warn ) {
+				console.warn( 'SiteOrigin CSS: setSnippets() is deprecated since 1.6.9; the snippets browser was removed.' );
+			}
+		},
+
 		initialize: function ( options ) {
 			
 			this.listenTo( this.model, 'change:selectedPost', this.getSelectedPostCss );
