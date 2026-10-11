@@ -207,10 +207,14 @@
 				);
 				this.codeMirror = wp.codeEditor.initialize( $textArea.get( 0 ), codeMirrorSettings ).codemirror;
 			} else {
+				// The fallback editor has no autocomplete helper of its own, so
+				// register ours. On the WordPress path we leave WordPress's richer
+				// CSS hint in place rather than overwriting it.
 				this.registerCodeMirrorAutocomplete();
 				this.codeMirror = CodeMirror.fromTextArea( $textArea.get( 0 ), codeMirrorSettings );
-				this.setupCodeMirrorExtensions();
 			}
+			// The cursor-driven preview highlight is wired for either editor.
+			this.setupCodeMirrorExtensions();
 
 			var editor = this.codeMirror;
 			$( '#so_css_editor_theme' ).on( 'change', function() {
@@ -253,6 +257,9 @@
 		 * Register the autocomplete helper. Based on css-hint.js in the codemirror addon folder.
 		 */
 		registerCodeMirrorAutocomplete: function () {
+			// This runs only for the fallback editor, which exposes CodeMirror
+			// globally.
+			var CodeMirror = window.CodeMirror;
 			var pseudoClasses = {
 				link: 1, visited: 1, active: 1, hover: 1, focus: 1,
 				"first-letter": 1, "first-line": 1, "first-child": 1,
@@ -343,7 +350,10 @@
 		},
 		
 		setupCodeMirrorExtensions: function () {
-			
+			// WordPress's editor exposes CodeMirror as wp.CodeMirror; the fallback
+			// exposes it globally. Pick the one that matches the editor in use.
+			var CodeMirror = ( typeof wp !== 'undefined' && typeof wp.codeEditor !== 'undefined' ) ? wp.CodeMirror : window.CodeMirror;
+
 			this.codeMirror.on( 'cursorActivity', function ( cm ) {
 				var cur = cm.getCursor(), token = cm.getTokenAt( cur );
 				var inner = CodeMirror.innerMode( cm.getMode(), token.state );
@@ -360,7 +370,12 @@
 				}
 			}.bind( this ) );
 			
-			if ( typeof CodeMirror.showHint == 'function' ) {
+			// Our keyup autocomplete trigger is only for the fallback editor;
+			// wp.codeEditor installs its own trigger and hint helper.
+			if (
+				typeof CodeMirror.showHint == 'function' &&
+				( typeof wp === 'undefined' || typeof wp.codeEditor === 'undefined' )
+			) {
 				// This sets up automatic autocompletion at all times
 				this.codeMirror.on( 'keyup', function ( cm, e ) {
 					if (
