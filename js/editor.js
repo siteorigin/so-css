@@ -372,9 +372,9 @@
 		
 		setupCodeMirrorExtensions: function () {
 			// WordPress's editor exposes CodeMirror as wp.CodeMirror; the fallback
-			// exposes it globally. Pick the one that matches the editor loadCSS built,
-			// which uses the bundled global whenever WordPress did not provide its code
-			// editor, even if another plugin has loaded wp.codeEditor.
+			// exposes it globally. Pick the one that matches the editor setupEditor
+			// built, which uses the bundled global whenever WordPress did not provide
+			// its code editor, even if another plugin has loaded wp.codeEditor.
 			var CodeMirror = ( typeof wp !== 'undefined' && typeof wp.codeEditor !== 'undefined' && ! socssOptions.usesFallbackEditor ) ? wp.CodeMirror : window.CodeMirror;
 
 			this.codeMirror.on( 'cursorActivity', function ( cm ) {
