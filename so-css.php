@@ -468,8 +468,13 @@ class SiteOrigin_CSS {
 
 		global $wp_version;
 
-		if ( version_compare( $wp_version, '4.9', '>=' ) && wp_get_current_user()->syntax_highlighting ) {
-			wp_enqueue_code_editor(
+		// wp_enqueue_code_editor() returns false when the user has turned off
+		// syntax highlighting in their profile, and enqueues nothing. The editor
+		// still needs CodeMirror for its Visual and Expanded modes, so fall back
+		// to the bundled copy whenever the code editor was not enqueued.
+		$code_editor_settings = false;
+		if ( version_compare( $wp_version, '4.9', '>=' ) ) {
+			$code_editor_settings = wp_enqueue_code_editor(
 				array(
 					'type' => 'css',
 					'codemirror' => array(
@@ -477,7 +482,8 @@ class SiteOrigin_CSS {
 					),
 				)
 			);
-		} else {
+		}
+		if ( false === $code_editor_settings ) {
 			$this->enqueue_fallback_codemirror();
 		}
 		wp_enqueue_style( 'socss-codemirror-theme-neat', plugin_dir_url( __FILE__ ) . 'lib/codemirror/theme/neat.css', array(), SOCSS_VERSION );
