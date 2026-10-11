@@ -338,9 +338,18 @@ test( 'The editor loads when syntax highlighting is disabled.', async ( { page }
 		expect( highlighting.mode ).not.toBe( 'css' );
 		expect( highlighting.lint ).toBeFalsy();
 
+		// A notice explains why the editor is plain, so the missing colour and
+		// features read as expected rather than broken.
+		const notice = page.locator( '#so-custom-css-form .socss-highlighting-off-notice' );
+		await expect( notice ).toBeVisible();
+
 		// Visual Mode still opens.
 		await page.locator( '#so-custom-css-form a.editor-visual' ).click();
 		await expect( page.locator( '#so-custom-css-properties' ) ).toBeVisible();
+
+		// The notice can be dismissed.
+		await notice.locator( '.notice-dismiss' ).click();
+		await expect( notice ).toHaveCount( 0 );
 
 		expect( errors.filter( ( e ) => /CodeMirror is not defined/.test( e ) ) ).toEqual( [] );
 	} finally {

@@ -529,6 +529,9 @@ class SiteOrigin_CSS {
 			// When a dedicated CSS file is the source, get_custom_css() reads it
 			// back, so a save there is only safe once the file write is confirmed.
 			'usesCustomFile' => ! empty( apply_filters( 'siteorigin_custom_css_file', false ) ),
+			// The user turned syntax highlighting off in their profile. The editor
+			// then loads a plain, un-highlighted CodeMirror and shows a notice.
+			'syntaxHighlightingOff' => 'false' === wp_get_current_user()->syntax_highlighting,
 
 			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() ),
 
@@ -537,6 +540,8 @@ class SiteOrigin_CSS {
 				'select'       => esc_html__( 'Select', 'so-css' ),
 				'select_image' => esc_html__( 'Select Image', 'so-css' ),
 				'leave'        => esc_html__( 'Are you sure you want to leave without saving?', 'so-css' ),
+				'highlightingOff' => esc_html__( 'Syntax highlighting is off in your profile, so the editor shows plain text. Autocomplete and live preview highlighting are unavailable until you turn it back on.', 'so-css' ),
+				'dismiss'      => esc_html__( 'Dismiss', 'so-css' ),
 			),
 		) );
 

@@ -206,6 +206,17 @@
 				},
 			}
 
+			// The user turned syntax highlighting off in their profile, so load a
+			// plain editor: no CSS mode, no linting, no lint gutter. The Visual and
+			// Expanded modes read and parse the text themselves, so they still work.
+			// The colour-based extras (preview highlight, autocomplete) need token
+			// types, so they stay off here; a notice tells the user why.
+			if ( socssOptions.syntaxHighlightingOff ) {
+				codeMirrorSettings.mode = null;
+				codeMirrorSettings.lint = false;
+				codeMirrorSettings.gutters = [];
+			}
+
 			if ( typeof wp.codeEditor != "undefined" ) {
 				codeMirrorSettings = _.extend(
 					wp.codeEditor.defaultSettings.codemirror,
@@ -213,14 +224,6 @@
 				);
 				this.codeMirror = wp.codeEditor.initialize( $textArea.get( 0 ), codeMirrorSettings ).codemirror;
 			} else {
-				// The code editor is absent because the user disabled syntax
-				// highlighting in their profile, so honour that: load the bundled
-				// CodeMirror as a plain editor with no CSS colouring or linting. Visual
-				// and Expanded modes read the text and parse it themselves, so they
-				// keep working.
-				codeMirrorSettings.mode = null;
-				codeMirrorSettings.lint = false;
-				codeMirrorSettings.gutters = [];
 				// The fallback editor has no autocomplete helper of its own, so
 				// register ours. On the WordPress path we leave WordPress's richer
 				// CSS hint in place rather than overwriting it.
@@ -229,6 +232,10 @@
 			}
 			// The cursor-driven preview highlight is wired for either editor.
 			this.setupCodeMirrorExtensions();
+
+			if ( socssOptions.syntaxHighlightingOff ) {
+				this.showHighlightingOffNotice();
+			}
 
 			var editor = this.codeMirror;
 			$( '#so_css_editor_theme' ).on( 'change', function() {
@@ -406,7 +413,29 @@
 				} );
 			}
 		},
-		
+
+		// Tell the user the editor is plain because they turned syntax highlighting
+		// off, so the missing colour, autocomplete and preview highlight are expected.
+		// Reuses WordPress's admin-notice styles; the dismiss hides it for this view.
+		showHighlightingOffNotice: function () {
+			var $form = $( '#so-custom-css-form' );
+			if ( ! $form.length || $form.find( '.socss-highlighting-off-notice' ).length ) {
+				return;
+			}
+			var $notice = $(
+				'<div class="notice notice-info socss-highlighting-off-notice">' +
+					'<p></p>' +
+					'<button type="button" class="notice-dismiss"><span class="screen-reader-text"></span></button>' +
+				'</div>'
+			);
+			$notice.find( 'p' ).text( socssOptions.loc.highlightingOff );
+			$notice.find( '.screen-reader-text' ).text( socssOptions.loc.dismiss );
+			$notice.on( 'click', '.notice-dismiss', function () {
+				$notice.remove();
+			} );
+			$form.find( '.custom-css-toolbar' ).before( $notice );
+		},
+
 		/**
 		 * Scale the size of the editor depending on whether it's expanded or not
 		 */
