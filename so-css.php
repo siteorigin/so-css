@@ -463,6 +463,10 @@ class SiteOrigin_CSS {
 			return;
 		}
 
+		// Read the edited post from the editor's page route, so the editor knows
+		// when it is showing post-specific CSS rather than the global stylesheet.
+		$socss_post_id = filter_input( INPUT_GET, 'socss_post_id', FILTER_VALIDATE_INT );
+
 		// Core WordPress stuff that we use
 		wp_enqueue_media();
 
@@ -521,6 +525,10 @@ class SiteOrigin_CSS {
 			'getRevisionsListAjaxUrl' => wp_nonce_url( admin_url( 'admin-ajax.php?action=socss_get_revisions_list' ), 'get_revisions_list' ),
 			'ajaxurl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'so-css-ajax' ),
 			'openVisualEditor' => $open_visual_editor,
+			'postEditor' => ! empty( $socss_post_id ),
+			// When a dedicated CSS file is the source, get_custom_css() reads it
+			// back, so a save there is only safe once the file write is confirmed.
+			'usesCustomFile' => ! empty( apply_filters( 'siteorigin_custom_css_file', false ) ),
 
 			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() ),
 
