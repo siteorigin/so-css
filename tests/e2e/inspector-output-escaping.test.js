@@ -222,6 +222,54 @@ test( 'The navigate-to label reads with a single colon.', async ( { page } ) => 
 	expect( label ).not.toMatch( /:\s*:/ );
 } );
 
+test( 'The property list keeps every declaration of a rule and escapes values.', async ( { page } ) => {
+	const result = await page.evaluate( ( probe ) => {
+		const $ = window.jQuery;
+		// A rule with several declarations, a comment, and a markup-shaped value.
+		$(
+			'<style class="socss-theme-styles" id="socss-198-seed">' +
+			'.socss-198 { color: rgb(1, 2, 3); /* note */ text-decoration: none; ' +
+			'opacity: 0.5; content: "x<b/' + probe + '=1>"; }' +
+			'</style>'
+		).appendTo( 'head' );
+		window.socssInspector.parsedCss = {};
+
+		const el = $( '<div class="socss-198"></div>' ).appendTo( 'body' );
+		window.socssInspector.mainInspector.setActiveEl( el );
+
+		// Read the rows the inspector actually rendered.
+		const win = document.querySelector( '.socss-properties-window' );
+		const rows = Array.prototype.map.call(
+			win.querySelectorAll( '.socss-selector' ),
+			( d ) => d.textContent.trim()
+		);
+
+		const out = {
+			rows: rows,
+			hasUndefined: rows.some( ( t ) => t.indexOf( 'undefined' ) === 0 ),
+			probeNodes: win.querySelectorAll( '[' + probe + ']' ).length,
+		};
+
+		el.remove();
+		$( '#socss-198-seed' ).remove();
+		window.socssInspector.parsedCss = {};
+		return out;
+	}, PROBE );
+
+	// Every declaration appears in the visible property rows, not just the first.
+	const hasRow = ( name ) => result.rows.some( ( t ) => t.indexOf( name + ':' ) === 0 );
+	expect( hasRow( 'color' ) ).toBe( true );
+	expect( hasRow( 'text-decoration' ) ).toBe( true );
+	expect( hasRow( 'opacity' ) ).toBe( true );
+	expect( hasRow( 'content' ) ).toBe( true );
+	// Comment nodes do not become an "undefined" property row.
+	expect( result.hasUndefined ).toBe( false );
+	// The markup-shaped value renders as text: a row shows it literally and no
+	// node was created from it.
+	expect( result.rows.some( ( t ) => t.indexOf( 'x<b/' + PROBE + '=1>' ) !== -1 ) ).toBe( true );
+	expect( result.probeNodes ).toBe( 0 );
+} );
+
 /**
  * Drives setActiveEl on an anchor with the given href and reports the displayed
  * link's href attribute and label text.
