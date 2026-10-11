@@ -206,23 +206,24 @@
 				},
 			}
 
-			// The user turned syntax highlighting off in their profile, so load a
+			// WordPress did not enqueue its code editor (the user disabled syntax
+			// highlighting, or a site filter turned the code editor off), so load a
 			// plain editor: no CSS mode, no linting, no lint gutter. Visual Mode still
 			// reads and parses the text and Expanded Mode still reflows the editor, so
 			// both open. The colour-based extras (preview highlight, autocomplete) need
 			// token types, so they stay off here; a notice tells the user why.
-			if ( socssOptions.syntaxHighlightingOff ) {
+			if ( socssOptions.usesFallbackEditor ) {
 				codeMirrorSettings.mode = null;
 				codeMirrorSettings.lint = false;
 				codeMirrorSettings.gutters = [];
 			}
 
-			// When highlighting is off, always use the bundled plain editor, even if
+			// In the fallback case, always use the bundled plain editor, even if
 			// another plugin has loaded wp.codeEditor. wp.codeEditor.initialize() reads
 			// overrides from settings.codemirror and would otherwise merge its own CSS
 			// defaults back in. The bundled CodeMirror is enqueued in that case, so it
 			// is available here.
-			if ( typeof wp.codeEditor != "undefined" && ! socssOptions.syntaxHighlightingOff ) {
+			if ( typeof wp.codeEditor != "undefined" && ! socssOptions.usesFallbackEditor ) {
 				codeMirrorSettings = _.extend(
 					wp.codeEditor.defaultSettings.codemirror,
 					codeMirrorSettings
@@ -238,7 +239,7 @@
 			// The cursor-driven preview highlight is wired for either editor.
 			this.setupCodeMirrorExtensions();
 
-			if ( socssOptions.syntaxHighlightingOff ) {
+			if ( socssOptions.usesFallbackEditor ) {
 				this.showHighlightingOffNotice();
 			}
 

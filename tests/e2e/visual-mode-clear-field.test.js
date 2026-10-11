@@ -353,10 +353,17 @@ test( 'The editor loads when syntax highlighting is disabled.', async ( { page }
 		} );
 		expect( fits ).toBe( true );
 		await page.locator( '#so-custom-css-form a.editor-expand' ).click();
+		await expect( page.locator( '#so-custom-css-form' ) ).not.toHaveClass( /expanded/ );
 
-		// Dismiss before opening Visual Mode, whose panel overlaps the notice.
+		// Dismissing the notice reclaims its height: the editor grows. Dismiss before
+		// opening Visual Mode, whose panel overlaps the notice.
+		const scrollHeight = () => page.evaluate(
+			() => document.querySelector( '#so-custom-css-form .CodeMirror-scroll' ).getBoundingClientRect().height
+		);
+		const heightBefore = await scrollHeight();
 		await notice.locator( '.notice-dismiss' ).click();
 		await expect( notice ).toHaveCount( 0 );
+		await expect.poll( scrollHeight ).toBeGreaterThan( heightBefore );
 
 		await page.locator( '#so-custom-css-form a.editor-visual' ).click();
 		await expect( page.locator( '#so-custom-css-properties' ) ).toBeVisible();
