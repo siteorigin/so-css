@@ -790,7 +790,10 @@
 		if ( ! saveBtn.hasClass( 'button-primary-disabled' ) ) {
 			saveBtn.addClass( 'button-primary-disabled' )
 
-			// Which view is the user using?
+			// Which view is the user using? Submit each mode's own value as-is,
+			// not a reparsed copy, and capture it here, before the request's async
+			// gap, so it also serves as the baseline the warning clears against on
+			// success.
 			if ( typeof view.editor != 'undefined' ) {
 				// Visual.
 				css = view.editor.codeMirror.getValue().trim();
@@ -799,6 +802,7 @@
 				// Expanded.
 				css = view.codeMirror.getValue().trim();
 			}
+
 			$.post(
 				socssOptions.ajaxurl,
 				{
@@ -808,8 +812,24 @@
 				null,
 				'html'
 			).done( function ( response ) {
+				// Clear the leave-page warning only where the submitted CSS can be
+				// treated as stored as sent: a non-empty response (the handler
+				// wrote a revision, so the save was not skipped), the global editor
+				// (socssOptions.postEditor is false), not a dedicated-file source
+				// whose write is unconfirmed (socssOptions.usesCustomFile), and no
+				// "<" for the server's strip_tags() to alter. Any other case stays
+				// dirty.
+				if (
+					response.length &&
+					window.socss.mainEditor &&
+					! socssOptions.postEditor &&
+					! socssOptions.usesCustomFile &&
+					css.indexOf( '<' ) === -1
+				) {
+					window.socss.mainEditor.initValue = css;
+				}
 				if ( response.length ) {
-					// Update was successful. Update revisions list.
+					// Update the revisions list.
 					$( '.custom-revisions-list' ).html( response );
 				}
 			})

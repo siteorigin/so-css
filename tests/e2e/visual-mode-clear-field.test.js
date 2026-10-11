@@ -278,9 +278,8 @@ const saveAndReload = async ( page ) => {
 	await page.locator( '#so-custom-css-properties .toolbar .save' ).click();
 	await saved;
 
-	// A Visual Mode save leaves the editor's unsaved-changes check dirty, so
-	// accept its beforeunload prompt. Playwright would dismiss it and cancel
-	// the reload.
+	// Accept a beforeunload prompt if one appears, so the reload proceeds;
+	// Playwright would otherwise dismiss it and cancel the reload.
 	page.on( 'dialog', ( dialog ) => (
 		dialog.type() === 'beforeunload' ? dialog.accept() : dialog.dismiss()
 	) );
@@ -289,6 +288,231 @@ const saveAndReload = async ( page ) => {
 
 	return page.locator( '#custom-css-textarea' ).inputValue();
 };
+
+test( 'A toolbar save clears the leave-page warning.', async ( { page } ) => {
+	await soGoTo( page, EDITOR_URL );
+	await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible();
+
+	// Includes a comment, so the reload check also proves the toolbar save
+	// stores the CSS verbatim rather than reformatting it.
+	const newCss = '.qa-199 { color: #abcdef; /* keep this note */ }';
+	await page.evaluate(
+		( css ) => document.querySelector( '#so-custom-css-form .CodeMirror' ).CodeMirror.setValue( css ),
+		newCss
+	);
+
+	// With unsaved changes, leaving warns.
+	const before = await page.evaluate( () => ( {
+		warning: window.jQuery( window ).triggerHandler( 'beforeunload' ),
+		expected: socssOptions.loc.leave,
+	} ) );
+	expect( before.warning ).toBe( before.expected );
+
+	const saved = page.waitForResponse( ( r ) =>
+		r.url().includes( 'admin-ajax.php' ) &&
+		r.request().method() === 'POST' &&
+		( r.request().postData() || '' ).includes( 'action=socss_save_css' ) &&
+		r.ok()
+	);
+	await page.evaluate( () => window.socss.mainEditor.save() );
+	await saved;
+
+	// After the save the baseline advances (poll: the .done callback can run
+	// after the response event), so leaving no longer warns.
+	await page.waitForFunction(
+		() => window.jQuery( window ).triggerHandler( 'beforeunload' ) === undefined,
+		null,
+		{ timeout: 5000 }
+	);
+	expect( await page.evaluate( () => window.socss.mainEditor.initValue ) ).toContain( '.qa-199' );
+
+	// The CSS really persisted: reload and read it back from the textarea.
+	await soGoTo( page, EDITOR_URL );
+	await expect( page.locator( '#custom-css-textarea' ) ).toHaveValue( newCss );
+} );
+
+test( 'A save of CSS the server would alter keeps the leave-page warning.', async ( { page } ) => {
+	await soGoTo( page, EDITOR_URL );
+	await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible();
+
+	// The server stores trim( strip_tags() ), so the "<b>" is removed and the
+	// stored CSS differs from this. The warning must stay so the user is not
+	// told it saved unchanged.
+	const taggedCss = '.qa-199-tag::after { content: "<b>"; }';
+	await page.evaluate(
+		( css ) => document.querySelector( '#so-custom-css-form .CodeMirror' ).CodeMirror.setValue( css ),
+		taggedCss
+	);
+
+	const saved = page.waitForResponse( ( r ) =>
+		r.url().includes( 'admin-ajax.php' ) &&
+		r.request().method() === 'POST' &&
+		( r.request().postData() || '' ).includes( 'action=socss_save_css' ) &&
+		r.ok()
+	);
+	const revsBefore = await page.evaluate(
+		() => ( document.querySelector( '.custom-revisions-list' ) || {} ).innerHTML || ''
+	);
+	await page.evaluate( () => window.socss.mainEditor.save() );
+	await saved;
+	// Wait for the .done() callback to run, so the baseline decision is made.
+	await page.waitForFunction(
+		( before ) => {
+			const el = document.querySelector( '.custom-revisions-list' );
+			return el && el.innerHTML !== before;
+		},
+		revsBefore,
+		{ timeout: 10000 }
+	);
+
+	const result = await page.evaluate( () => ( {
+		warning: window.jQuery( window ).triggerHandler( 'beforeunload' ),
+		expected: socssOptions.loc.leave,
+	} ) );
+	expect( result.warning ).toBe( result.expected );
+} );
+
+test( 'A save keeps the warning when a dedicated CSS file is the source.', async ( { page } ) => {
+	// With a dedicated CSS file, get_custom_css() reads the file back, so an
+	// unconfirmed file write must not be reported as a clean save.
+	await soGoTo( page, EDITOR_URL );
+	await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible();
+
+	await page.evaluate( () => {
+		window.socssOptions.usesCustomFile = true;
+		document.querySelector( '#so-custom-css-form .CodeMirror' ).CodeMirror.setValue( '.qa-199-file { color: #0a0b0c; }' );
+	} );
+
+	const saved = page.waitForResponse( ( r ) =>
+		r.url().includes( 'admin-ajax.php' ) &&
+		r.request().method() === 'POST' &&
+		( r.request().postData() || '' ).includes( 'action=socss_save_css' ) &&
+		r.ok()
+	);
+	const revsBefore = await page.evaluate(
+		() => ( document.querySelector( '.custom-revisions-list' ) || {} ).innerHTML || ''
+	);
+	await page.evaluate( () => window.socss.mainEditor.save() );
+	await saved;
+	await page.waitForFunction(
+		( before ) => {
+			const el = document.querySelector( '.custom-revisions-list' );
+			return el && el.innerHTML !== before;
+		},
+		revsBefore,
+		{ timeout: 10000 }
+	);
+
+	const result = await page.evaluate( () => ( {
+		warning: window.jQuery( window ).triggerHandler( 'beforeunload' ),
+		expected: socssOptions.loc.leave,
+	} ) );
+	expect( result.warning ).toBe( result.expected );
+} );
+
+test( 'A post-specific toolbar save keeps the leave-page warning.', async ( { page } ) => {
+	// On the socss_post_id route the AJAX save still writes the global option,
+	// so the warning must stay rather than hide an unsaved post edit.
+	const requestUtils = await setupRequestUtils();
+	let qaPostId = null;
+	try {
+		const post = await requestUtils.rest( {
+			method: 'POST',
+			path: '/wp/v2/posts',
+			data: { title: 'QA 199 post-specific CSS', status: 'publish' },
+		} );
+		qaPostId = post.id;
+
+		await soGoTo( page, EDITOR_URL + '&socss_post_id=' + qaPostId );
+		await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible();
+
+		await page.evaluate(
+			() => document.querySelector( '#so-custom-css-form .CodeMirror' ).CodeMirror.setValue( '.qa-199-post { color: #123456; }' )
+		);
+
+		const saved = page.waitForResponse( ( r ) =>
+			r.url().includes( 'admin-ajax.php' ) &&
+			r.request().method() === 'POST' &&
+			( r.request().postData() || '' ).includes( 'action=socss_save_css' ) &&
+			r.ok()
+		);
+		const revsBefore = await page.evaluate(
+			() => ( document.querySelector( '.custom-revisions-list' ) || {} ).innerHTML || ''
+		);
+		await page.evaluate( () => window.socss.mainEditor.save() );
+		await saved;
+		// Wait until the save's .done() callback has run: it rewrites the
+		// revisions list, so the baseline decision has already been made before
+		// the warning is checked below.
+		await page.waitForFunction(
+			( before ) => {
+				const el = document.querySelector( '.custom-revisions-list' );
+				return el && el.innerHTML !== before;
+			},
+			revsBefore,
+			{ timeout: 10000 }
+		);
+
+		// The baseline must NOT advance here, so the leave-page warning still fires.
+		const result = await page.evaluate( () => ( {
+			warning: window.jQuery( window ).triggerHandler( 'beforeunload' ),
+			expected: socssOptions.loc.leave,
+		} ) );
+		expect( result.warning ).toBe( result.expected );
+	} finally {
+		if ( qaPostId ) {
+			await requestUtils.rest( { method: 'DELETE', path: `/wp/v2/posts/${ qaPostId }`, data: { force: true } } );
+		}
+		await requestUtils.request.dispose();
+	}
+} );
+
+test( 'A Visual Mode save clears the leave-page warning.', async ( { page } ) => {
+	const section = await openTextSection( page );
+
+	// Change a field so there are unsaved changes.
+	const fontSize = section
+		.locator( 'tr', { has: page.locator( 'th', { hasText: /^Font Size$/ } ) } )
+		.locator( '.socss-field-input' );
+	await fontSize.click();
+	await fontSize.selectText();
+	await fontSize.type( '42' );
+
+	// The field change live-updates the main editor, so leaving warns before
+	// saving. Poll, since the update runs on the field's key handler.
+	await page.waitForFunction(
+		() => window.jQuery( window ).triggerHandler( 'beforeunload' ) !== undefined,
+		null,
+		{ timeout: 5000 }
+	);
+
+	// Save through the Visual Mode toolbar and wait for the AJAX save.
+	const saved = page.waitForResponse( ( r ) =>
+		r.url().includes( 'admin-ajax.php' ) &&
+		r.request().method() === 'POST' &&
+		( r.request().postData() || '' ).includes( 'action=socss_save_css' ) &&
+		r.ok()
+	);
+	await page.locator( '#so-custom-css-properties .toolbar .save' ).click();
+	await saved;
+
+	// After a Visual save the baseline matches the main editor's content, so
+	// leaving no longer warns. Poll, since the .done callback can run after the
+	// response event.
+	await page.waitForFunction(
+		() => window.jQuery( window ).triggerHandler( 'beforeunload' ) === undefined,
+		null,
+		{ timeout: 5000 }
+	);
+
+	// The warning cleared, so the displayed CSS must equal what was stored.
+	// Capture the editor's value, reload, and assert the saved CSS matches it
+	// exactly (and that the change is there).
+	const displayed = await getEditorCss( page );
+	expect( displayed ).toContain( 'font-size: 42px' );
+	await soGoTo( page, EDITOR_URL );
+	await expect( page.locator( '#custom-css-textarea' ) ).toHaveValue( displayed );
+} );
 
 test( 'Clearing Font Size keeps the declarations after it.', async ( { page } ) => {
 	const section = await openTextSection( page );
