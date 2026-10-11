@@ -382,6 +382,19 @@ test( 'Switching the editor theme applies and reverts it.', async ( { page } ) =
 	await expect( cm ).not.toHaveClass( /cm-s-ambiance/ );
 } );
 
+test( 'A measurement field shows its configured default unit.', async ( { page } ) => {
+	const section = await openTextSection( page );
+
+	// Line Height is configured with a default unit of em. The control must
+	// show that, not the generic px fallback.
+	const unit = await section
+		.locator( 'tr', { has: page.locator( 'th', { hasText: /^Line Height$/ } ) } )
+		.locator( '.units' )
+		.textContent();
+
+	expect( unit.trim() ).toBe( 'em' );
+} );
+
 test( 'Clearing Font Size keeps the declarations after it.', async ( { page } ) => {
 	const section = await openTextSection( page );
 
