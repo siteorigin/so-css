@@ -764,9 +764,10 @@ class SiteOrigin_CSS {
 			// Sanitize CSS input. Should keep most tags, apart from script and style tags.
 			$custom_css = self::sanitize_css( stripslashes( $_POST['css'] ) );
 
+			$saved = true;
 			if ( empty( $this->css_file ) ) {
 				$current = $this->get_custom_css( $this->theme );
-				$this->save_custom_css( $custom_css, $this->theme );
+				$saved = $this->save_custom_css( $custom_css, $this->theme );
 			} else {
 				$current = $this->css_file;
 			}
@@ -776,8 +777,13 @@ class SiteOrigin_CSS {
 				$this->add_custom_css_revision( $custom_css, $this->theme );
 				$this->save_custom_css_file( $custom_css, $this->theme );
 
-				// Output the full revisions list.
-				$this->custom_css_revisions_list( $this->theme );
+				// Output the full revisions list only when the option write was
+				// confirmed. The editor treats a non-empty response as proof the CSS
+				// was stored and clears its unsaved-changes warning, so a failed
+				// write must not emit it.
+				if ( $saved ) {
+					$this->custom_css_revisions_list( $this->theme );
+				}
 			}
 		}
 		wp_die();
