@@ -213,6 +213,14 @@
 				);
 				this.codeMirror = wp.codeEditor.initialize( $textArea.get( 0 ), codeMirrorSettings ).codemirror;
 			} else {
+				// The code editor is absent because the user disabled syntax
+				// highlighting in their profile, so honour that: load the bundled
+				// CodeMirror as a plain editor with no CSS colouring or linting. Visual
+				// and Expanded modes read the text and parse it themselves, so they
+				// keep working.
+				codeMirrorSettings.mode = null;
+				codeMirrorSettings.lint = false;
+				codeMirrorSettings.gutters = [];
 				// The fallback editor has no autocomplete helper of its own, so
 				// register ours. On the WordPress path we leave WordPress's richer
 				// CSS hint in place rather than overwriting it.

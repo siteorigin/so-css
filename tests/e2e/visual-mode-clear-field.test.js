@@ -328,7 +328,17 @@ test( 'The editor loads when syntax highlighting is disabled.', async ( { page }
 		);
 		expect( hasEditor ).toBe( true );
 
-		// Visual Mode opens.
+		// The disabled preference is honoured: the fallback editor carries no CSS
+		// mode and no linting, so the code is not syntax highlighted.
+		const highlighting = await page.evaluate( () => {
+			const cm = window.socss.mainEditor.codeMirror;
+			return { mode: cm.getOption( 'mode' ), lint: cm.getOption( 'lint' ) };
+		} );
+		expect( highlighting.mode ).toBeFalsy();
+		expect( highlighting.mode ).not.toBe( 'css' );
+		expect( highlighting.lint ).toBeFalsy();
+
+		// Visual Mode still opens.
 		await page.locator( '#so-custom-css-form a.editor-visual' ).click();
 		await expect( page.locator( '#so-custom-css-properties' ) ).toBeVisible();
 
