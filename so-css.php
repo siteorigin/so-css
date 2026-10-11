@@ -3,6 +3,8 @@
 Plugin Name: SiteOrigin CSS
 Description: Powerful, simple CSS editing for WordPress. Visual controls & real-time previews for effortless site customization.
 Version: dev
+Requires at least: 6.0
+Requires PHP: 7.0.0
 Author: SiteOrigin
 Text Domain: so-css
 Author URI: https://siteorigin.com
@@ -664,8 +666,12 @@ class SiteOrigin_CSS {
 		$output_location = get_option( 'so_css_output_location', 'file' );
 
 		// Fire the retired snippets filter as the editor page renders, so a callback
-		// still hooked to it runs and receives the deprecation notice.
-		apply_filters_deprecated( 'siteorigin_css_snippet_paths', array( array() ), '1.6.9' );
+		// still hooked to it runs and receives the deprecation notice. The guard
+		// keeps a pre-6.0 install that reaches this code from fataling, as
+		// apply_filters_deprecated() exists only since WordPress 4.6.
+		if ( function_exists( 'apply_filters_deprecated' ) ) {
+			apply_filters_deprecated( 'siteorigin_css_snippet_paths', array( array() ), '1.6.9' );
+		}
 
 		include plugin_dir_path( __FILE__ ) . 'tpl/page.php';
 	}
@@ -832,7 +838,11 @@ class SiteOrigin_CSS {
 	 */
 	public function get_snippets() {
 		_deprecated_function( __METHOD__, '1.6.9' );
-		apply_filters_deprecated( 'siteorigin_css_snippet_paths', array( array() ), '1.6.9' );
+		// Guarded so a pre-6.0 install cannot fatal: apply_filters_deprecated()
+		// exists only since WordPress 4.6.
+		if ( function_exists( 'apply_filters_deprecated' ) ) {
+			apply_filters_deprecated( 'siteorigin_css_snippet_paths', array( array() ), '1.6.9' );
+		}
 		return array();
 	}
 

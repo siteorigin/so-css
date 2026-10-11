@@ -91,8 +91,7 @@
 			'submit': 'onSubmit',
 		},
 
-		// Deprecated no-op since 1.6.9. Warns and does nothing: the snippets browser
-		// it populated no longer exists.
+		// Deprecated no-op since 1.6.9: warns and opens no snippets UI.
 		setSnippets: function () {
 			if ( window.console && console.warn ) {
 				console.warn( 'SiteOrigin CSS: setSnippets() is deprecated since 1.6.9; the snippets browser was removed.' );
