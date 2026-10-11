@@ -1,6 +1,6 @@
 === SiteOrigin CSS ===
 Tags: css editor, visual css, live editing, theme editor, website styling
-Requires at least: 3.9
+Requires at least: 6.0
 Requires PHP: 7.0.0
 Tested up to: 7.1
 Stable tag: trunk
