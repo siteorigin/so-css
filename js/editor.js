@@ -91,9 +91,8 @@
 			'submit': 'onSubmit',
 		},
 
-		// Deprecated in 1.6.9: the snippets browser was removed. Kept as a no-op so
-		// an external caller of window.socss.mainEditor.setSnippets() still works
-		// instead of throwing, and learns the method is gone.
+		// Deprecated no-op since 1.6.9. Warns and does nothing: the snippets browser
+		// it populated no longer exists.
 		setSnippets: function () {
 			if ( window.console && console.warn ) {
 				console.warn( 'SiteOrigin CSS: setSnippets() is deprecated since 1.6.9; the snippets browser was removed.' );

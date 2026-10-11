@@ -663,11 +663,9 @@ class SiteOrigin_CSS {
 		$editor_theme = get_option( 'so_css_editor_theme', 'neat' );
 		$output_location = get_option( 'so_css_output_location', 'file' );
 
-		// Notify an integration still hooked to the retired snippets filter. The
-		// editor page used to read the filter here while rendering, so fire the
-		// deprecation at the same point to keep reaching a callback added later in
-		// the admin load. apply_filters_deprecated() needs WordPress 4.6+ (the
-		// readme declares 3.9) and runs callbacks only when the filter is hooked.
+		// Fire the retired snippets filter's deprecation as the editor page renders,
+		// so a callback still hooked to it runs and receives the notice.
+		// apply_filters_deprecated() needs WordPress 4.6+ (the readme declares 3.9).
 		if ( function_exists( 'apply_filters_deprecated' ) ) {
 			apply_filters_deprecated( 'siteorigin_css_snippet_paths', array( array() ), '1.6.9' );
 		}

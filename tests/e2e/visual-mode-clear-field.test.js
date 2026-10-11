@@ -691,6 +691,31 @@ test( 'The removed snippets browser is gone and the editor still loads.', async 
 	expect( state.hasTemplate ).toBe( false );
 	expect( state.hasEditor ).toBe( true );
 	await expect( page.locator( '#so-custom-css-form .custom-css-toolbar' ) ).not.toContainText( 'Snippets' );
+
+	// The deprecated setSnippets() stub stays callable: an external caller of
+	// window.socss.mainEditor gets a no-op, not a TypeError, and no browser opens.
+	const stub = await page.evaluate( () => {
+		const editor = window.socss.mainEditor;
+		const type = typeof editor.setSnippets;
+		let threw = false;
+		let returned = 'skipped';
+		try {
+			returned = editor.setSnippets( [ { name: 'Test', css: 'a {}' } ] );
+		} catch ( e ) {
+			threw = true;
+		}
+		return {
+			type,
+			threw,
+			returned,
+			hasBrowser: !! document.querySelector( '.snippet-browser-dialog' ),
+		};
+	} );
+	expect( stub.type ).toBe( 'function' );
+	expect( stub.threw ).toBe( false );
+	expect( stub.returned ).toBeUndefined();
+	expect( stub.hasBrowser ).toBe( false );
+
 	expect( errors ).toEqual( [] );
 } );
 
