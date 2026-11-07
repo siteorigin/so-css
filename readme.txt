@@ -73,6 +73,21 @@ SiteOrigin Premium includes access to our professional email support service, pe
 
 == Changelog ==
 
+= 1.6.9 - 07 November 2026 =
+* Visual Editor: Measurement fields now start in their configured default unit instead of always using pixels.
+* Visual Editor: Changing the editor theme now applies the selected theme.
+* Visual Editor: Background Size now offers only the valid keywords: auto, cover and contain.
+* Visual Editor: Editing a color field no longer erases a color value the picker can't display, such as a named color.
+* Visual Editor: The selector dropdown now shows special characters as text and selects the correct rule.
+* Inspector: Lists every declaration of a matching rule, including rules that contain comments.
+* Inspector: Menu item class selectors are only offered when they are valid, and only once each.
+* Inspector: Removed the duplicate colon from the "Navigate To:" label.
+* Editor: The leave-page warning now clears after a toolbar save once the CSS write is confirmed.
+* Editor: The preview highlight now works in the default editor, and the Visual and Expanded modes load when syntax highlighting is turned off in your user profile.
+* Editor: Shows a notice when the editor runs without syntax highlighting.
+* Removed the non-functional CSS snippets browser.
+* Raised the minimum WordPress version to 6.0.
+
 = 1.6.8 - 09 October 2026 =
 * Inspector: Improved output handling for links and selectors.
 
