@@ -3,6 +3,8 @@
 Plugin Name: SiteOrigin CSS
 Description: Powerful, simple CSS editing for WordPress. Visual controls & real-time previews for effortless site customization.
 Version: dev
+Requires at least: 6.0
+Requires PHP: 7.0.0
 Author: SiteOrigin
 Text Domain: so-css
 Author URI: https://siteorigin.com
@@ -23,12 +25,10 @@ define( 'SOCSS_JS_SUFFIX', '' );
 class SiteOrigin_CSS {
 
 	private $theme;
-	private $snippet_paths;
 	private $css_file;
 
 	public function __construct() {
 		$this->theme = basename( get_template_directory() );
-		$this->snippet_paths = array();
 
 		// Main header actions
 		add_action( 'plugins_loaded', array( $this, 'set_plugin_textdomain' ) );
@@ -463,13 +463,22 @@ class SiteOrigin_CSS {
 			return;
 		}
 
+		// Read the edited post from the editor's page route, so the editor knows
+		// when it is showing post-specific CSS rather than the global stylesheet.
+		$socss_post_id = filter_input( INPUT_GET, 'socss_post_id', FILTER_VALIDATE_INT );
+
 		// Core WordPress stuff that we use
 		wp_enqueue_media();
 
 		global $wp_version;
 
-		if ( version_compare( $wp_version, '4.9', '>=' ) && wp_get_current_user()->syntax_highlighting ) {
-			wp_enqueue_code_editor(
+		// wp_enqueue_code_editor() returns false when the user has turned off
+		// syntax highlighting in their profile, and enqueues nothing. The editor
+		// still needs CodeMirror for its Visual and Expanded modes, so fall back
+		// to the bundled copy whenever the code editor was not enqueued.
+		$code_editor_settings = false;
+		if ( version_compare( $wp_version, '4.9', '>=' ) ) {
+			$code_editor_settings = wp_enqueue_code_editor(
 				array(
 					'type' => 'css',
 					'codemirror' => array(
@@ -477,7 +486,8 @@ class SiteOrigin_CSS {
 					),
 				)
 			);
-		} else {
+		}
+		if ( false === $code_editor_settings ) {
 			$this->enqueue_fallback_codemirror();
 		}
 		wp_enqueue_style( 'socss-codemirror-theme-neat', plugin_dir_url( __FILE__ ) . 'lib/codemirror/theme/neat.css', array(), SOCSS_VERSION );
@@ -515,6 +525,15 @@ class SiteOrigin_CSS {
 			'getRevisionsListAjaxUrl' => wp_nonce_url( admin_url( 'admin-ajax.php?action=socss_get_revisions_list' ), 'get_revisions_list' ),
 			'ajaxurl' => wp_nonce_url( admin_url( 'admin-ajax.php' ), 'so-css-ajax' ),
 			'openVisualEditor' => $open_visual_editor,
+			'postEditor' => ! empty( $socss_post_id ),
+			// When a dedicated CSS file is the source, get_custom_css() reads it
+			// back, so a save there is only safe once the file write is confirmed.
+			'usesCustomFile' => ! empty( apply_filters( 'siteorigin_custom_css_file', false ) ),
+			// True when WordPress did not enqueue its code editor, so the plugin fell
+			// back to the bundled CodeMirror. This covers both a user who disabled
+			// syntax highlighting and a site that filtered the code editor off. The
+			// editor then loads plain and shows a notice.
+			'usesFallbackEditor' => false === $code_editor_settings,
 
 			'propertyControllers' => apply_filters( 'siteorigin_css_property_controllers', $this->get_property_controllers() ),
 
@@ -523,6 +542,10 @@ class SiteOrigin_CSS {
 				'select'       => esc_html__( 'Select', 'so-css' ),
 				'select_image' => esc_html__( 'Select Image', 'so-css' ),
 				'leave'        => esc_html__( 'Are you sure you want to leave without saving?', 'so-css' ),
+				// Inserted with jQuery .text(), which escapes for us, so these stay
+				// unescaped; esc_html__() would turn a translated apostrophe into an entity.
+				'highlightingOff' => __( 'Syntax highlighting is off, so the editor shows plain text. Autocomplete and live preview highlighting are unavailable.', 'so-css' ),
+				'dismiss'      => __( 'Dismiss', 'so-css' ),
 			),
 		) );
 
@@ -651,6 +674,12 @@ class SiteOrigin_CSS {
 		$editor_theme = get_option( 'so_css_editor_theme', 'neat' );
 		$output_location = get_option( 'so_css_output_location', 'file' );
 
+		// Fire the retired snippets filter as the editor page renders, so a hooked
+		// callback still runs and receives the deprecation notice.
+		if ( function_exists( 'apply_filters_deprecated' ) ) {
+			apply_filters_deprecated( 'siteorigin_css_snippet_paths', array( array() ), '1.6.9' );
+		}
+
 		include plugin_dir_path( __FILE__ ) . 'tpl/page.php';
 	}
 
@@ -744,9 +773,10 @@ class SiteOrigin_CSS {
 			// Sanitize CSS input. Should keep most tags, apart from script and style tags.
 			$custom_css = self::sanitize_css( stripslashes( $_POST['css'] ) );
 
+			$saved = true;
 			if ( empty( $this->css_file ) ) {
 				$current = $this->get_custom_css( $this->theme );
-				$this->save_custom_css( $custom_css, $this->theme );
+				$saved = $this->save_custom_css( $custom_css, $this->theme );
 			} else {
 				$current = $this->css_file;
 			}
@@ -756,8 +786,13 @@ class SiteOrigin_CSS {
 				$this->add_custom_css_revision( $custom_css, $this->theme );
 				$this->save_custom_css_file( $custom_css, $this->theme );
 
-				// Output the full revisions list.
-				$this->custom_css_revisions_list( $this->theme );
+				// Output the full revisions list only when the option write was
+				// confirmed. The editor treats a non-empty response as proof the CSS
+				// was stored and clears its unsaved-changes warning, so a failed
+				// write must not emit it.
+				if ( $saved ) {
+					$this->custom_css_revisions_list( $this->theme );
+				}
 			}
 		}
 		wp_die();
@@ -797,66 +832,40 @@ class SiteOrigin_CSS {
 	}
 
 	/**
-	 *  Add one or more paths to the registered snippet paths
+	 * Deprecated no-op. Registers no snippet path.
+	 *
+	 * @deprecated 1.6.9
 	 *
 	 * @param string|array $path
 	 */
 	public function register_snippet_path( $path ) {
-		$this->snippet_paths = array_merge( $this->snippet_paths, (array) $path );
+		_deprecated_function( __METHOD__, '1.6.9' );
 	}
 
 	/**
-	 * Get all the available snippets
+	 * Deprecated. Returns an empty array.
 	 *
-	 * @return array|bool
+	 * @deprecated 1.6.9
+	 *
+	 * @return array
 	 */
 	public function get_snippets() {
-		// Get the snippet paths
-		$snippet_paths = apply_filters( 'siteorigin_css_snippet_paths', $this->snippet_paths );
-
-		if ( empty( $snippet_paths ) ) {
-			return array();
+		_deprecated_function( __METHOD__, '1.6.9' );
+		if ( function_exists( 'apply_filters_deprecated' ) ) {
+			apply_filters_deprecated( 'siteorigin_css_snippet_paths', array( array() ), '1.6.9' );
 		}
-
-		static $snippets = array();
-
-		if ( ! empty( $snippets ) ) {
-			return $snippets;
-		}
-
-		if ( ! WP_Filesystem() ) {
-			return false;
-		}
-		global $wp_filesystem;
-
-		foreach ( $snippet_paths as $path ) {
-			foreach ( glob( $path . '/*.css' ) as $css_file ) {
-				$data = get_file_data( $css_file, array(
-					'Name'        => 'Name',
-					'Description' => 'Description',
-				) );
-
-				// Get the CSS and strip out the first header
-				$css = $wp_filesystem->get_contents( $css_file );
-				$css = preg_replace( '!/\*.*?\*/!s', '', $css, 1 );
-
-				$snippets[] = wp_parse_args( $data, array(
-					'css' => str_replace( "\t", '  ', trim( $css ) ),
-				) );
-			}
-		}
-
-		usort( $snippets, array( $this, 'sort_snippet_callback' ) );
-
-		return $snippets;
+		return array();
 	}
 
 	/**
-	 * Sort snippets by name.
+	 * Deprecated sort comparator. Orders two snippet arrays by their Name.
+	 *
+	 * @deprecated 1.6.9
 	 *
 	 * @return int
 	 */
 	public static function sort_snippet_callback( $a, $b ) {
+		_deprecated_function( __METHOD__, '1.6.9' );
 		return $a['Name'] > $b['Name'] ? 1 : - 1;
 	}
 

@@ -75,7 +75,6 @@
 	socss.view.editor = Backbone.View.extend( {
 		
 		codeMirror: null,
-		snippets: null,
 		toolbar: null,
 		visualProperties: null,
 		
@@ -91,7 +90,14 @@
 			'click .socss-button.save': 'save',
 			'submit': 'onSubmit',
 		},
-		
+
+		// Deprecated no-op since 1.6.9: warns and opens no snippets UI.
+		setSnippets: function () {
+			if ( window.console && console.warn ) {
+				console.warn( 'SiteOrigin CSS: setSnippets() is deprecated since 1.6.9; the snippets browser was removed.' );
+			}
+		},
+
 		initialize: function ( options ) {
 			
 			this.listenTo( this.model, 'change:selectedPost', this.getSelectedPostCss );
@@ -200,25 +206,42 @@
 				},
 			}
 
-			if ( typeof wp.codeEditor != "undefined" ) {
+			// WordPress did not provide its code editor, so run a plain editor with no
+			// CSS highlighting or linting. The modes read the text themselves, so they
+			// still work; a notice explains the colour-based extras are off.
+			if ( socssOptions.usesFallbackEditor ) {
+				codeMirrorSettings.mode = null;
+				codeMirrorSettings.lint = false;
+				codeMirrorSettings.gutters = [];
+			}
+
+			// Use the bundled editor in that case even if another plugin loaded
+			// wp.codeEditor, whose initialize() would merge its own CSS defaults back in.
+			if ( typeof wp.codeEditor != "undefined" && ! socssOptions.usesFallbackEditor ) {
 				codeMirrorSettings = _.extend(
 					wp.codeEditor.defaultSettings.codemirror,
 					codeMirrorSettings
 				);
 				this.codeMirror = wp.codeEditor.initialize( $textArea.get( 0 ), codeMirrorSettings ).codemirror;
 			} else {
+				// The fallback editor has no autocomplete helper of its own, so
+				// register ours. On the WordPress path we leave WordPress's richer
+				// CSS hint in place rather than overwriting it.
 				this.registerCodeMirrorAutocomplete();
 				this.codeMirror = CodeMirror.fromTextArea( $textArea.get( 0 ), codeMirrorSettings );
-				this.setupCodeMirrorExtensions();
+			}
+			// The cursor-driven preview highlight is wired for either editor.
+			this.setupCodeMirrorExtensions();
+
+			if ( socssOptions.usesFallbackEditor ) {
+				this.showHighlightingOffNotice();
 			}
 
 			var editor = this.codeMirror;
 			$( '#so_css_editor_theme' ).on( 'change', function() {
-				if ( $( this ).val() == 1 ) {
-					editor.setOption( 'theme', 'neat' );
-				} else {
-					editor.setOption( 'theme', 'ambiance' );
-				}
+				// The option values are the CodeMirror theme names ("neat",
+				// "ambiance"), so apply the selected value as the theme.
+				editor.setOption( 'theme', $( this ).val() );
 			} );
 
 			this.codeMirror.on( 'change', function ( cm, change ) {
@@ -255,6 +278,9 @@
 		 * Register the autocomplete helper. Based on css-hint.js in the codemirror addon folder.
 		 */
 		registerCodeMirrorAutocomplete: function () {
+			// This runs only for the fallback editor, which exposes CodeMirror
+			// globally.
+			var CodeMirror = window.CodeMirror;
 			var pseudoClasses = {
 				link: 1, visited: 1, active: 1, hover: 1, focus: 1,
 				"first-letter": 1, "first-line": 1, "first-child": 1,
@@ -345,7 +371,12 @@
 		},
 		
 		setupCodeMirrorExtensions: function () {
-			
+			// WordPress's editor exposes CodeMirror as wp.CodeMirror; the fallback
+			// exposes it globally. Pick the one that matches the editor setupEditor
+			// built, which uses the bundled global whenever WordPress did not provide
+			// its code editor, even if another plugin has loaded wp.codeEditor.
+			var CodeMirror = ( typeof wp !== 'undefined' && typeof wp.codeEditor !== 'undefined' && ! socssOptions.usesFallbackEditor ) ? wp.CodeMirror : window.CodeMirror;
+
 			this.codeMirror.on( 'cursorActivity', function ( cm ) {
 				var cur = cm.getCursor(), token = cm.getTokenAt( cur );
 				var inner = CodeMirror.innerMode( cm.getMode(), token.state );
@@ -362,7 +393,12 @@
 				}
 			}.bind( this ) );
 			
-			if ( typeof CodeMirror.showHint == 'function' ) {
+			// Our keyup autocomplete trigger is only for the fallback editor;
+			// wp.codeEditor installs its own trigger and hint helper.
+			if (
+				typeof CodeMirror.showHint == 'function' &&
+				( typeof wp === 'undefined' || typeof wp.codeEditor === 'undefined' )
+			) {
 				// This sets up automatic autocompletion at all times
 				this.codeMirror.on( 'keyup', function ( cm, e ) {
 					if (
@@ -379,17 +415,48 @@
 				} );
 			}
 		},
-		
+
+		// Tell the user the editor is plain because WordPress is not providing its
+		// code editor, so the missing colour, autocomplete and preview highlight are
+		// expected. Reuses WordPress's admin-notice styles; the dismiss hides it for
+		// this view. The is-dismissible class gives core's CSS the positioning
+		// context its absolutely-placed dismiss button needs.
+		showHighlightingOffNotice: function () {
+			var $form = $( '#so-custom-css-form' );
+			if ( ! $form.length || $form.find( '.socss-highlighting-off-notice' ).length ) {
+				return;
+			}
+			var self = this;
+			var $notice = $(
+				'<div class="notice notice-info is-dismissible socss-highlighting-off-notice">' +
+					'<p></p>' +
+					'<button type="button" class="notice-dismiss"><span class="screen-reader-text"></span></button>' +
+				'</div>'
+			);
+			$notice.find( 'p' ).text( socssOptions.loc.highlightingOff );
+			$notice.find( '.screen-reader-text' ).text( socssOptions.loc.dismiss );
+			$notice.on( 'click', '.notice-dismiss', function () {
+				$notice.remove();
+				// Reclaim the height the notice held so the editor fills it.
+				self.scaleEditor();
+			} );
+			$form.find( '.custom-css-toolbar' ).before( $notice );
+		},
+
 		/**
 		 * Scale the size of the editor depending on whether it's expanded or not
 		 */
 		scaleEditor: function () {
 			var windowHeight = $( window ).outerHeight();
 			var areaHeight;
+			// The syntax-highlighting-off notice sits above the toolbar inside the
+			// form, so it takes height the editor must not claim for itself.
+			var $notice = $( '#so-custom-css-form .socss-highlighting-off-notice' );
+			var noticeHeight = $notice.length ? $notice.outerHeight( true ) : 0;
 			if ( this.$el.hasClass( 'expanded' ) ) {
 				// If we're in the expanded view, then resize the editor
 				this.$el.find( '.CodeMirror-scroll' ).css( 'max-height', '' );
-				areaHeight = windowHeight - this.$( '.custom-css-toolbar' ).outerHeight();
+				areaHeight = windowHeight - this.$( '.custom-css-toolbar' ).outerHeight() - noticeHeight;
 				this.codeMirror.setSize( '100%', areaHeight );
 				this.$el.find( '.CodeMirror-scroll' ).css( 'height', '100%' );
 			}
@@ -400,6 +467,7 @@
 					$( '#siteorigin-custom-css' ).find( '> h2' ).outerHeight( true ) +
 					$form.find( '> .custom-css-toolbar' ).outerHeight( true ) +
 					$form.find( '> .so-css-footer' ).outerHeight( true ) +
+					noticeHeight +
 					parseFloat( $( '#wpbody-content' ).css( 'padding-bottom' ) );
 
 				areaHeight = windowHeight - otherEltsHeight;
@@ -452,26 +520,7 @@
 			this.visualProperties.loadCSS( this.codeMirror.getValue().trim() );
 			this.visualProperties.show();
 		},
-		
-		/**
-		 * Set the snippets available to this editor
-		 */
-		setSnippets: function ( snippets ) {
-			if ( !_.isEmpty( snippets ) ) {
-				
-				this.snippets = new socss.view.snippets( {
-					snippets: snippets
-				} );
-				this.snippets.editor = this;
-				
-				this.snippets.render();
-				this.toolbar.addButton( 'Snippets', 'snippets' );
-				this.toolbar.on( 'click_snippets', function () {
-					this.snippets.show();
-				}.bind( this ) );
-			}
-		},
-		
+
 		/**
 		 * Add some CSS to the editor.
 		 * @param css
@@ -682,107 +731,6 @@
 		
 	} );
 	
-	/**
-	 * The dialog for the snippets browser
-	 */
-	socss.view.snippets = Backbone.View.extend( {
-		template: _.template( $( '#template-snippet-browser' ).html() ),
-		snippet: _.template( '<li class="snippet"><%- name %></li>' ),
-		className: 'css-editor-snippet-browser',
-		snippets: null,
-		editor: null,
-		
-		events: {
-			'click .close': 'hide',
-			'click .buttons .insert-snippet': 'insertSnippet',
-			'click .snippet': 'clickSnippet',
-		},
-		
-		currentSnippet: null,
-		
-		initialize: function ( args ) {
-			this.snippets = args.snippets;
-		},
-		
-		render: function () {
-			this.$el.html( this.template() );
-			for ( var i = 0; i < this.snippets.length; i++ ) {
-				$( this.snippet( { name: this.snippets[ i ].Name } ) )
-				.data( {
-					'description': this.snippets[ i ].Description,
-					'css': this.snippets[ i ].css
-				} )
-				.appendTo( this.$( 'ul.snippets' ) );
-			}
-			
-			// Click on the first one
-			this.$( '.snippets li.snippet' ).eq( 0 ).trigger( 'click' );
-			
-			this.attach();
-			return this;
-		},
-		
-		clickSnippet: function ( event ) {
-			event.preventDefault();
-			var $$ = $( event.currentTarget );
-			
-			this.$( '.snippets li.snippet' ).removeClass( 'active' );
-			$( this ).addClass( 'active' );
-			this.viewSnippet( {
-				name: $$.html(),
-				description: $$.data( 'description' ),
-				css: $$.data( 'css' )
-			} );
-		},
-		
-		viewSnippet: function ( args ) {
-			var w = this.$( '.main .snippet-view' );
-			
-			w.find( '.snippet-title' ).html( args.name );
-			w.find( '.snippet-description' ).html( args.description );
-			w.find( '.snippet-code' ).html( args.css );
-			
-			this.currentSnippet = args;
-		},
-		
-		insertSnippet: function () {
-			var editor = this.editor.codeMirror;
-			var css = this.currentSnippet.css;
-			
-			var before_css = '';
-			if ( editor.doc.lineCount() === 1 && editor.doc.getLine( editor.doc.lastLine() ).length === 0 ) {
-				before_css = "";
-			}
-			else if ( editor.doc.getLine( editor.doc.lastLine() ).length === 0 ) {
-				before_css = "\n";
-			}
-			else {
-				before_css = "\n\n";
-			}
-			
-			// Now insert the code in the editor
-			editor.doc.setCursor(
-				editor.doc.lastLine(),
-				editor.doc.getLine( editor.doc.lastLine() ).length
-			);
-			editor.doc.replaceSelection( before_css + css );
-			
-			this.hide();
-		},
-		
-		attach: function () {
-			this.$el.appendTo( 'body' );
-		},
-		
-		show: function () {
-			this.$el.show();
-		},
-		
-		hide: function () {
-			this.$el.hide();
-		}
-	} );
-
 	socss.save = function ( view ) {
 		let saveBtn = $( '#siteorigin-custom-css .save' );
 		var css;
@@ -790,7 +738,10 @@
 		if ( ! saveBtn.hasClass( 'button-primary-disabled' ) ) {
 			saveBtn.addClass( 'button-primary-disabled' )
 
-			// Which view is the user using?
+			// Which view is the user using? Submit each mode's own value as-is,
+			// not a reparsed copy, and capture it here, before the request's async
+			// gap, so it also serves as the baseline the warning clears against on
+			// success.
 			if ( typeof view.editor != 'undefined' ) {
 				// Visual.
 				css = view.editor.codeMirror.getValue().trim();
@@ -799,6 +750,7 @@
 				// Expanded.
 				css = view.codeMirror.getValue().trim();
 			}
+
 			$.post(
 				socssOptions.ajaxurl,
 				{
@@ -808,8 +760,24 @@
 				null,
 				'html'
 			).done( function ( response ) {
+				// Clear the leave-page warning only where the submitted CSS can be
+				// treated as stored as sent: a non-empty response (the handler
+				// wrote a revision, so the save was not skipped), the global editor
+				// (socssOptions.postEditor is false), not a dedicated-file source
+				// whose write is unconfirmed (socssOptions.usesCustomFile), and no
+				// "<" for the server's strip_tags() to alter. Any other case stays
+				// dirty.
+				if (
+					response.length &&
+					window.socss.mainEditor &&
+					! socssOptions.postEditor &&
+					! socssOptions.usesCustomFile &&
+					css.indexOf( '<' ) === -1
+				) {
+					window.socss.mainEditor.initValue = css;
+				}
 				if ( response.length ) {
-					// Update was successful. Update revisions list.
+					// Update the revisions list.
 					$( '.custom-revisions-list' ).html( response );
 				}
 			})
@@ -1165,8 +1133,8 @@
 						}
 						dropdown.append(
 							$( '<option>' )
-							.html( mediaRule + ': ' + subRule.selectors.join( ',' ) )
-							.attr( 'val', mediaRule + ': ' + subRule.selectors.join( ',' ) )
+							.text( mediaRule + ': ' + subRule.selectors.join( ',' ) )
+							.attr( 'value', mediaRule + ': ' + subRule.selectors.join( ',' ) )
 							.data( 'selector', subRule )
 						);
 					}
@@ -1175,15 +1143,15 @@
 				else {
 					dropdown.append(
 						$( '<option>' )
-						.html( rule.selectors.join( ',' ) )
-						.attr( 'val', rule.selectors.join( ',' ) )
+						.text( rule.selectors.join( ',' ) )
+						.attr( 'value', rule.selectors.join( ',' ) )
 						.data( 'selector', rule )
 					);
 				}
 			}
 			
 			if ( typeof activeSelector === 'undefined' ) {
-				activeSelector = dropdown.find( 'option' ).eq( 0 ).attr( 'val' );
+				activeSelector = dropdown.find( 'option' ).eq( 0 ).attr( 'value' );
 			}
 			if ( !_.isEmpty( activeSelector ) ) {
 				dropdown.val( activeSelector ).trigger( 'change' );
@@ -1330,22 +1298,49 @@
 			socss.view.propertyController.prototype.render.apply( this, arguments );
 			// Set this up as a color picker
 			this.field.minicolors( {} );
-			
+
+			var thisView = this;
+			this.field.on( 'keydown', function ( event ) {
+				// An edit of the field drops keptValue; an arrow or a modifier
+				// shortcut (Ctrl+A, Cmd+C) does not.
+				var typingChar = event.key && event.key.length === 1 &&
+					! event.ctrlKey && ! event.metaKey && ! event.altKey;
+				if ( event.key === 'Backspace' || event.key === 'Delete' || typingChar ) {
+					thisView.keptValue = null;
+				}
+			} );
 		},
-		
+
 		onChange: function () {
-			this.trigger( 'change', this.field.minicolors( 'value' ) );
+			// minicolors fires change during a programmatic setValue; ignore it.
+			if ( this.settingValue ) {
+				return;
+			}
+			// A real colour in the field makes the kept value stale.
+			if ( this.field.minicolors( 'value' ).trim() !== '' ) {
+				this.keptValue = null;
+			}
+			this.trigger( 'change', this.getValue() );
 		},
-		
+
 		getValue: function () {
-			return this.field.minicolors( 'value' ).trim();
+			var value = this.field.minicolors( 'value' ).trim();
+			// While the field is blank, fall back to a value minicolors could
+			// not display (keptValue), so it is never written away as empty.
+			return value === '' && this.keptValue ? this.keptValue : value;
 		},
-		
+
 		setValue: function ( val, options ) {
 			options = _.extend( { silent: false }, options );
-			
+
+			// minicolors blanks a value it cannot display (e.g. a keyword) and
+			// fires change. Suppress that change and remember the value, so it
+			// is not written back as empty and getValue can return it.
+			this.settingValue = true;
 			this.field.minicolors( 'value', val );
-			
+			this.settingValue = false;
+			this.keptValue = val && this.field.minicolors( 'value' ).trim() === '' ? val : null;
+
 			if ( !options.silent ) {
 				this.trigger( 'set_value', val );
 			}
@@ -1549,7 +1544,7 @@
 		},
 		
 		setupMeasurementField: function () {
-			var defaultUnit = 'px';
+			var defaultUnit = this.args.defaultUnit || 'px';
 			
 			this.field.hide();
 			this.$el.addClass( this.wrapperClass ).data( 'unit', defaultUnit );
@@ -1894,7 +1889,6 @@ jQuery( function ( $ ) {
 		openVisualEditor: socssOptions.openVisualEditor,
 	} );
 	// editor.render();
-	editor.setSnippets( socssOptions.snippets );
 	
 	// This is for hiding the getting started video
 	$( '#so-custom-css-getting-started a.hide' ).on( 'click', function( e ) {

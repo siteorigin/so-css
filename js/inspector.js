@@ -215,11 +215,19 @@
                     const existingSelectors = new Set( selectors.map( s => s.selector ) );
 
                     // If a class isn't already present, add it to the selectors array.
+                    // Only plain class names are used. A class that CSS.escape would change
+                    // can't follow the dot as written, so it's skipped.
                     parentClasses.forEach( cls => {
-                        if ( ! existingSelectors.has( selector ) ) {
+                        if ( ! cls || CSS.escape( cls ) !== cls ) {
+                            return;
+                        }
+
+                        const classSelector = '.' + cls;
+                        if ( ! existingSelectors.has( classSelector ) ) {
+                            existingSelectors.add( classSelector );
                             selectors.push( {
-                                selector: '.' + cls,
-                                specificity: getSelectorSpecificity( '.' + cls )
+                                selector: classSelector,
+                                specificity: getSelectorSpecificity( classSelector )
                             } );
                         }
                     } );
@@ -264,7 +272,7 @@
 
             _.each( attributes, function(v, k){
                 container.append(
-                    $( thisView.selectorTemplate( { selector: '<strong>' + k + '</strong>: ' + v } ) )
+                    $( thisView.selectorTemplate( { selector: '<strong>' + _.escape( k ) + '</strong>: ' + _.escape( v ) } ) )
                         .data( 'property', k + ': ' + v )
                 );
             } );
@@ -487,10 +495,16 @@
                         try {
                             if ( el.is( ruleSpecificity[l].selector ) ) {
                                 var declarations = rule.declarations;
-                                for (var l = 0; l < declarations.length; l++) {
+                                for (var d = 0; d < declarations.length; d++) {
+                                    // The parser lists comment nodes among the
+                                    // declarations; only real declarations have
+                                    // a property name.
+                                    if ( declarations[d].type !== 'declaration' ) {
+                                        continue;
+                                    }
                                     elProperties.push({
-                                        'name': declarations[l].property,
-                                        'value': declarations[l].value,
+                                        'name': declarations[d].property,
+                                        'value': declarations[d].value,
                                         'specificity': parseInt( ruleSpecificity[l].specificity.replace( /,/g, '' ) )
                                     });
                                 }
