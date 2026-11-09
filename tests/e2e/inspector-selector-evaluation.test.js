@@ -8,12 +8,14 @@
  * positional selector preceded by markup must never reach jQuery's HTML
  * parser, and must never be offered as a selector.
  *
- * These tests inject fixtures client-side and recompute the selector list,
- * then wrap jQuery.parseHTML to record its arguments. The payload is a bare,
- * inert <b> tag carrying only a data attribute: it drives jQuery down the
- * markup-parse path without running script. The assertion is that no raw,
- * unescaped probe tag reaches parseHTML; the escaped row templates the
- * inspector parses for its own UI are expected and allowed.
+ * The fixtures are stored in the post content, so they are present when the
+ * inspector initialises and builds its selector list, and jQuery.parseHTML is
+ * wrapped before navigation (via addInitScript) so the initialisation path is
+ * covered as well as later clicks. The payload is a bare, inert <b> tag
+ * carrying only a data attribute: it drives jQuery down the markup-parse path
+ * without running script. The assertion is that no raw, unescaped probe tag
+ * reaches parseHTML; the escaped row templates the inspector parses for its
+ * own UI are expected and allowed.
  *
  * Runs via `npm run tests`, which starts a throwaway Playground site. Point
  * tests/so-tests.env only at a disposable site.
@@ -37,10 +39,19 @@ const PROBE = 'data-socss-xss';
 // The raw tag, in the stored slash form and the HTML-normalised space form.
 const RAW_PROBE = '<b[/\\s]data-socss-xss';
 
+// The stored fixtures. The attribute values are written with entities so the
+// rendered class/id hold the literal crafted strings. data-fixture locates each
+// element without affecting the selector the inspector builds from it.
+const FIXTURE_CONTENT =
+	'<div data-fixture="class" class="x,&lt;b/data-socss-xss&gt;:eq(0)">class fixture</div>' +
+	'<div data-fixture="id" id="x,&lt;b data-socss-xss&gt;:eq(0)">id fixture</div>' +
+	'<div data-fixture="star" class="x,*">star fixture</div>' +
+	'<div data-fixture="safe" class="safe-class">safe fixture</div>';
+
 /**
  * Logs in as the admin.
  *
- * @param {import('@playwright/test').Page} page The Playwright page.
+ * @param {import('@playwright/test').Page} page The page.
  */
 const login = async ( page ) => {
 	const username = page.locator( '#user_login' );
@@ -127,7 +138,7 @@ test.beforeAll( async () => {
 			data: {
 				title: 'SiteOrigin CSS inspector selector evaluation',
 				status: 'publish',
-				content: 'Inspector selector evaluation check.',
+				content: FIXTURE_CONTENT,
 			},
 		} );
 		postId = post.id;
@@ -162,6 +173,30 @@ test.afterAll( async () => {
 test.beforeEach( async ( { page } ) => {
 	await login( page );
 
+	// Wrap jQuery.parseHTML before any page script runs, so the inspector's
+	// one-time initialisation over the stored fixtures is recorded too.
+	await page.addInitScript( () => {
+		window.__socssParseCalls = [];
+		let value;
+		Object.defineProperty( window, 'jQuery', {
+			configurable: true,
+			get() {
+				return value;
+			},
+			set( next ) {
+				if ( next && next.parseHTML && ! next.__socssWrapped ) {
+					const original = next.parseHTML;
+					next.parseHTML = function ( data ) {
+						window.__socssParseCalls.push( String( data ) );
+						return original.apply( this, arguments );
+					};
+					next.__socssWrapped = true;
+				}
+				value = next;
+			},
+		} );
+	} );
+
 	await page.goto( `${ postLink }?so_css_preview=1` );
 	await page.waitForFunction(
 		() => window.socssInspector && window.socssInspector.mainInspector
@@ -169,137 +204,74 @@ test.beforeEach( async ( { page } ) => {
 	await expect( page.locator( '#socss-inspector-interface' ) ).toBeAttached();
 } );
 
-/**
- * Runs a browser-side step with jQuery.parseHTML wrapped, and reports whether
- * any recorded argument carried the raw, unescaped probe tag.
- *
- * @param {import('@playwright/test').Page} page   The page.
- * @param {string}                          action One of the ACTION_* bodies.
- *
- * @return {Promise<Object>} { result, rawProbeParsed, probeNodes }.
- */
-const withParseRecorder = ( page, action ) =>
+// Reads whether any recorded parseHTML argument carried the raw probe tag, and
+// how many nodes carry the probe attribute.
+const readParseResult = ( page ) =>
 	page.evaluate(
-		( { fnBody, probe, rawSource } ) => {
-			const $ = window.jQuery;
-			const calls = [];
-			const original = $.parseHTML;
-			$.parseHTML = function ( data ) {
-				calls.push( String( data ) );
-				return original.apply( this, arguments );
-			};
-
-			let result;
-			try {
-				// eslint-disable-next-line no-new-func
-				result = new Function( '$', fnBody )( $ );
-			} finally {
-				$.parseHTML = original;
-			}
-
+		( rawSource ) => {
 			const raw = new RegExp( rawSource, 'i' );
 			return {
-				result,
-				rawProbeParsed: calls.some( ( s ) => raw.test( s ) ),
-				probeNodes: document.querySelectorAll( `[${ probe }]` ).length,
+				rawProbeParsed: ( window.__socssParseCalls || [] ).some( ( s ) => raw.test( s ) ),
+				probeNodes: document.querySelectorAll( '[data-socss-xss]' ).length,
 			};
 		},
-		{ fnBody: action, probe: PROBE, rawSource: RAW_PROBE }
+		RAW_PROBE
 	);
 
-// Injects the fixtures and installs the recomputed selector list, so the
-// inspector matches against a list built with the crafted elements present.
-const INJECT_AND_RECOMPUTE = `
-	const host = document.getElementById( 'socss-eval-fixture' ) || document.createElement( 'div' );
-	host.id = 'socss-eval-fixture';
-	if ( ! host.parentNode ) { document.body.appendChild( host ); }
-	host.innerHTML = '';
+test( 'The stored hostile class renders verbatim (precondition).', async ( { page } ) => {
+	const className = await page.getAttribute( '[data-fixture="class"]', 'class' );
+	// If this ever changes, the server altered the stored value and the other
+	// tests would pass without exercising the crafted path.
+	expect( className ).toContain( '<b/data-socss-xss>' );
+} );
 
-	const classEl = document.createElement( 'div' );
-	classEl.className = 'x,<b/data-socss-xss>:eq(0)';
-	host.appendChild( classEl );
+test( 'Initialising and clicking a harmless element never parses stored markup.', async ( { page } ) => {
+	await page.evaluate( () => {
+		window.socssInspector.mainInspector.setActiveEl( window.jQuery( '[data-fixture="safe"]' ) );
+	} );
 
-	const idEl = document.createElement( 'div' );
-	idEl.setAttribute( 'id', 'x,<b data-socss-xss>:eq(0)' );
-	host.appendChild( idEl );
-
-	const starEl = document.createElement( 'div' );
-	starEl.className = 'x,*';
-	host.appendChild( starEl );
-
-	const safeEl = document.createElement( 'div' );
-	safeEl.className = 'safe-class';
-	host.appendChild( safeEl );
-
-	window.socssInspector.mainInspector.pageSelectors = window.socssInspector.fn.pageSelectors();
-`;
-
-test( 'Clicking a harmless element never parses a stored hostile selector as markup.', async ( { page } ) => {
-	const observed = await withParseRecorder(
-		page,
-		`
-		${ INJECT_AND_RECOMPUTE }
-		// Precondition: the hostile class must actually be present.
-		const present = document.querySelector( '#socss-eval-fixture div' ).className;
-		window.socssInspector.mainInspector.setActiveEl( $( '.safe-class' ) );
-		return { present };
-		`
-	);
-
-	expect( observed.result.present ).toContain( '<b/data-socss-xss>' );
+	const observed = await readParseResult( page );
 	expect( observed.rawProbeParsed ).toBe( false );
 	expect( observed.probeNodes ).toBe( 0 );
 } );
 
 test( 'Setting the hostile class or id element active never parses it as markup.', async ( { page } ) => {
-	const observed = await withParseRecorder(
-		page,
-		`
-		${ INJECT_AND_RECOMPUTE }
-		const fixtures = document.querySelectorAll( '#socss-eval-fixture div' );
-		window.socssInspector.mainInspector.setActiveEl( $( fixtures[ 0 ] ) );
-		window.socssInspector.mainInspector.setActiveEl( $( fixtures[ 1 ] ) );
-		return {};
-		`
-	);
+	await page.evaluate( () => {
+		const $ = window.jQuery;
+		window.socssInspector.mainInspector.setActiveEl( $( '[data-fixture="class"]' ) );
+		window.socssInspector.mainInspector.setActiveEl( $( '[data-fixture="id"]' ) );
+	} );
 
+	const observed = await readParseResult( page );
 	expect( observed.rawProbeParsed ).toBe( false );
 	expect( observed.probeNodes ).toBe( 0 );
 } );
 
 test( 'Highlighting a hostile selector string never parses it as markup.', async ( { page } ) => {
-	const observed = await withParseRecorder(
-		page,
-		`
+	await page.evaluate( () => {
 		window.socssInspector.mainInspector.hl.highlight( '<b/data-socss-xss>:eq(0)' );
-		return {};
-		`
-	);
+	} );
 
+	const observed = await readParseResult( page );
 	expect( observed.rawProbeParsed ).toBe( false );
 	expect( observed.probeNodes ).toBe( 0 );
 } );
 
 test( 'Element attributes for a hostile theme selector are read without parsing markup.', async ( { page } ) => {
-	const observed = await withParseRecorder(
-		page,
-		`
-		window.socssInspector.parsedCss = {
-			hostile: {
-				stylesheet: {
-					rules: [ {
-						type: 'rule',
-						selectors: [ '.safe-class,<b/data-socss-xss>:eq(0)' ],
-						declarations: [ { type: 'declaration', property: 'color', value: 'red' } ],
-					} ],
-				},
-			},
-		};
-		window.socssInspector.fn.elementAttributes( $( 'body' ) );
-		return {};
-		`
-	);
+	await page.evaluate( () => {
+		const $ = window.jQuery;
+		// Supply the rule through the real .socss-theme-styles/getParsedCss path.
+		const style = document.createElement( 'script' );
+		style.type = 'text/css';
+		style.className = 'socss-theme-styles';
+		style.id = 'socss-inlined-style-hostile';
+		style.textContent = '.safe-class,<b/data-socss-xss>:eq(0) { color: red; }';
+		document.body.appendChild( style );
+		window.socssInspector.parsedCss = {};
+		window.socssInspector.fn.elementAttributes( $( '[data-fixture="safe"]' ) );
+	} );
 
+	const observed = await readParseResult( page );
 	expect( observed.rawProbeParsed ).toBe( false );
 	expect( observed.probeNodes ).toBe( 0 );
 } );
@@ -328,38 +300,19 @@ test( 'Reading element attributes tolerates a matched rule with no declarations.
 } );
 
 test( 'The offered selectors exclude crafted fragments and keep clean ones.', async ( { page } ) => {
-	// pageSelectors dedupes and keeps no source, and a theme may legitimately
-	// use '*', so provenance is asserted directly on elementSelector: the
-	// crafted elements must contribute nothing, the clean one its own selector.
+	// Provenance is asserted directly on elementSelector (pageSelectors dedupes
+	// and keeps no source). The list is checked only for the hostile fragment,
+	// not for any '<', so a theme's valid [title="a<b"] would not trip it.
 	const observed = await page.evaluate( () => {
 		const $ = window.jQuery;
-		const host = document.getElementById( 'socss-eval-fixture' ) || document.createElement( 'div' );
-		host.id = 'socss-eval-fixture';
-		if ( ! host.parentNode ) {
-			document.body.appendChild( host );
-		}
-		host.innerHTML = '';
-
-		const classEl = document.createElement( 'div' );
-		classEl.className = 'x,<b/data-socss-xss>:eq(0)';
-		host.appendChild( classEl );
-
-		const starEl = document.createElement( 'div' );
-		starEl.className = 'x,*';
-		host.appendChild( starEl );
-
-		const safeEl = document.createElement( 'div' );
-		safeEl.className = 'safe-class';
-		host.appendChild( safeEl );
-
 		const fn = window.socssInspector.fn;
 		const list = fn.pageSelectors().map( ( s ) => s.selector );
 
 		return {
 			list,
-			classBuilt: fn.elementSelector( $( classEl ) ),
-			starBuilt: fn.elementSelector( $( starEl ) ),
-			safeBuilt: fn.elementSelector( $( safeEl ) ),
+			classBuilt: fn.elementSelector( $( '[data-fixture="class"]' ) ),
+			starBuilt: fn.elementSelector( $( '[data-fixture="star"]' ) ),
+			safeBuilt: fn.elementSelector( $( '[data-fixture="safe"]' ) ),
 		};
 	} );
 
@@ -368,32 +321,30 @@ test( 'The offered selectors exclude crafted fragments and keep clean ones.', as
 	expect( observed.starBuilt ).toBe( '' );
 	expect( observed.safeBuilt ).toBe( '.safe-class' );
 
-	// No markup fragment reaches the offered list, and the clean class is there.
+	// No crafted fragment reaches the offered list; the clean class does.
 	// cssSelectors is a copy of this list (js/editor.js:559).
-	expect( observed.list.some( ( s ) => s.indexOf( '<' ) !== -1 ) ).toBe( false );
 	expect( observed.list.some( ( s ) => s.indexOf( PROBE ) !== -1 ) ).toBe( false );
+	expect( observed.list.some( ( s ) => s.indexOf( '<b' ) !== -1 ) ).toBe( false );
 	expect( observed.list ).toContain( '.safe-class' );
 } );
 
 test( 'A valid theme rule with a universal or quoted selector is preserved.', async ( { page } ) => {
 	const list = await page.evaluate( () => {
-		// Seed the theme stylesheet cache directly: a universal selector, a
-		// valid attribute selector whose quoted value contains '<', a clean
-		// class, and an invalid markup rule.
-		window.socssInspector.parsedCss = {
-			seeded: {
-				stylesheet: {
-					rules: [
-						{ type: 'rule', selectors: [ '*' ], declarations: [] },
-						{ type: 'rule', selectors: [ '[title="a<b"]' ], declarations: [] },
-						{ type: 'rule', selectors: [ '.safe-class' ], declarations: [] },
-						{ type: 'rule', selectors: [ '<b/data-socss-xss>:eq(0)' ], declarations: [] },
-					],
-				},
-			},
-		};
-		const selectors = window.socssInspector.fn.pageSelectors();
-		return selectors.map( ( s ) => s.selector );
+		// Supply rules through the real .socss-theme-styles/getParsedCss path: a
+		// universal selector, a valid attribute selector whose quoted value
+		// contains '<', a clean class, and an invalid markup rule.
+		const style = document.createElement( 'script' );
+		style.type = 'text/css';
+		style.className = 'socss-theme-styles';
+		style.id = 'socss-inlined-style-seeded';
+		style.textContent =
+			'* { color: red; }' +
+			'[title="a<b"] { color: red; }' +
+			'.safe-class { color: red; }' +
+			'<b/data-socss-xss>:eq(0) { color: red; }';
+		document.body.appendChild( style );
+		window.socssInspector.parsedCss = {};
+		return window.socssInspector.fn.pageSelectors().map( ( s ) => s.selector );
 	} );
 
 	// Legitimate universal and quoted-attribute selectors survive.
