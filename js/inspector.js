@@ -45,7 +45,6 @@
             return false;
         }
     };
-    socss.fn.isValidSelector = isValidSelector;
 
     // Native element match for an untrusted selector string. Unlike jQuery's
     // .is(), Element.matches() never routes a positional or markup-like string
@@ -577,7 +576,10 @@
                         // string is never routed through jQuery's HTML parser;
                         // matchesSelector swallows malformed selectors.
                         if ( matchesSelector( el[0], ruleSpecificity[l].selector ) ) {
-                            var declarations = rule.declarations;
+                            // In silent mode the parser can return a matched rule
+                            // with no declarations (e.g. an unterminated block),
+                            // so default to an empty list before iterating.
+                            var declarations = rule.declarations || [];
                             for (var d = 0; d < declarations.length; d++) {
                                 // The parser lists comment nodes among the
                                 // declarations; only real declarations have

@@ -208,7 +208,7 @@ const withParseRecorder = ( page, action ) =>
 	);
 
 // Injects the fixtures and installs the recomputed selector list, so the
-// inspector matches against a list that holds the crafted entries on develop.
+// inspector matches against a list built with the crafted elements present.
 const INJECT_AND_RECOMPUTE = `
 	const host = document.getElementById( 'socss-eval-fixture' ) || document.createElement( 'div' );
 	host.id = 'socss-eval-fixture';
@@ -302,6 +302,29 @@ test( 'Element attributes for a hostile theme selector are read without parsing 
 
 	expect( observed.rawProbeParsed ).toBe( false );
 	expect( observed.probeNodes ).toBe( 0 );
+} );
+
+test( 'Reading element attributes tolerates a matched rule with no declarations.', async ( { page } ) => {
+	// In silent mode the parser can return a matched rule with no declarations
+	// (e.g. an unterminated block). Reading properties must not throw.
+	const outcome = await page.evaluate( () => {
+		const $ = window.jQuery;
+		window.socssInspector.parsedCss = {
+			malformed: {
+				stylesheet: {
+					rules: [ { type: 'rule', selectors: [ 'body' ] } ],
+				},
+			},
+		};
+		try {
+			window.socssInspector.fn.elementAttributes( $( 'body' ) );
+			return 'ok';
+		} catch ( err ) {
+			return 'threw: ' + err.message;
+		}
+	} );
+
+	expect( outcome ).toBe( 'ok' );
 } );
 
 test( 'The offered selectors exclude crafted fragments and keep clean ones.', async ( { page } ) => {
