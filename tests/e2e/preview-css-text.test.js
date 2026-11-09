@@ -1,10 +1,11 @@
 /**
  * Live preview writes the editor CSS as text.
  *
- * updatePreviewCss (js/editor.js) copies the CodeMirror value into the preview
- * iframe's <style> element. Writing it with jQuery .html() runs jQuery's HTML
- * fallback when the text contains <style>/<script>/<link>, which can build
- * child nodes. Writing it with .text() keeps the value inert and unchanged.
+ * updatePreviewCss (js/editor.js) copies the trimmed CodeMirror value into the
+ * preview iframe's <style> element. Writing it with jQuery .html() runs
+ * jQuery's HTML fallback when the text contains <style>/<script>/<link>, which
+ * can build child nodes. Writing it with .text() applies the trimmed CSS as
+ * plain text, never interpreting it as markup.
  *
  * This checks the unsaved live preview only: the save handler runs
  * sanitize_css()/strip_tags() (so-css.php), so a <style>-bearing round-trip is
@@ -26,6 +27,10 @@ const {
 } = require( 'siteorigin-tests-common/playwright/common' );
 
 const EDITOR_URL = 'wp-admin/themes.php?page=so_custom_css';
+
+// These tests save and restore the site's CSS, so they run serially in one
+// worker: a single captured original, never a parallel worker's probe value.
+test.describe.configure( { mode: 'serial' } );
 
 /**
  * Finds the SiteOrigin CSS install under test.

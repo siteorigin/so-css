@@ -32,6 +32,10 @@ const {
 	soGoTo,
 } = require( 'siteorigin-tests-common/playwright/common' );
 
+// These tests share site state (the activated plugin and a stored post), so
+// they run serially in one worker rather than split across parallel workers.
+test.describe.configure( { mode: 'serial' } );
+
 // Set in a class or id value, then searched for unescaped in every parseHTML
 // argument. '/' separates the tag and attribute so the class value carries no
 // whitespace, which elementSelector would otherwise turn into dots.
@@ -310,8 +314,8 @@ test( 'Element attributes keep the valid rule and never parse the hostile one.',
 		return window.socssInspector.fn.elementAttributes( $( '[data-fixture="safe"]' ) );
 	} );
 
-	// The valid half of the rule still resolves for the element: the fix did not
-	// simply stop reading theme declarations.
+	// The valid half of the rule resolves to its declaration for the element,
+	// so theme declarations are still read.
 	expect( properties.color ).toBe( 'rgb(9, 8, 7)' );
 
 	const observed = await readParseResult( page );
