@@ -2,15 +2,10 @@
  * Live preview writes the editor CSS as text.
  *
  * updatePreviewCss (js/editor.js) copies the trimmed CodeMirror value into the
- * preview iframe's <style> element. Writing it with jQuery .html() runs
- * jQuery's HTML fallback when the text contains <style>/<script>/<link>, which
- * can build child nodes. Writing it with .text() applies the trimmed CSS as
- * plain text, never interpreting it as markup.
- *
- * This checks the unsaved live preview only, so it mutates no site-wide state:
- * it sets the editor value in memory and reads the preview. The save path is
- * unchanged by this work and its round-trip is already covered by the
- * visual-mode specs.
+ * preview iframe's <style> element and must apply it as plain text: CSS whose
+ * text contains <style>/<script>/<link> stays text and builds no child nodes.
+ * The value is set in the editor only and never saved, so this mutates no
+ * site-wide state.
  *
  * Runs via `npm run tests`, which starts a throwaway Playground site.
  */
@@ -22,35 +17,12 @@ const {
 const path = require( 'path' );
 
 const {
+	doLogin,
 	setupRequestUtils,
 	soGoTo,
 } = require( 'siteorigin-tests-common/playwright/common' );
 
 const EDITOR_URL = 'wp-admin/themes.php?page=so_custom_css';
-
-/**
- * Logs in as the admin.
- *
- * @param {import('@playwright/test').Page} page The page.
- */
-const login = async ( page ) => {
-	const username = page.locator( '#user_login' );
-	const password = page.locator( '#user_pass' );
-
-	await soGoTo( page, 'wp-login.php' );
-
-	await expect( async () => {
-		await username.fill( process.env.WP_USERNAME );
-		await password.fill( process.env.WP_PASSWORD );
-		await expect( username ).toHaveValue( process.env.WP_USERNAME, { timeout: 500 } );
-		await expect( password ).toHaveValue( process.env.WP_PASSWORD, { timeout: 500 } );
-	} ).toPass();
-
-	await Promise.all( [
-		page.waitForURL( /\/wp-admin\//, { waitUntil: 'commit' } ),
-		page.locator( '#wp-submit' ).click(),
-	] );
-};
 
 /**
  * Finds the SiteOrigin CSS install under test.
@@ -76,29 +48,10 @@ const findPluginUnderTest = ( plugins ) => {
 	return byName[ 0 ];
 };
 
-/**
- * Sets the plugin status via REST.
- *
- * @param {string} pluginId The plugin's REST ID.
- * @param {string} status 'active' or 'inactive'.
- */
-const setPluginStatus = async ( pluginId, status ) => {
-	const requestUtils = await setupRequestUtils();
-
-	try {
-		await requestUtils.rest( {
-			method: 'PUT',
-			path: `/wp/v2/plugins/${ pluginId }`,
-			data: { status },
-		} );
-	} finally {
-		await requestUtils.request.dispose();
-	}
-};
-
-let activatedPluginId = null;
-
 test.beforeAll( async () => {
+	// Ensure the plugin is active. Activation is idempotent across parallel
+	// workers; the suite never deactivates it, so it cannot disable the plugin
+	// out from under another suite.
 	const requestUtils = await setupRequestUtils();
 
 	try {
@@ -106,23 +59,19 @@ test.beforeAll( async () => {
 		const plugin = findPluginUnderTest( plugins );
 
 		if ( plugin.status !== 'active' ) {
-			await setPluginStatus( plugin.plugin, 'active' );
-			activatedPluginId = plugin.plugin;
+			await requestUtils.rest( {
+				method: 'PUT',
+				path: `/wp/v2/plugins/${ plugin.plugin }`,
+				data: { status: 'active' },
+			} );
 		}
 	} finally {
 		await requestUtils.request.dispose();
 	}
 } );
 
-test.afterAll( async () => {
-	if ( activatedPluginId ) {
-		await setPluginStatus( activatedPluginId, 'inactive' );
-		activatedPluginId = null;
-	}
-} );
-
 test.beforeEach( async ( { page } ) => {
-	await login( page );
+	await doLogin( page );
 	await soGoTo( page, EDITOR_URL );
 	await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible();
 } );

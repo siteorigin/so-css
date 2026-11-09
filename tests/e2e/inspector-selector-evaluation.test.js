@@ -28,12 +28,12 @@ const {
 const path = require( 'path' );
 
 const {
+	doLogin,
 	setupRequestUtils,
-	soGoTo,
 } = require( 'siteorigin-tests-common/playwright/common' );
 
-// These tests share site state (the activated plugin and a stored post), so
-// they run serially in one worker rather than split across parallel workers.
+// These tests use a stored post of their own, so they run serially in one
+// worker rather than split across parallel workers.
 test.describe.configure( { mode: 'serial' } );
 
 // Set in a class or id value, then searched for unescaped in every parseHTML
@@ -51,30 +51,6 @@ const FIXTURE_CONTENT =
 	'<div data-fixture="id" id="x,&lt;b data-socss-xss&gt;:eq(0)">id fixture</div>' +
 	'<div data-fixture="star" class="x,*">star fixture</div>' +
 	'<div data-fixture="safe" class="safe-class">safe fixture</div>';
-
-/**
- * Logs in as the admin.
- *
- * @param {import('@playwright/test').Page} page The page.
- */
-const login = async ( page ) => {
-	const username = page.locator( '#user_login' );
-	const password = page.locator( '#user_pass' );
-
-	await soGoTo( page, 'wp-login.php' );
-
-	await expect( async () => {
-		await username.fill( process.env.WP_USERNAME );
-		await password.fill( process.env.WP_PASSWORD );
-		await expect( username ).toHaveValue( process.env.WP_USERNAME, { timeout: 500 } );
-		await expect( password ).toHaveValue( process.env.WP_PASSWORD, { timeout: 500 } );
-	} ).toPass();
-
-	await Promise.all( [
-		page.waitForURL( /\/wp-admin\//, { waitUntil: 'commit' } ),
-		page.locator( '#wp-submit' ).click(),
-	] );
-};
 
 /**
  * Finds the SiteOrigin CSS install under test.
@@ -120,7 +96,6 @@ const setPluginStatus = async ( pluginId, status ) => {
 	}
 };
 
-let activatedPluginId = null;
 let postId = null;
 let postLink = null;
 
@@ -131,9 +106,10 @@ test.beforeAll( async () => {
 		const plugins = await requestUtils.rest( { path: '/wp/v2/plugins' } );
 		const plugin = findPluginUnderTest( plugins );
 
+		// Activation is idempotent across parallel workers; the suite never
+		// deactivates the plugin, so it cannot disable it under another suite.
 		if ( plugin.status !== 'active' ) {
 			await setPluginStatus( plugin.plugin, 'active' );
-			activatedPluginId = plugin.plugin;
 		}
 
 		const post = await requestUtils.rest( {
@@ -153,11 +129,8 @@ test.beforeAll( async () => {
 } );
 
 test.afterAll( async () => {
-	// Each cleanup step is independent: a failure in one must not skip the
-	// others. The last error is re-thrown so a broken teardown is still seen.
-	let teardownError = null;
-
 	const requestUtils = await setupRequestUtils();
+
 	try {
 		if ( postId ) {
 			await requestUtils.rest( {
@@ -167,28 +140,13 @@ test.afterAll( async () => {
 			} );
 			postId = null;
 		}
-	} catch ( error ) {
-		teardownError = error;
 	} finally {
 		await requestUtils.request.dispose();
-	}
-
-	if ( activatedPluginId ) {
-		try {
-			await setPluginStatus( activatedPluginId, 'inactive' );
-		} catch ( error ) {
-			teardownError = error;
-		}
-		activatedPluginId = null;
-	}
-
-	if ( teardownError ) {
-		throw teardownError;
 	}
 } );
 
 test.beforeEach( async ( { page } ) => {
-	await login( page );
+	await doLogin( page );
 
 	// Wrap jQuery.parseHTML before any page script runs, so the inspector's
 	// one-time initialisation over the stored fixtures is recorded too.
@@ -214,7 +172,11 @@ test.beforeEach( async ( { page } ) => {
 		} );
 	} );
 
-	await page.goto( `${ postLink }?so_css_preview=1` );
+	// Add the preview flag through the URL API so it is a real query parameter
+	// on both pretty and plain (?p=ID) permalinks.
+	const previewUrl = new URL( postLink );
+	previewUrl.searchParams.set( 'so_css_preview', '1' );
+	await page.goto( previewUrl.toString() );
 	await page.waitForFunction(
 		() => window.socssInspector && window.socssInspector.mainInspector
 	);
