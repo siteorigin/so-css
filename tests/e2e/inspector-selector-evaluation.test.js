@@ -149,8 +149,11 @@ test.beforeAll( async () => {
 } );
 
 test.afterAll( async () => {
-	const requestUtils = await setupRequestUtils();
+	// Each cleanup step is independent: a failure in one must not skip the
+	// others. The last error is re-thrown so a broken teardown is still seen.
+	let teardownError = null;
 
+	const requestUtils = await setupRequestUtils();
 	try {
 		if ( postId ) {
 			await requestUtils.rest( {
@@ -160,13 +163,23 @@ test.afterAll( async () => {
 			} );
 			postId = null;
 		}
+	} catch ( error ) {
+		teardownError = error;
 	} finally {
 		await requestUtils.request.dispose();
 	}
 
 	if ( activatedPluginId ) {
-		await setPluginStatus( activatedPluginId, 'inactive' );
+		try {
+			await setPluginStatus( activatedPluginId, 'inactive' );
+		} catch ( error ) {
+			teardownError = error;
+		}
 		activatedPluginId = null;
+	}
+
+	if ( teardownError ) {
+		throw teardownError;
 	}
 } );
 
@@ -204,14 +217,17 @@ test.beforeEach( async ( { page } ) => {
 	await expect( page.locator( '#socss-inspector-interface' ) ).toBeAttached();
 } );
 
-// Reads whether any recorded parseHTML argument carried the raw probe tag, and
-// how many nodes carry the probe attribute.
+// Reads whether any recorded parseHTML argument carried the raw probe tag, how
+// many nodes carry the probe attribute, and whether the recorder is armed (so a
+// detached wrapper cannot make a negative assertion pass vacuously).
 const readParseResult = ( page ) =>
 	page.evaluate(
 		( rawSource ) => {
 			const raw = new RegExp( rawSource, 'i' );
+			const calls = window.__socssParseCalls;
 			return {
-				rawProbeParsed: ( window.__socssParseCalls || [] ).some( ( s ) => raw.test( s ) ),
+				armed: Array.isArray( calls ) && !! ( window.jQuery && window.jQuery.__socssWrapped ),
+				rawProbeParsed: ( calls || [] ).some( ( s ) => raw.test( s ) ),
 				probeNodes: document.querySelectorAll( '[data-socss-xss]' ).length,
 			};
 		},
@@ -228,12 +244,29 @@ test( 'The stored hostile class and id render verbatim (precondition).', async (
 	expect( id ).toContain( '<b data-socss-xss>' );
 } );
 
+test( 'The parse recorder captures a controlled raw parse (self-check).', async ( { page } ) => {
+	// Proves the recorder is attached and the RAW_PROBE regex detects a raw
+	// parse, so the negative assertions in the other tests are trustworthy.
+	const captured = await page.evaluate( ( rawSource ) => {
+		window.jQuery.parseHTML( '<b/data-socss-xss></b>' );
+		const raw = new RegExp( rawSource, 'i' );
+		return {
+			armed: Array.isArray( window.__socssParseCalls ) && !! window.jQuery.__socssWrapped,
+			detected: ( window.__socssParseCalls || [] ).some( ( s ) => raw.test( s ) ),
+		};
+	}, RAW_PROBE );
+
+	expect( captured.armed ).toBe( true );
+	expect( captured.detected ).toBe( true );
+} );
+
 test( 'Initialising and clicking a harmless element never parses stored markup.', async ( { page } ) => {
 	await page.evaluate( () => {
 		window.socssInspector.mainInspector.setActiveEl( window.jQuery( '[data-fixture="safe"]' ) );
 	} );
 
 	const observed = await readParseResult( page );
+	expect( observed.armed ).toBe( true );
 	expect( observed.rawProbeParsed ).toBe( false );
 	expect( observed.probeNodes ).toBe( 0 );
 } );
@@ -246,6 +279,7 @@ test( 'Setting the hostile class or id element active never parses it as markup.
 	} );
 
 	const observed = await readParseResult( page );
+	expect( observed.armed ).toBe( true );
 	expect( observed.rawProbeParsed ).toBe( false );
 	expect( observed.probeNodes ).toBe( 0 );
 } );
@@ -256,6 +290,7 @@ test( 'Highlighting a hostile selector string never parses it as markup.', async
 	} );
 
 	const observed = await readParseResult( page );
+	expect( observed.armed ).toBe( true );
 	expect( observed.rawProbeParsed ).toBe( false );
 	expect( observed.probeNodes ).toBe( 0 );
 } );
@@ -280,6 +315,7 @@ test( 'Element attributes keep the valid rule and never parse the hostile one.',
 	expect( properties.color ).toBe( 'rgb(9, 8, 7)' );
 
 	const observed = await readParseResult( page );
+	expect( observed.armed ).toBe( true );
 	expect( observed.rawProbeParsed ).toBe( false );
 	expect( observed.probeNodes ).toBe( 0 );
 } );

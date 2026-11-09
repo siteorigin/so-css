@@ -158,16 +158,30 @@ test.beforeAll( async () => {
 } );
 
 test.afterAll( async ( { browser } ) => {
-	// Restore the site's CSS first, so a mid-test failure in the save test does
-	// not leave probe CSS active. saveCss asserts the restored value.
+	// Each cleanup step is independent: restoring the CSS and deactivating the
+	// plugin must both run even if one fails. The last error is re-thrown.
+	let teardownError = null;
+
 	if ( originalCss !== null ) {
-		await withAdminPage( browser, ( page ) => saveCss( page, originalCss ) );
+		try {
+			await withAdminPage( browser, ( page ) => saveCss( page, originalCss ) );
+		} catch ( error ) {
+			teardownError = error;
+		}
 		originalCss = null;
 	}
 
 	if ( activatedPluginId ) {
-		await setPluginStatus( activatedPluginId, 'inactive' );
+		try {
+			await setPluginStatus( activatedPluginId, 'inactive' );
+		} catch ( error ) {
+			teardownError = error;
+		}
 		activatedPluginId = null;
+	}
+
+	if ( teardownError ) {
+		throw teardownError;
 	}
 } );
 
