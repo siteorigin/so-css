@@ -218,11 +218,14 @@ const readParseResult = ( page ) =>
 		RAW_PROBE
 	);
 
-test( 'The stored hostile class renders verbatim (precondition).', async ( { page } ) => {
+test( 'The stored hostile class and id render verbatim (precondition).', async ( { page } ) => {
+	// If either is altered, the server rewrote the stored value and the
+	// class- or id-specific tests would pass without exercising the crafted path.
 	const className = await page.getAttribute( '[data-fixture="class"]', 'class' );
-	// If this ever changes, the server altered the stored value and the other
-	// tests would pass without exercising the crafted path.
 	expect( className ).toContain( '<b/data-socss-xss>' );
+
+	const id = await page.getAttribute( '[data-fixture="id"]', 'id' );
+	expect( id ).toContain( '<b data-socss-xss>' );
 } );
 
 test( 'Initialising and clicking a harmless element never parses stored markup.', async ( { page } ) => {
@@ -257,19 +260,24 @@ test( 'Highlighting a hostile selector string never parses it as markup.', async
 	expect( observed.probeNodes ).toBe( 0 );
 } );
 
-test( 'Element attributes for a hostile theme selector are read without parsing markup.', async ( { page } ) => {
-	await page.evaluate( () => {
+test( 'Element attributes keep the valid rule and never parse the hostile one.', async ( { page } ) => {
+	const properties = await page.evaluate( () => {
 		const $ = window.jQuery;
-		// Supply the rule through the real .socss-theme-styles/getParsedCss path.
+		// Supply a rule whose selector list pairs the element's own class with a
+		// crafted fragment, through the real .socss-theme-styles/getParsedCss path.
 		const style = document.createElement( 'script' );
 		style.type = 'text/css';
 		style.className = 'socss-theme-styles';
 		style.id = 'socss-inlined-style-hostile';
-		style.textContent = '.safe-class,<b/data-socss-xss>:eq(0) { color: red; }';
+		style.textContent = '.safe-class,<b/data-socss-xss>:eq(0) { color: rgb(9, 8, 7); }';
 		document.body.appendChild( style );
 		window.socssInspector.parsedCss = {};
-		window.socssInspector.fn.elementAttributes( $( '[data-fixture="safe"]' ) );
+		return window.socssInspector.fn.elementAttributes( $( '[data-fixture="safe"]' ) );
 	} );
+
+	// The valid half of the rule still resolves for the element: the fix did not
+	// simply stop reading theme declarations.
+	expect( properties.color ).toBe( 'rgb(9, 8, 7)' );
 
 	const observed = await readParseResult( page );
 	expect( observed.rawProbeParsed ).toBe( false );

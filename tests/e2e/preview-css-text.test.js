@@ -97,6 +97,48 @@ const login = async ( page ) => {
 	] );
 };
 
+/**
+ * Opens a logged-in admin page, runs the callback, and closes the page.
+ *
+ * @param {import('@playwright/test').Browser} browser  The browser.
+ * @param {Function}                           callback Receives the page.
+ *
+ * @return {Promise<*>} The callback's result.
+ */
+const withAdminPage = async ( browser, callback ) => {
+	const page = await browser.newPage();
+
+	try {
+		await login( page );
+		return await callback( page );
+	} finally {
+		await page.close();
+	}
+};
+
+/**
+ * Saves the given CSS through the editor and confirms it landed.
+ *
+ * @param {import('@playwright/test').Page} page The page.
+ * @param {string}                          css  The CSS to save.
+ */
+const saveCss = async ( page, css ) => {
+	await soGoTo( page, EDITOR_URL );
+	await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible();
+
+	await page.evaluate(
+		( value ) => document.querySelector( '#so-custom-css-form .CodeMirror' ).CodeMirror.setValue( value ),
+		css
+	);
+
+	await Promise.all( [
+		page.waitForNavigation(),
+		page.locator( 'input[name="siteorigin_custom_css_save"]' ).click(),
+	] );
+
+	await expect( page.locator( '#custom-css-textarea' ) ).toHaveValue( css );
+};
+
 let originalCss = null;
 
 test.beforeAll( async () => {
@@ -115,7 +157,14 @@ test.beforeAll( async () => {
 	}
 } );
 
-test.afterAll( async () => {
+test.afterAll( async ( { browser } ) => {
+	// Restore the site's CSS first, so a mid-test failure in the save test does
+	// not leave probe CSS active. saveCss asserts the restored value.
+	if ( originalCss !== null ) {
+		await withAdminPage( browser, ( page ) => saveCss( page, originalCss ) );
+		originalCss = null;
+	}
+
 	if ( activatedPluginId ) {
 		await setPluginStatus( activatedPluginId, 'inactive' );
 		activatedPluginId = null;
@@ -157,7 +206,6 @@ test( 'CSS containing a style tag stays inert text in the live preview.', async 
 		return {
 			textContent: style.textContent,
 			childElements: style.children.length,
-			styleTagsInHead: doc.head.querySelectorAll( 'style' ).length,
 		};
 	} );
 
@@ -171,34 +219,13 @@ test( 'CSS containing a style tag stays inert text in the live preview.', async 
 test( 'Tag-free CSS round-trips through save and reload unchanged.', async ( { page } ) => {
 	const css = '.socss-roundtrip { color: rgb(4, 5, 6); }';
 
-	await page.evaluate(
-		( value ) => {
-			document.querySelector( '#so-custom-css-form .CodeMirror' ).CodeMirror.setValue( value );
-		},
-		css
-	);
+	// saveCss saves and confirms the textarea value; afterAll restores the
+	// original CSS, so a failure here cannot leave the probe CSS on the site.
+	await saveCss( page, css );
 
-	await Promise.all( [
-		page.waitForNavigation(),
-		page.locator( 'input[name="siteorigin_custom_css_save"]' ).click(),
-	] );
-	// The saved value is read back from the textarea, then confirmed on reload.
-	await expect( page.locator( '#custom-css-textarea' ) ).toHaveValue( css );
 	await soGoTo( page, EDITOR_URL );
 	const saved = await page.evaluate(
 		() => document.querySelector( '#so-custom-css-form .CodeMirror' ).CodeMirror.getValue()
 	);
 	expect( saved ).toBe( css );
-
-	// Restore the original CSS so the site is left as it was found.
-	await page.evaluate(
-		( value ) => {
-			document.querySelector( '#so-custom-css-form .CodeMirror' ).CodeMirror.setValue( value );
-		},
-		originalCss
-	);
-	await Promise.all( [
-		page.waitForNavigation(),
-		page.locator( 'input[name="siteorigin_custom_css_save"]' ).click(),
-	] );
 } );
