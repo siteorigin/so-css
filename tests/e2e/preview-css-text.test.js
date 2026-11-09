@@ -7,10 +7,10 @@
  * can build child nodes. Writing it with .text() applies the trimmed CSS as
  * plain text, never interpreting it as markup.
  *
- * This checks the unsaved live preview only: the save handler runs
- * sanitize_css()/strip_tags() (so-css.php), so a <style>-bearing round-trip is
- * not a valid preservation check. A separate test confirms tag-free CSS still
- * round-trips through save and reload.
+ * This checks the unsaved live preview only, so it mutates no site-wide state:
+ * it sets the editor value in memory and reads the preview. The save path is
+ * unchanged by this work and its round-trip is already covered by the
+ * visual-mode specs.
  *
  * Runs via `npm run tests`, which starts a throwaway Playground site.
  */
@@ -28,9 +28,29 @@ const {
 
 const EDITOR_URL = 'wp-admin/themes.php?page=so_custom_css';
 
-// These tests save and restore the site's CSS, so they run serially in one
-// worker: a single captured original, never a parallel worker's probe value.
-test.describe.configure( { mode: 'serial' } );
+/**
+ * Logs in as the admin.
+ *
+ * @param {import('@playwright/test').Page} page The page.
+ */
+const login = async ( page ) => {
+	const username = page.locator( '#user_login' );
+	const password = page.locator( '#user_pass' );
+
+	await soGoTo( page, 'wp-login.php' );
+
+	await expect( async () => {
+		await username.fill( process.env.WP_USERNAME );
+		await password.fill( process.env.WP_PASSWORD );
+		await expect( username ).toHaveValue( process.env.WP_USERNAME, { timeout: 500 } );
+		await expect( password ).toHaveValue( process.env.WP_PASSWORD, { timeout: 500 } );
+	} ).toPass();
+
+	await Promise.all( [
+		page.waitForURL( /\/wp-admin\//, { waitUntil: 'commit' } ),
+		page.locator( '#wp-submit' ).click(),
+	] );
+};
 
 /**
  * Finds the SiteOrigin CSS install under test.
@@ -78,74 +98,6 @@ const setPluginStatus = async ( pluginId, status ) => {
 
 let activatedPluginId = null;
 
-/**
- * Logs in as the admin.
- *
- * @param {import('@playwright/test').Page} page The page.
- */
-const login = async ( page ) => {
-	const username = page.locator( '#user_login' );
-	const password = page.locator( '#user_pass' );
-
-	await soGoTo( page, 'wp-login.php' );
-
-	await expect( async () => {
-		await username.fill( process.env.WP_USERNAME );
-		await password.fill( process.env.WP_PASSWORD );
-		await expect( username ).toHaveValue( process.env.WP_USERNAME, { timeout: 500 } );
-		await expect( password ).toHaveValue( process.env.WP_PASSWORD, { timeout: 500 } );
-	} ).toPass();
-
-	await Promise.all( [
-		page.waitForURL( /\/wp-admin\//, { waitUntil: 'commit' } ),
-		page.locator( '#wp-submit' ).click(),
-	] );
-};
-
-/**
- * Opens a logged-in admin page, runs the callback, and closes the page.
- *
- * @param {import('@playwright/test').Browser} browser  The browser.
- * @param {Function}                           callback Receives the page.
- *
- * @return {Promise<*>} The callback's result.
- */
-const withAdminPage = async ( browser, callback ) => {
-	const page = await browser.newPage();
-
-	try {
-		await login( page );
-		return await callback( page );
-	} finally {
-		await page.close();
-	}
-};
-
-/**
- * Saves the given CSS through the editor and confirms it landed.
- *
- * @param {import('@playwright/test').Page} page The page.
- * @param {string}                          css  The CSS to save.
- */
-const saveCss = async ( page, css ) => {
-	await soGoTo( page, EDITOR_URL );
-	await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible();
-
-	await page.evaluate(
-		( value ) => document.querySelector( '#so-custom-css-form .CodeMirror' ).CodeMirror.setValue( value ),
-		css
-	);
-
-	await Promise.all( [
-		page.waitForNavigation(),
-		page.locator( 'input[name="siteorigin_custom_css_save"]' ).click(),
-	] );
-
-	await expect( page.locator( '#custom-css-textarea' ) ).toHaveValue( css );
-};
-
-let originalCss = null;
-
 test.beforeAll( async () => {
 	const requestUtils = await setupRequestUtils();
 
@@ -162,31 +114,10 @@ test.beforeAll( async () => {
 	}
 } );
 
-test.afterAll( async ( { browser } ) => {
-	// Each cleanup step is independent: restoring the CSS and deactivating the
-	// plugin must both run even if one fails. The last error is re-thrown.
-	let teardownError = null;
-
-	if ( originalCss !== null ) {
-		try {
-			await withAdminPage( browser, ( page ) => saveCss( page, originalCss ) );
-		} catch ( error ) {
-			teardownError = error;
-		}
-		originalCss = null;
-	}
-
+test.afterAll( async () => {
 	if ( activatedPluginId ) {
-		try {
-			await setPluginStatus( activatedPluginId, 'inactive' );
-		} catch ( error ) {
-			teardownError = error;
-		}
+		await setPluginStatus( activatedPluginId, 'inactive' );
 		activatedPluginId = null;
-	}
-
-	if ( teardownError ) {
-		throw teardownError;
 	}
 } );
 
@@ -194,14 +125,12 @@ test.beforeEach( async ( { page } ) => {
 	await login( page );
 	await soGoTo( page, EDITOR_URL );
 	await expect( page.locator( '#so-custom-css-form .CodeMirror' ) ).toBeVisible();
-	if ( originalCss === null ) {
-		originalCss = await page.locator( '#custom-css-textarea' ).inputValue();
-	}
 } );
 
 test( 'CSS containing a style tag stays inert text in the live preview.', async ( { page } ) => {
 	// Valid CSS whose comment holds a well-formed <style></style>. Under .html()
-	// jQuery parses this into a child node; under .text() it stays text.
+	// jQuery parses this into a child node; under .text() it stays text. The
+	// value is set in the editor only and never saved.
 	const css = '.socss-preview-probe { color: rgb(1, 2, 3); } /* <style></style> */';
 
 	await page.evaluate(
@@ -228,23 +157,9 @@ test( 'CSS containing a style tag stays inert text in the live preview.', async 
 		};
 	} );
 
-	// The style element's text is exactly the editor value: nothing was parsed
-	// away or into nodes.
+	// The style element's text is exactly the editor value (already whitespace-
+	// trimmed): nothing was parsed away or into nodes.
 	expect( result.textContent ).toBe( '.socss-preview-probe { color: rgb(1, 2, 3); } /* <style></style> */' );
 	// The style element holds no child elements (a parsed <style> would appear).
 	expect( result.childElements ).toBe( 0 );
-} );
-
-test( 'Tag-free CSS round-trips through save and reload unchanged.', async ( { page } ) => {
-	const css = '.socss-roundtrip { color: rgb(4, 5, 6); }';
-
-	// saveCss saves and confirms the textarea value; afterAll restores the
-	// original CSS, so a failure here cannot leave the probe CSS on the site.
-	await saveCss( page, css );
-
-	await soGoTo( page, EDITOR_URL );
-	const saved = await page.evaluate(
-		() => document.querySelector( '#so-custom-css-form .CodeMirror' ).CodeMirror.getValue()
-	);
-	expect( saved ).toBe( css );
 } );
