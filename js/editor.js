@@ -699,10 +699,12 @@
 				head.append( '<style class="siteorigin-custom-css" type="text/css"></style>' );
 			}
 			var style = head.find( 'style.siteorigin-custom-css' );
-			
-			// Update the CSS after a short delay
+
+			// Write the editor's CSS as the style element's text. .text() never
+			// routes the value through jQuery's HTML parser, so CSS containing
+			// markup-like text stays inert.
 			var css = this.editor.codeMirror.getValue().trim();
-			style.html( css );
+			style.text( css );
 		},
 		
 		/**
