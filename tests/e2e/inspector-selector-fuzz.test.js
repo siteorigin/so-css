@@ -389,3 +389,378 @@ test( 'Adding fuzzed selectors to the dropdown never inserts markup, keeps value
 	expect( result.probeNodes ).toBe( 0 );
 	expect( result.failures ).toEqual( [] );
 } );
+
+test( 'Fuzzed hostile class and id values never let the inspector build attacker nodes.', async ( { page } ) => {
+	await login( page );
+	const previewUrl = new URL( postLink );
+	previewUrl.searchParams.set( 'so_css_preview', '1' );
+	await page.goto( previewUrl.toString() );
+	await page.waitForFunction(
+		() => window.socssInspector && window.socssInspector.mainInspector
+	);
+
+	const result = await page.evaluate( ( args ) => {
+		const { fragments, seed, iterations } = args;
+		const $ = window.jQuery;
+
+		let state = seed;
+		const rng = () => {
+			state |= 0;
+			state = ( state + 0x6D2B79F5 ) | 0;
+			let t = Math.imul( state ^ ( state >>> 15 ), 1 | state );
+			t = ( t + Math.imul( t ^ ( t >>> 7 ), 61 | t ) ) ^ t;
+			return ( ( t ^ ( t >>> 14 ) ) >>> 0 ) / 4294967296;
+		};
+		const pick = ( arr ) => arr[ Math.floor( rng() * arr.length ) ];
+
+		const insp = window.socssInspector;
+		const inspector = insp.mainInspector;
+		const realCss = insp.fn.getParsedCss();
+
+		// Detect a genuine attacker node: wrap parseHTML and inspect what it
+		// builds. The marker 'data-fuzz' only ever appears as a real attribute on
+		// a node the parser created from attacker input; the inspector's own row
+		// templates escape the selector, so the marker there is inert text and
+		// does not match. This catches detached nodes too, which a DOM query
+		// over the document would miss.
+		let attackerNodes = 0;
+		const attackerSamples = [];
+		const origParse = $.parseHTML;
+		$.parseHTML = function ( data ) {
+			const res = origParse.apply( this, arguments );
+			try {
+				( res || [] ).forEach( ( n ) => {
+					if ( ! n || n.nodeType !== 1 ) {
+						return;
+					}
+					if (
+						( n.hasAttribute && n.hasAttribute( 'data-fuzz' ) ) ||
+						( n.querySelector && n.querySelector( '[data-fuzz]' ) )
+					) {
+						attackerNodes++;
+						if ( attackerSamples.length < 5 ) {
+							attackerSamples.push( String( data ).slice( 0, 80 ) );
+						}
+					}
+				} );
+			} catch ( e ) {}
+			return res;
+		};
+
+		const TAGS = [ 'b', 'i', 'img', 'x', 'span', 'div', 'svg' ];
+		const PSEUDOS = [ ':eq(0)', ':first', ':last', ':gt(0)', ':lt(1)', ':nth(0)', ':even', ':odd', ':contains(x)', '' ];
+		const COMBINATORS = [ ',', '>', '+', '~', ' ', ',*,' ];
+
+		// Builds a hostile value carrying a markup tag marked with data-fuzz,
+		// wrapped in random selector syntax. forId uses a space separator (ids
+		// keep spaces); class values use '/' (the inspector dots whitespace).
+		const genValue = ( forId ) => {
+			const tag = pick( TAGS );
+			const sep = forId ? ' ' : '/';
+			const markup = '<' + tag + sep + 'data-fuzz' + ( rng() < 0.5 ? '' : '=' + Math.floor( rng() * 9 ) ) + '>';
+			const piece = markup + pick( PSEUDOS );
+			let noise = '';
+			const n = Math.floor( rng() * 4 );
+			for ( let k = 0; k < n; k++ ) {
+				noise += pick( fragments );
+			}
+			const head = rng() < 0.7 ? 'fz' + Math.floor( rng() * 5 ) : '';
+			const parts = [ head, piece, noise ].filter( ( p ) => p !== '' );
+			// Join with random commas/combinators so the markup lands in varied
+			// positions relative to the comma split.
+			let out = parts[ 0 ] || piece;
+			for ( let k = 1; k < parts.length; k++ ) {
+				out += pick( COMBINATORS ) + parts[ k ];
+			}
+			return out;
+		};
+
+		const host = document.createElement( 'div' );
+		host.id = 'socss-fuzz-host';
+		document.body.appendChild( host );
+
+		const failures = [];
+
+		for ( let i = 0; i < iterations; i++ ) {
+			const useId = rng() < 0.5;
+			const value = genValue( useId );
+
+			host.removeAttribute( 'class' );
+			host.removeAttribute( 'id' );
+			host.id = 'socss-fuzz-host';
+			if ( useId ) {
+				host.setAttribute( 'id', value );
+			} else {
+				host.setAttribute( 'class', value );
+			}
+
+			try {
+				// The real producer path: rebuild the offered list with the
+				// hostile element present, then match against it.
+				inspector.pageSelectors = insp.fn.pageSelectors();
+				inspector.setActiveEl( $( host ) );
+				inspector.setActiveEl( $( 'body' ) );
+				// The highlight string sink, with the raw value.
+				inspector.hl.highlight( value );
+				// The theme-CSS matching sink: a rule whose selector list pairs a
+				// clean selector with the hostile fragment.
+				insp.parsedCss = {
+					fuzz: {
+						stylesheet: {
+							rules: [ {
+								type: 'rule',
+								selectors: [ '#socss-fuzz-host,' + value ],
+								declarations: [ { type: 'declaration', property: 'color', value: 'red' } ],
+							} ],
+						},
+					},
+				};
+				insp.fn.elementAttributes( $( host ) );
+				insp.parsedCss = realCss;
+			} catch ( err ) {
+				if ( failures.length < 5 ) {
+					failures.push( { i, value: value.slice( 0, 80 ), err: String( err ).slice( 0, 120 ) } );
+				}
+			}
+		}
+
+		$.parseHTML = origParse;
+		host.removeAttribute( 'id' );
+		host.setAttribute( 'id', 'socss-fuzz-host' );
+		const probeNodes = document.querySelectorAll( '[data-fuzz]' ).length;
+		host.remove();
+
+		return { attackerNodes, attackerSamples, failures, probeNodes };
+	}, { fragments: FRAGMENTS, seed: 0x0f0fed, iterations: 700 } );
+
+	// Not one fuzzed value caused the inspector to build an attacker node,
+	// leave one in the document, or throw.
+	expect( result.attackerNodes ).toBe( 0 );
+	expect( result.probeNodes ).toBe( 0 );
+	expect( result.failures ).toEqual( [] );
+} );
+
+
+// Extra bundled themes to widen the harvested selector corpus. Fetched over
+// HTTP from the running site; any that are not installed are skipped.
+const EXTRA_THEME_CSS = [
+	'twentytwentyfive', 'twentytwentyfour', 'twentytwentyone', 'storefront',
+	'siteorigin-unwind', 'mesmerize', 'vantage',
+];
+
+// Representative framework utility selectors (escaped forms a real Tailwind or
+// Bootstrap build emits), to stress the character space portably.
+const FRAMEWORK_CSS = [
+	'.md\\:flex{}', '.w-1\\/2{}', '.hover\\:bg-red-500{}', '.sm\\:grid-cols-3{}',
+	'.lg\\:gap-4{}', '.-mx-2{}', '.2xl\\:block{}', '.text-gray-500\\/50{}',
+	'[class~="btn"]{}', '.btn{}', '.btn-primary{}', '.card__title--large{}',
+	'.is-active{}', '.col-md-6{}', '.d-none{}', '.visually-hidden{}',
+	'.before\\:content-\\[\\x27\\x27\\]{}', '.group-hover\\:opacity-100{}',
+].join( '\n' );
+
+test( 'Parity over harvested real theme, block and framework CSS: no user-visible change.', async ( { page } ) => {
+	await login( page );
+	const previewUrl = new URL( postLink );
+	previewUrl.searchParams.set( 'so_css_preview', '1' );
+	await page.goto( previewUrl.toString() );
+	await page.waitForFunction(
+		() => window.socssInspector && window.socssInspector.mainInspector
+	);
+
+	// Fetch extra theme stylesheets over HTTP, best-effort.
+	const base = process.env.WP_BASE_URL.replace( /\/$/, '' );
+	const extraCss = [];
+	for ( const theme of EXTRA_THEME_CSS ) {
+		try {
+			const res = await page.request.get( `${ base }/wp-content/themes/${ theme }/style.css` );
+			if ( res.ok() ) {
+				extraCss.push( await res.text() );
+			}
+		} catch ( e ) {
+			// Theme not installed on this site; skip.
+		}
+	}
+
+	const result = await page.evaluate( ( args ) => {
+		const { seed, extraCss, frameworkCss } = args;
+		const $ = window.jQuery;
+		const insp = window.socssInspector;
+
+		let state = seed;
+		const rng = () => {
+			state |= 0;
+			state = ( state + 0x6D2B79F5 ) | 0;
+			let t = Math.imul( state ^ ( state >>> 15 ), 1 | state );
+			t = ( t + Math.imul( t ^ ( t >>> 7 ), 61 | t ) ) ^ t;
+			return ( ( t ^ ( t >>> 14 ) ) >>> 0 ) / 4294967296;
+		};
+
+		const isValidCss = ( sel ) => {
+			try {
+				document.createDocumentFragment().querySelector( sel );
+				return true;
+			} catch ( e ) {
+				return false;
+			}
+		};
+
+		// Inject the framework utilities and any fetched theme CSS so their
+		// selectors enter document.styleSheets and the inspector's parser.
+		const inject = ( css, id ) => {
+			const style = document.createElement( 'style' );
+			style.setAttribute( 'data-parity', id );
+			style.textContent = css;
+			document.head.appendChild( style );
+			// Also feed the inspector's own parser (js/css.js) via a
+			// .socss-theme-styles script, the way enqueued stylesheets arrive.
+			const script = document.createElement( 'script' );
+			script.type = 'text/css';
+			script.className = 'socss-theme-styles';
+			script.id = 'socss-inlined-style-parity-' + id;
+			script.textContent = css;
+			document.body.appendChild( script );
+		};
+		inject( frameworkCss, 'fw' );
+		extraCss.forEach( ( css, i ) => inject( css, 't' + i ) );
+
+		// Harvest selectors from every readable stylesheet (CSSOM), recursing
+		// into grouping rules, splitting selector lists.
+		const harvested = new Set();
+		const addFromRules = ( rules ) => {
+			for ( const rule of rules || [] ) {
+				if ( rule.selectorText ) {
+					rule.selectorText.split( ',' ).forEach( ( s ) => {
+						s = s.trim();
+						if ( s ) {
+							harvested.add( s );
+						}
+					} );
+				}
+				if ( rule.cssRules ) {
+					addFromRules( rule.cssRules );
+				}
+			}
+		};
+		for ( const sheet of document.styleSheets ) {
+			try {
+				addFromRules( sheet.cssRules );
+			} catch ( e ) {
+				// Cross-origin or unreadable sheet; skip.
+			}
+		}
+		// Also take the selectors the inspector's own parser produced.
+		try {
+			insp.parsedCss = {};
+			insp.fn.pageSelectors().forEach( ( s ) => {
+				if ( s && s.selector ) {
+					harvested.add( s.selector );
+				}
+			} );
+		} catch ( e ) {}
+
+		// Sample the corpus (seeded shuffle, capped for runtime).
+		let selectors = Array.from( harvested );
+		for ( let k = selectors.length - 1; k > 0; k-- ) {
+			const j = Math.floor( rng() * ( k + 1 ) );
+			[ selectors[ k ], selectors[ j ] ] = [ selectors[ j ], selectors[ k ] ];
+		}
+		selectors = selectors.slice( 0, 3000 );
+
+		const els = Array.from( document.querySelectorAll( 'body, body *' ) ).slice( 0, 150 );
+
+		const oldElSelector = ( el ) => {
+			let name = '';
+			const id = el.getAttribute( 'id' );
+			const cls = el.getAttribute( 'class' );
+			if ( id !== null ) {
+				name += '#' + id;
+			}
+			if ( cls !== null ) {
+				name += '.' + cls.replace( /\s+/g, '.' );
+			}
+			return name === '' ? el.tagName.toLowerCase() : name;
+		};
+
+		// 1) Matching parity over harvested real selectors.
+		const matchDivergences = [];
+		let validSelectors = 0;
+		let matchedTrue = 0;
+		for ( const sel of selectors ) {
+			const valid = isValidCss( sel );
+			if ( valid ) {
+				validSelectors++;
+			}
+			// Test each selector against a seeded sample of elements.
+			for ( let s = 0; s < 25; s++ ) {
+				const el = els[ Math.floor( rng() * els.length ) ];
+				let jq;
+				let nat;
+				try {
+					jq = $( el ).is( sel );
+				} catch ( e ) {
+					jq = 'throw';
+				}
+				try {
+					nat = el.matches( sel );
+				} catch ( e ) {
+					nat = 'throw';
+				}
+				if ( jq === true && nat === true ) {
+					matchedTrue++;
+				}
+				if ( jq !== nat && valid && matchDivergences.length < 25 ) {
+					matchDivergences.push( { sel, jq, nat, el: el.tagName } );
+				}
+			}
+		}
+
+		// 2) Offered-selector parity over every real element's own class/id.
+		const buildDivergences = [];
+		let buildChecked = 0;
+		const probe = document.createElement( 'div' );
+		document.body.appendChild( probe );
+		for ( const el of els ) {
+			const cls = el.getAttribute( 'class' );
+			const id = el.getAttribute( 'id' );
+			if ( cls === null && id === null ) {
+				continue;
+			}
+			probe.removeAttribute( 'class' );
+			probe.removeAttribute( 'id' );
+			if ( cls !== null ) {
+				probe.setAttribute( 'class', cls );
+			}
+			if ( id !== null ) {
+				probe.setAttribute( 'id', id );
+			}
+			const oldSel = oldElSelector( probe );
+			const newSel = insp.fn.elementSelector( $( probe ) );
+			if ( isValidCss( oldSel ) ) {
+				buildChecked++;
+				if ( oldSel !== newSel && buildDivergences.length < 25 ) {
+					buildDivergences.push( { cls, id, oldSel, newSel } );
+				}
+			}
+		}
+		probe.remove();
+
+		return {
+			harvestedCount: harvested.size,
+			selectorsTested: selectors.length,
+			validSelectors,
+			matchedTrue,
+			buildChecked,
+			matchDivergences,
+			buildDivergences,
+		};
+	}, { seed: 0x1234abcd & 0x7fffffff, extraCss, frameworkCss: FRAMEWORK_CSS } );
+
+	// The corpus must be large and actually match real elements, or the test is
+	// vacuous.
+	expect( result.harvestedCount ).toBeGreaterThan( 300 );
+	expect( result.matchedTrue ).toBeGreaterThan( 50 );
+	expect( result.buildChecked ).toBeGreaterThan( 20 );
+	// No user-visible change for any valid real selector or element.
+	expect( result.matchDivergences ).toEqual( [] );
+	expect( result.buildDivergences ).toEqual( [] );
+} );

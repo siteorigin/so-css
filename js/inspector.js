@@ -31,6 +31,68 @@
         return specificities;
     };
 
+    // Reports whether the browser's own selector parser accepts the string.
+    // The query runs against an empty DocumentFragment, so it never touches
+    // the live DOM and never parses the string as HTML.
+    var isValidSelector = function( selector ) {
+        if ( typeof selector !== 'string' || selector === '' ) {
+            return false;
+        }
+        try {
+            document.createDocumentFragment().querySelector( selector );
+            return true;
+        } catch ( err ) {
+            return false;
+        }
+    };
+
+    // Native element match for an untrusted selector string. Unlike jQuery's
+    // .is(), Element.matches() never routes a positional or markup-like string
+    // through jQuery's HTML parser. el is a raw DOM node.
+    var matchesSelector = function( el, selector ) {
+        if ( ! el || el.nodeType !== 1 ) {
+            return false;
+        }
+        try {
+            return el.matches( selector );
+        } catch ( err ) {
+            return false;
+        }
+    };
+
+    // Builds an element's own selector from only its clean id and class
+    // tokens, the way the menu-item branch does: a token that CSS.escape
+    // would change (a comma, markup, a pseudo, a leading digit) is dropped.
+    // An attribute value can therefore never introduce markup, a comma or a
+    // universal selector. Returns an empty string when the element carried an
+    // id or class but no token survived, so a crafted value never degrades to
+    // the page-wide tag selector; the lowercase tag name is used only when the
+    // element has neither attribute.
+    socss.fn.elementSelector = function( el ) {
+        var id = el.attr( 'id' );
+        var cls = el.attr( 'class' );
+        var hadAttr = id !== undefined || cls !== undefined;
+        var selector = '';
+
+        if ( id !== undefined && id !== '' && CSS.escape( id ) === id ) {
+            selector += '#' + id;
+        }
+
+        if ( cls !== undefined ) {
+            cls.split( /\s+/ ).forEach( function( token ) {
+                if ( token && CSS.escape( token ) === token ) {
+                    selector += '.' + token;
+                }
+            } );
+        }
+
+        if ( selector !== '' ) {
+            return selector;
+        }
+
+        return hadAttr ? '' : el.prop( 'tagName' ).toLowerCase();
+    };
+
     /**
      * This is the main view for the app
      */
@@ -193,15 +255,11 @@
             // Scroll all the way left...
             $h.scrollLeft( 99999 );
 
-            // Now lets add all the CSS selectors
+            // Now lets add all the CSS selectors. Match with the native engine
+            // so a stored selector string is never routed through jQuery's HTML
+            // parser; matchesSelector swallows malformed selectors.
             var selectors = this.pageSelectors.filter( function(a){
-                // Use try to catch any malformed selectors
-                try {
-                    return el.is( a.selector );
-                }
-                catch(err) {
-                    return false;
-                }
+                return matchesSelector( el[0], a.selector );
             } );
 
             // If the selected element is a link, check if it's a menu item.
@@ -319,6 +377,13 @@
             this.clear();
             var thisView = this;
 
+            // Resolve a selector string with the native engine so it is never
+            // parsed as HTML; an invalid selector highlights nothing. Element
+            // and jQuery inputs keep their existing path.
+            if ( typeof els === 'string' ) {
+                els = isValidSelector( els ) ? document.querySelectorAll( els ) : [];
+            }
+
             $(els).each(function(i, el){
                 el = $(el);
 
@@ -410,22 +475,37 @@
                 }
 
                 for(var j = 0; j < rules[i].selectors.length; j++) {
-                    selectors = selectors.concat( getSelectorSpecificity( rules[i].selectors[j] ) );
+                    // Validate each entry after getSelectorSpecificity splits
+                    // on commas: a valid rule like [title="a,b"] splits into
+                    // fragments the browser would reject, so the check belongs
+                    // on the emitted entries, not the whole rule.
+                    getSelectorSpecificity( rules[i].selectors[j] ).forEach( function( entry ) {
+                        if ( isValidSelector( entry.selector ) ) {
+                            selectors.push( entry );
+                        }
+                    } );
                 }
             }
         }
 
-        // Also add selectors for all the elements in the
+        // Add each element's own selector, rebuilt from its clean id and class
+        // tokens so a crafted attribute value cannot contribute a selector, and
+        // confirmed against the element with a native match.
         $('body *').each(function(){
-            var $$ = $(this);
-            var elName = socss.fn.elSelector( $$ );
+            var elName = socss.fn.elementSelector( $(this) );
+
+            if ( elName === '' || ! matchesSelector( this, elName ) ) {
+                return;
+            }
 
             selectors = selectors.concat(getSelectorSpecificity(elName));
         });
 
         var $body = $('body');
-        var bName = socss.fn.elSelector($body);
-        selectors = selectors.concat(getSelectorSpecificity(bName, true));
+        var bName = socss.fn.elementSelector($body);
+        if ( bName !== '' ) {
+            selectors = selectors.concat(getSelectorSpecificity(bName, true));
+        }
 
         selectors = _.uniq( selectors, false, function( a ){
             return a.selector;
@@ -492,26 +572,27 @@
                 for(var j = 0; j < rule.selectors.length; j++) {
                     var ruleSpecificity = SPECIFICITY.calculate( rule.selectors[j] );
                     for (var l = 0; l < ruleSpecificity.length; l++) {
-                        try {
-                            if ( el.is( ruleSpecificity[l].selector ) ) {
-                                var declarations = rule.declarations;
-                                for (var d = 0; d < declarations.length; d++) {
-                                    // The parser lists comment nodes among the
-                                    // declarations; only real declarations have
-                                    // a property name.
-                                    if ( declarations[d].type !== 'declaration' ) {
-                                        continue;
-                                    }
-                                    elProperties.push({
-                                        'name': declarations[d].property,
-                                        'value': declarations[d].value,
-                                        'specificity': parseInt( ruleSpecificity[l].specificity.replace( /,/g, '' ) )
-                                    });
+                        // Match with the native engine so a stylesheet selector
+                        // string is never routed through jQuery's HTML parser;
+                        // matchesSelector swallows malformed selectors.
+                        if ( matchesSelector( el[0], ruleSpecificity[l].selector ) ) {
+                            // In silent mode the parser can return a matched rule
+                            // with no declarations (e.g. an unterminated block),
+                            // so default to an empty list before iterating.
+                            var declarations = rule.declarations || [];
+                            for (var d = 0; d < declarations.length; d++) {
+                                // The parser lists comment nodes among the
+                                // declarations; only real declarations have
+                                // a property name.
+                                if ( declarations[d].type !== 'declaration' ) {
+                                    continue;
                                 }
+                                elProperties.push({
+                                    'name': declarations[d].property,
+                                    'value': declarations[d].value,
+                                    'specificity': parseInt( ruleSpecificity[l].specificity.replace( /,/g, '' ) )
+                                });
                             }
-                        }
-                        catch (e) {
-                            // For now, we're just going to ignore rules that trigger errors
                         }
                     }
                 }
