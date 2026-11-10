@@ -539,3 +539,160 @@ test( 'Fuzzed hostile class and id values never let the inspector build attacker
 	expect( result.probeNodes ).toBe( 0 );
 	expect( result.failures ).toEqual( [] );
 } );
+
+test( 'Parity: the fix never changes matching or offered selectors for legitimate input.', async ( { page } ) => {
+	await login( page );
+	const previewUrl = new URL( postLink );
+	previewUrl.searchParams.set( 'so_css_preview', '1' );
+	await page.goto( previewUrl.toString() );
+	await page.waitForFunction(
+		() => window.socssInspector && window.socssInspector.mainInspector
+	);
+
+	const result = await page.evaluate( ( seed ) => {
+		const $ = window.jQuery;
+		const insp = window.socssInspector;
+
+		let state = seed;
+		const rng = () => {
+			state |= 0;
+			state = ( state + 0x6D2B79F5 ) | 0;
+			let t = Math.imul( state ^ ( state >>> 15 ), 1 | state );
+			t = ( t + Math.imul( t ^ ( t >>> 7 ), 61 | t ) ) ^ t;
+			return ( ( t ^ ( t >>> 14 ) ) >>> 0 ) / 4294967296;
+		};
+		const pick = ( a ) => a[ Math.floor( rng() * a.length ) ];
+
+		const isValidCss = ( sel ) => {
+			try {
+				document.createDocumentFragment().querySelector( sel );
+				return true;
+			} catch ( e ) {
+				return false;
+			}
+		};
+
+		// Legitimate, real-world class/id tokens (all valid CSS identifiers).
+		const CLASS_TOKENS = [
+			'button', 'btn', 'btn-primary', 'wp-block-group', 'has-text-align-center',
+			'menu-item', 'menu-item-7', 'site-title', 'entry-content', 'widget',
+			'card', 'card__title', 'card__title--large', 'is-active', 'is-layout-flex',
+			'col-6', 'u-mt-2', 'elementor-widget', 'fa', 'fa-home', 'nav', 'nav-link',
+			'café', 'déjà', 'über', '_private', '-dash', 'A1', 'x2y', 'section-1',
+		];
+		const IDS = [
+			'main', 'content', 'site-header', 'nav-primary', 'footer', 'block-5',
+			'comment-1', 'respond', 'wrapper', 'café-id',
+		];
+		// Real-world selector shapes, all valid CSS.
+		const SEL_PARTS = [
+			'.button', '.btn.btn-primary', '#main', 'div', 'a', 'li', 'ul', 'nav',
+			'.menu-item > a', '.nav .nav-link', '.card + .card', '.a ~ .b',
+			'[data-x="y"]', '[href^="http"]', '[class*="col-"]', '[title]',
+			'a:hover', 'li:first-child', 'li:nth-child(2n)', 'p:not(.x)',
+			':is(.a, .b)', ':where(.card)', 'a:has(> img)', 'p::before', 'p::first-line',
+			'.entry-content', 'h1', 'h2', '*', 'body', '.widget', 'section:nth-of-type(1)',
+		];
+
+		// Sample real elements from the themed preview DOM.
+		const els = Array.from( document.querySelectorAll( 'body, body *' ) ).slice( 0, 120 );
+
+		const matchDivergences = [];
+		const buildDivergences = [];
+
+		// Rebuild develop's elSelector logic to compare against the fix's
+		// elementSelector: '#'+id then '.'+class with whitespace dotted, else tag.
+		const oldElSelector = ( el ) => {
+			let name = '';
+			const id = el.getAttribute( 'id' );
+			const cls = el.getAttribute( 'class' );
+			if ( id !== null ) {
+				name += '#' + id;
+			}
+			if ( cls !== null ) {
+				name += '.' + cls.replace( /\s+/g, '.' );
+			}
+			return name === '' ? el.tagName.toLowerCase() : name;
+		};
+
+		// 1) Matching parity: for every valid selector, jQuery .is() (old) and
+		// native matches (new) must agree on every element. A disagreement on a
+		// VALID selector is a user-visible regression.
+		const built = [];
+		for ( let i = 0; i < 400; i++ ) {
+			let sel = pick( SEL_PARTS );
+			// Sometimes compound with a class token to widen the space.
+			if ( rng() < 0.4 ) {
+				sel = sel + '.' + pick( CLASS_TOKENS );
+			}
+			built.push( sel );
+		}
+		built.push( ...SEL_PARTS );
+
+		for ( const sel of built ) {
+			const valid = isValidCss( sel );
+			for ( const el of els ) {
+				let jq;
+				let nat;
+				try {
+					jq = $( el ).is( sel );
+				} catch ( e ) {
+					jq = 'throw';
+				}
+				try {
+					nat = el.matches( sel );
+				} catch ( e ) {
+					nat = 'throw';
+				}
+				if ( jq !== nat && valid && matchDivergences.length < 20 ) {
+					matchDivergences.push( { sel, jq, nat, el: el.tagName } );
+				}
+			}
+		}
+
+		// 2) Offered-selector parity: build a probe element from legitimate class
+		// and id values and compare the fix's elementSelector to develop's. When
+		// develop's selector is valid CSS (so it would have been offered), the fix
+		// must produce the same string — never drop a clean token.
+		const probe = document.createElement( 'div' );
+		document.body.appendChild( probe );
+		for ( let i = 0; i < 800; i++ ) {
+			probe.removeAttribute( 'class' );
+			probe.removeAttribute( 'id' );
+			const nClasses = Math.floor( rng() * 4 );
+			const classes = [];
+			for ( let k = 0; k < nClasses; k++ ) {
+				classes.push( pick( CLASS_TOKENS ) );
+			}
+			if ( classes.length ) {
+				probe.setAttribute( 'class', classes.join( ' ' ) );
+			}
+			if ( rng() < 0.5 ) {
+				probe.setAttribute( 'id', pick( IDS ) );
+			}
+
+			const oldSel = oldElSelector( probe );
+			const newSel = insp.fn.elementSelector( $( probe ) );
+
+			// When develop's selector is valid CSS it would have been offered and
+			// matched; the fix must offer the same string.
+			if ( isValidCss( oldSel ) && oldSel !== newSel && buildDivergences.length < 20 ) {
+				buildDivergences.push( {
+					class: probe.getAttribute( 'class' ),
+					id: probe.getAttribute( 'id' ),
+					oldSel,
+					newSel,
+				} );
+			}
+		}
+		probe.remove();
+
+		return { matchDivergences, buildDivergences };
+	}, 0x9e3779b1 & 0x7fffffff );
+
+	// For legitimate input the fix changes nothing a user would see: native
+	// matching agrees with the old jQuery matching, and the offered element
+	// selector is identical whenever the old one was valid.
+	expect( result.matchDivergences ).toEqual( [] );
+	expect( result.buildDivergences ).toEqual( [] );
+} );
