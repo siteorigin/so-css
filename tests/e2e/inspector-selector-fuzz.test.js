@@ -389,3 +389,153 @@ test( 'Adding fuzzed selectors to the dropdown never inserts markup, keeps value
 	expect( result.probeNodes ).toBe( 0 );
 	expect( result.failures ).toEqual( [] );
 } );
+
+test( 'Fuzzed hostile class and id values never let the inspector build attacker nodes.', async ( { page } ) => {
+	await login( page );
+	const previewUrl = new URL( postLink );
+	previewUrl.searchParams.set( 'so_css_preview', '1' );
+	await page.goto( previewUrl.toString() );
+	await page.waitForFunction(
+		() => window.socssInspector && window.socssInspector.mainInspector
+	);
+
+	const result = await page.evaluate( ( args ) => {
+		const { fragments, seed, iterations } = args;
+		const $ = window.jQuery;
+
+		let state = seed;
+		const rng = () => {
+			state |= 0;
+			state = ( state + 0x6D2B79F5 ) | 0;
+			let t = Math.imul( state ^ ( state >>> 15 ), 1 | state );
+			t = ( t + Math.imul( t ^ ( t >>> 7 ), 61 | t ) ) ^ t;
+			return ( ( t ^ ( t >>> 14 ) ) >>> 0 ) / 4294967296;
+		};
+		const pick = ( arr ) => arr[ Math.floor( rng() * arr.length ) ];
+
+		const insp = window.socssInspector;
+		const inspector = insp.mainInspector;
+		const realCss = insp.fn.getParsedCss();
+
+		// Detect a genuine attacker node: wrap parseHTML and inspect what it
+		// builds. The marker 'data-fuzz' only ever appears as a real attribute on
+		// a node the parser created from attacker input; the inspector's own row
+		// templates escape the selector, so the marker there is inert text and
+		// does not match. This catches detached nodes too, which a DOM query
+		// over the document would miss.
+		let attackerNodes = 0;
+		const attackerSamples = [];
+		const origParse = $.parseHTML;
+		$.parseHTML = function ( data ) {
+			const res = origParse.apply( this, arguments );
+			try {
+				( res || [] ).forEach( ( n ) => {
+					if ( ! n || n.nodeType !== 1 ) {
+						return;
+					}
+					if (
+						( n.hasAttribute && n.hasAttribute( 'data-fuzz' ) ) ||
+						( n.querySelector && n.querySelector( '[data-fuzz]' ) )
+					) {
+						attackerNodes++;
+						if ( attackerSamples.length < 5 ) {
+							attackerSamples.push( String( data ).slice( 0, 80 ) );
+						}
+					}
+				} );
+			} catch ( e ) {}
+			return res;
+		};
+
+		const TAGS = [ 'b', 'i', 'img', 'x', 'span', 'div', 'svg' ];
+		const PSEUDOS = [ ':eq(0)', ':first', ':last', ':gt(0)', ':lt(1)', ':nth(0)', ':even', ':odd', ':contains(x)', '' ];
+		const COMBINATORS = [ ',', '>', '+', '~', ' ', ',*,' ];
+
+		// Builds a hostile value carrying a markup tag marked with data-fuzz,
+		// wrapped in random selector syntax. forId uses a space separator (ids
+		// keep spaces); class values use '/' (the inspector dots whitespace).
+		const genValue = ( forId ) => {
+			const tag = pick( TAGS );
+			const sep = forId ? ' ' : '/';
+			const markup = '<' + tag + sep + 'data-fuzz' + ( rng() < 0.5 ? '' : '=' + Math.floor( rng() * 9 ) ) + '>';
+			const piece = markup + pick( PSEUDOS );
+			let noise = '';
+			const n = Math.floor( rng() * 4 );
+			for ( let k = 0; k < n; k++ ) {
+				noise += pick( fragments );
+			}
+			const head = rng() < 0.7 ? 'fz' + Math.floor( rng() * 5 ) : '';
+			const parts = [ head, piece, noise ].filter( ( p ) => p !== '' );
+			// Join with random commas/combinators so the markup lands in varied
+			// positions relative to the comma split.
+			let out = parts[ 0 ] || piece;
+			for ( let k = 1; k < parts.length; k++ ) {
+				out += pick( COMBINATORS ) + parts[ k ];
+			}
+			return out;
+		};
+
+		const host = document.createElement( 'div' );
+		host.id = 'socss-fuzz-host';
+		document.body.appendChild( host );
+
+		const failures = [];
+
+		for ( let i = 0; i < iterations; i++ ) {
+			const useId = rng() < 0.5;
+			const value = genValue( useId );
+
+			host.removeAttribute( 'class' );
+			host.removeAttribute( 'id' );
+			host.id = 'socss-fuzz-host';
+			if ( useId ) {
+				host.setAttribute( 'id', value );
+			} else {
+				host.setAttribute( 'class', value );
+			}
+
+			try {
+				// The real producer path: rebuild the offered list with the
+				// hostile element present, then match against it.
+				inspector.pageSelectors = insp.fn.pageSelectors();
+				inspector.setActiveEl( $( host ) );
+				inspector.setActiveEl( $( 'body' ) );
+				// The highlight string sink, with the raw value.
+				inspector.hl.highlight( value );
+				// The theme-CSS matching sink: a rule whose selector list pairs a
+				// clean selector with the hostile fragment.
+				insp.parsedCss = {
+					fuzz: {
+						stylesheet: {
+							rules: [ {
+								type: 'rule',
+								selectors: [ '#socss-fuzz-host,' + value ],
+								declarations: [ { type: 'declaration', property: 'color', value: 'red' } ],
+							} ],
+						},
+					},
+				};
+				insp.fn.elementAttributes( $( host ) );
+				insp.parsedCss = realCss;
+			} catch ( err ) {
+				if ( failures.length < 5 ) {
+					failures.push( { i, value: value.slice( 0, 80 ), err: String( err ).slice( 0, 120 ) } );
+				}
+			}
+		}
+
+		$.parseHTML = origParse;
+		host.removeAttribute( 'id' );
+		host.setAttribute( 'id', 'socss-fuzz-host' );
+		const probeNodes = document.querySelectorAll( '[data-fuzz]' ).length;
+		host.remove();
+
+		return { attackerNodes, attackerSamples, failures, probeNodes };
+	}, { fragments: FRAGMENTS, seed: 0x0f0fed, iterations: 700 } );
+
+	// Not one fuzzed value caused the inspector to build an attacker node,
+	// leave one in the document, or throw.
+	expect( result.attackerNodes ).toBe( 0 );
+	expect( result.probeNodes ).toBe( 0 );
+	expect( result.failures ).toEqual( [] );
+} );
