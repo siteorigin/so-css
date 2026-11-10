@@ -540,7 +540,25 @@ test( 'Fuzzed hostile class and id values never let the inspector build attacker
 	expect( result.failures ).toEqual( [] );
 } );
 
-test( 'Parity: the fix never changes matching or offered selectors for legitimate input.', async ( { page } ) => {
+
+// Extra bundled themes to widen the harvested selector corpus. Fetched over
+// HTTP from the running site; any that are not installed are skipped.
+const EXTRA_THEME_CSS = [
+	'twentytwentyfive', 'twentytwentyfour', 'twentytwentyone', 'storefront',
+	'siteorigin-unwind', 'mesmerize', 'vantage',
+];
+
+// Representative framework utility selectors (escaped forms a real Tailwind or
+// Bootstrap build emits), to stress the character space portably.
+const FRAMEWORK_CSS = [
+	'.md\\:flex{}', '.w-1\\/2{}', '.hover\\:bg-red-500{}', '.sm\\:grid-cols-3{}',
+	'.lg\\:gap-4{}', '.-mx-2{}', '.2xl\\:block{}', '.text-gray-500\\/50{}',
+	'[class~="btn"]{}', '.btn{}', '.btn-primary{}', '.card__title--large{}',
+	'.is-active{}', '.col-md-6{}', '.d-none{}', '.visually-hidden{}',
+	'.before\\:content-\\[\\x27\\x27\\]{}', '.group-hover\\:opacity-100{}',
+].join( '\n' );
+
+test( 'Parity over harvested real theme, block and framework CSS: no user-visible change.', async ( { page } ) => {
 	await login( page );
 	const previewUrl = new URL( postLink );
 	previewUrl.searchParams.set( 'so_css_preview', '1' );
@@ -549,7 +567,22 @@ test( 'Parity: the fix never changes matching or offered selectors for legitimat
 		() => window.socssInspector && window.socssInspector.mainInspector
 	);
 
-	const result = await page.evaluate( ( seed ) => {
+	// Fetch extra theme stylesheets over HTTP, best-effort.
+	const base = process.env.WP_BASE_URL.replace( /\/$/, '' );
+	const extraCss = [];
+	for ( const theme of EXTRA_THEME_CSS ) {
+		try {
+			const res = await page.request.get( `${ base }/wp-content/themes/${ theme }/style.css` );
+			if ( res.ok() ) {
+				extraCss.push( await res.text() );
+			}
+		} catch ( e ) {
+			// Theme not installed on this site; skip.
+		}
+	}
+
+	const result = await page.evaluate( ( args ) => {
+		const { seed, extraCss, frameworkCss } = args;
 		const $ = window.jQuery;
 		const insp = window.socssInspector;
 
@@ -561,7 +594,6 @@ test( 'Parity: the fix never changes matching or offered selectors for legitimat
 			t = ( t + Math.imul( t ^ ( t >>> 7 ), 61 | t ) ) ^ t;
 			return ( ( t ^ ( t >>> 14 ) ) >>> 0 ) / 4294967296;
 		};
-		const pick = ( a ) => a[ Math.floor( rng() * a.length ) ];
 
 		const isValidCss = ( sel ) => {
 			try {
@@ -572,36 +604,70 @@ test( 'Parity: the fix never changes matching or offered selectors for legitimat
 			}
 		};
 
-		// Legitimate, real-world class/id tokens (all valid CSS identifiers).
-		const CLASS_TOKENS = [
-			'button', 'btn', 'btn-primary', 'wp-block-group', 'has-text-align-center',
-			'menu-item', 'menu-item-7', 'site-title', 'entry-content', 'widget',
-			'card', 'card__title', 'card__title--large', 'is-active', 'is-layout-flex',
-			'col-6', 'u-mt-2', 'elementor-widget', 'fa', 'fa-home', 'nav', 'nav-link',
-			'café', 'déjà', 'über', '_private', '-dash', 'A1', 'x2y', 'section-1',
-		];
-		const IDS = [
-			'main', 'content', 'site-header', 'nav-primary', 'footer', 'block-5',
-			'comment-1', 'respond', 'wrapper', 'café-id',
-		];
-		// Real-world selector shapes, all valid CSS.
-		const SEL_PARTS = [
-			'.button', '.btn.btn-primary', '#main', 'div', 'a', 'li', 'ul', 'nav',
-			'.menu-item > a', '.nav .nav-link', '.card + .card', '.a ~ .b',
-			'[data-x="y"]', '[href^="http"]', '[class*="col-"]', '[title]',
-			'a:hover', 'li:first-child', 'li:nth-child(2n)', 'p:not(.x)',
-			':is(.a, .b)', ':where(.card)', 'a:has(> img)', 'p::before', 'p::first-line',
-			'.entry-content', 'h1', 'h2', '*', 'body', '.widget', 'section:nth-of-type(1)',
-		];
+		// Inject the framework utilities and any fetched theme CSS so their
+		// selectors enter document.styleSheets and the inspector's parser.
+		const inject = ( css, id ) => {
+			const style = document.createElement( 'style' );
+			style.setAttribute( 'data-parity', id );
+			style.textContent = css;
+			document.head.appendChild( style );
+			// Also feed the inspector's own parser (js/css.js) via a
+			// .socss-theme-styles script, the way enqueued stylesheets arrive.
+			const script = document.createElement( 'script' );
+			script.type = 'text/css';
+			script.className = 'socss-theme-styles';
+			script.id = 'socss-inlined-style-parity-' + id;
+			script.textContent = css;
+			document.body.appendChild( script );
+		};
+		inject( frameworkCss, 'fw' );
+		extraCss.forEach( ( css, i ) => inject( css, 't' + i ) );
 
-		// Sample real elements from the themed preview DOM.
-		const els = Array.from( document.querySelectorAll( 'body, body *' ) ).slice( 0, 120 );
+		// Harvest selectors from every readable stylesheet (CSSOM), recursing
+		// into grouping rules, splitting selector lists.
+		const harvested = new Set();
+		const addFromRules = ( rules ) => {
+			for ( const rule of rules || [] ) {
+				if ( rule.selectorText ) {
+					rule.selectorText.split( ',' ).forEach( ( s ) => {
+						s = s.trim();
+						if ( s ) {
+							harvested.add( s );
+						}
+					} );
+				}
+				if ( rule.cssRules ) {
+					addFromRules( rule.cssRules );
+				}
+			}
+		};
+		for ( const sheet of document.styleSheets ) {
+			try {
+				addFromRules( sheet.cssRules );
+			} catch ( e ) {
+				// Cross-origin or unreadable sheet; skip.
+			}
+		}
+		// Also take the selectors the inspector's own parser produced.
+		try {
+			insp.parsedCss = {};
+			insp.fn.pageSelectors().forEach( ( s ) => {
+				if ( s && s.selector ) {
+					harvested.add( s.selector );
+				}
+			} );
+		} catch ( e ) {}
 
-		const matchDivergences = [];
-		const buildDivergences = [];
+		// Sample the corpus (seeded shuffle, capped for runtime).
+		let selectors = Array.from( harvested );
+		for ( let k = selectors.length - 1; k > 0; k-- ) {
+			const j = Math.floor( rng() * ( k + 1 ) );
+			[ selectors[ k ], selectors[ j ] ] = [ selectors[ j ], selectors[ k ] ];
+		}
+		selectors = selectors.slice( 0, 3000 );
 
-		// Rebuild develop's elSelector logic to compare against the fix's
-		// elementSelector: '#'+id then '.'+class with whitespace dotted, else tag.
+		const els = Array.from( document.querySelectorAll( 'body, body *' ) ).slice( 0, 150 );
+
 		const oldElSelector = ( el ) => {
 			let name = '';
 			const id = el.getAttribute( 'id' );
@@ -615,23 +681,18 @@ test( 'Parity: the fix never changes matching or offered selectors for legitimat
 			return name === '' ? el.tagName.toLowerCase() : name;
 		};
 
-		// 1) Matching parity: for every valid selector, jQuery .is() (old) and
-		// native matches (new) must agree on every element. A disagreement on a
-		// VALID selector is a user-visible regression.
-		const built = [];
-		for ( let i = 0; i < 400; i++ ) {
-			let sel = pick( SEL_PARTS );
-			// Sometimes compound with a class token to widen the space.
-			if ( rng() < 0.4 ) {
-				sel = sel + '.' + pick( CLASS_TOKENS );
-			}
-			built.push( sel );
-		}
-		built.push( ...SEL_PARTS );
-
-		for ( const sel of built ) {
+		// 1) Matching parity over harvested real selectors.
+		const matchDivergences = [];
+		let validSelectors = 0;
+		let matchedTrue = 0;
+		for ( const sel of selectors ) {
 			const valid = isValidCss( sel );
-			for ( const el of els ) {
+			if ( valid ) {
+				validSelectors++;
+			}
+			// Test each selector against a seeded sample of elements.
+			for ( let s = 0; s < 25; s++ ) {
+				const el = els[ Math.floor( rng() * els.length ) ];
 				let jq;
 				let nat;
 				try {
@@ -644,55 +705,62 @@ test( 'Parity: the fix never changes matching or offered selectors for legitimat
 				} catch ( e ) {
 					nat = 'throw';
 				}
-				if ( jq !== nat && valid && matchDivergences.length < 20 ) {
+				if ( jq === true && nat === true ) {
+					matchedTrue++;
+				}
+				if ( jq !== nat && valid && matchDivergences.length < 25 ) {
 					matchDivergences.push( { sel, jq, nat, el: el.tagName } );
 				}
 			}
 		}
 
-		// 2) Offered-selector parity: build a probe element from legitimate class
-		// and id values and compare the fix's elementSelector to develop's. When
-		// develop's selector is valid CSS (so it would have been offered), the fix
-		// must produce the same string — never drop a clean token.
+		// 2) Offered-selector parity over every real element's own class/id.
+		const buildDivergences = [];
+		let buildChecked = 0;
 		const probe = document.createElement( 'div' );
 		document.body.appendChild( probe );
-		for ( let i = 0; i < 800; i++ ) {
+		for ( const el of els ) {
+			const cls = el.getAttribute( 'class' );
+			const id = el.getAttribute( 'id' );
+			if ( cls === null && id === null ) {
+				continue;
+			}
 			probe.removeAttribute( 'class' );
 			probe.removeAttribute( 'id' );
-			const nClasses = Math.floor( rng() * 4 );
-			const classes = [];
-			for ( let k = 0; k < nClasses; k++ ) {
-				classes.push( pick( CLASS_TOKENS ) );
+			if ( cls !== null ) {
+				probe.setAttribute( 'class', cls );
 			}
-			if ( classes.length ) {
-				probe.setAttribute( 'class', classes.join( ' ' ) );
+			if ( id !== null ) {
+				probe.setAttribute( 'id', id );
 			}
-			if ( rng() < 0.5 ) {
-				probe.setAttribute( 'id', pick( IDS ) );
-			}
-
 			const oldSel = oldElSelector( probe );
 			const newSel = insp.fn.elementSelector( $( probe ) );
-
-			// When develop's selector is valid CSS it would have been offered and
-			// matched; the fix must offer the same string.
-			if ( isValidCss( oldSel ) && oldSel !== newSel && buildDivergences.length < 20 ) {
-				buildDivergences.push( {
-					class: probe.getAttribute( 'class' ),
-					id: probe.getAttribute( 'id' ),
-					oldSel,
-					newSel,
-				} );
+			if ( isValidCss( oldSel ) ) {
+				buildChecked++;
+				if ( oldSel !== newSel && buildDivergences.length < 25 ) {
+					buildDivergences.push( { cls, id, oldSel, newSel } );
+				}
 			}
 		}
 		probe.remove();
 
-		return { matchDivergences, buildDivergences };
-	}, 0x9e3779b1 & 0x7fffffff );
+		return {
+			harvestedCount: harvested.size,
+			selectorsTested: selectors.length,
+			validSelectors,
+			matchedTrue,
+			buildChecked,
+			matchDivergences,
+			buildDivergences,
+		};
+	}, { seed: 0x1234abcd & 0x7fffffff, extraCss, frameworkCss: FRAMEWORK_CSS } );
 
-	// For legitimate input the fix changes nothing a user would see: native
-	// matching agrees with the old jQuery matching, and the offered element
-	// selector is identical whenever the old one was valid.
+	// The corpus must be large and actually match real elements, or the test is
+	// vacuous.
+	expect( result.harvestedCount ).toBeGreaterThan( 300 );
+	expect( result.matchedTrue ).toBeGreaterThan( 50 );
+	expect( result.buildChecked ).toBeGreaterThan( 20 );
+	// No user-visible change for any valid real selector or element.
 	expect( result.matchDivergences ).toEqual( [] );
 	expect( result.buildDivergences ).toEqual( [] );
 } );
