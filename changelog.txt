@@ -1,5 +1,9 @@
 == Changelog ==
 
+= 1.6.10 - 11 November 2026 =
+* Inspector: Improved selector matching and output handling.
+* Editor: Improved live preview output handling.
+
 = 1.6.9 - 07 November 2026 =
 * Visual Editor: Measurement fields now start in their configured default unit instead of always using pixels.
 * Visual Editor: Changing the editor theme now applies the selected theme.
